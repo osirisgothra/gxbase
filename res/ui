@@ -1,0 +1,46 @@
+#!/bin/false gxbase
+#
+# ui
+#
+#   ncurses, graphical, terminal user interface features
+#
+if [[ -z $GXBASE_LOADING ]] && [[ $GXBASE_LOADING != TRUE ]]; then
+	echo "To be loaded by GXBASE only, not as a general use script."
+	return 1
+else
+	gx.assert LOG
+	# scripts loaded by gxbase only output their name, all other output is redirected 
+	# to the log specified by GXBASE_LOG
+	echo -ne "$BASH_SOURCE"
+	# required components (GXBASE_LOG and gxbase-core)
+	gx.loadassert ROOT
+	gx.loadassert gxbase
+	gx.loadassert core
+	gx.loadassert envinfo
+fi
+
+function gx.shopt()
+{
+if [[ $DISPLAY ]]; then
+	CMD=zenity
+else
+	if [[ -x /usr/bin/whiptail ]]; then
+		CMD=whiptail
+	elif [[ -x /usr/bin/dialog ]]; then
+		CMD=dialog
+	fi
+fi
+zenity --list --text="Text" --column="Header" --checklist --print-column=2 --column="Option" $(shopt | awk '{ printf $2" "$1" "; }' | sed "s/\boff\b/FALSE/g;s/\bon\b/TRUE/g")zenity --list --text="Text" --column="Header" --checklist --print-column=2 --column="Option" $(shopt | awk '{ printf $2" "$1" "; }' | sed "s/\boff\b/FALSE/g;s/\bon\b/TRUE/g")
+}
+
+# all gxbase components need to have an unloader
+# their name is the same as the component's name with .unloader affixed to it
+function gx.gxbase-ui.unloader
+{
+	unset -f gx.shopt
+}
+
+# register component in the library
+# all components will called "gxbase-[ui]"
+# the filename will be [ui]
+GXBASE_COMPONENTS[gxbase-ui]=1

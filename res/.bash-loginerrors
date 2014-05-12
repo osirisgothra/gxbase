@@ -1,0 +1,4 @@
+-bash: /gxbase/res/temp: line 217: syntax error near unexpected token `;;'
+-bash: /gxbase/res/temp: line 217: `					;;'
+-bash: /gxbase/res/bash-functions: No such file or directory
+-bash: UID: readonly variable

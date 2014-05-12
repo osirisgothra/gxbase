@@ -1,0 +1,35 @@
+#!/bin/false gxbase
+#
+# config
+#
+#  gxbase configuration routines
+#
+if [[ -z $GXBASE_LOADING ]] && [[ $GXBASE_LOADING != TRUE ]]; then
+	echo "To be loaded by GXBASE only, not as a general use script."
+	return 1
+else
+	# scripts loaded by gxbase only output their name, all other output is redirected 
+	# to the log specified by GXBASE_LOG
+	echo -ne "$BASH_SOURCE"
+	# required components (GXBASE_LOG and gxbase-core)
+ # gx.assert LOG
+ # gx.loadassert core
+ # gx.loadassert envinfo
+fi
+
+function gx.config
+{
+		echo "TODO: implementation"
+}
+
+# all gxbase components need to have an unloader
+# their name is the same as the component's name with .unloader affixed to it
+function gx.gxbase-config.unloader
+{
+	unset -f gx.config
+}
+
+# register component in the library
+# all components will called "gxbase-[compname]"
+# the filename will be [compname]
+GXBASE_COMPONENTS[gxbase-config]=1

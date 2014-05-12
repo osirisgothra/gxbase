@@ -1,0 +1,41 @@
+#!/bin/false ---remove this line to allow the component to be autoloaded, do NOT remove the next line however, it is required!!!---
+#!/bin/false gxbase
+#
+# #COMPNAME
+#
+#   #DESCRIPTION
+#   #AUTHOR
+#   Created #DATE, Last Updated #DATE (on #HOSTNAME)
+#   Incepted in Version #GXBASEVERSION
+#
+if [[ -z $GXBASE_LOADING ]] && [[ $GXBASE_LOADING != TRUE ]]; then
+	echo "To be loaded by GXBASE only, not as a general use script."
+	return 1
+else
+	# scripts loaded by gxbase only output their name, all other output is redirected 
+	# to the log specified by GXBASE_LOG
+	echo -ne "$BASH_SOURCE"
+	# required components (GXBASE_LOG and gxbase-core)
+	gx.assert LOG
+	gx.loadassert core
+	gx.loadassert envinfo
+fi
+
+# #SOMEFUNC - primary function in #COMPNAME
+function gx.#SOMEFUNC()
+{
+}
+
+# all gxbase components need to have an unloader
+# their name is the same as the component's name with .unloader affixed to it
+function gx.gxbase-#COMPNAME.unloader
+{
+	unset -f gx.#SOMEFUNC
+}
+
+# register component in the library
+# component will called "gxbase-[#COMPNAME]"
+# the filename will be [#COMPNAME] 
+# this is done so that gx.gxbase-#COMPNAME.unloader can be called by the main
+# unloader:
+GXBASE_COMPONENTS[gxbase-#COMPNAME]=1
