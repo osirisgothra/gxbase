@@ -1,0 +1,249 @@
+# ~/.bashrc: executed by bash(1) for non-login shells.
+# see /usr/share/doc/bash/examples/startup-files (in the package bash-doc)
+# for examples
+
+# touches
+touch -f ~/.bash-aliases
+touch -f ~/.bash-helpers
+touch -f ~/.bash-settings
+touch -f ~/.bash-vars
+touch -c ~/.bash-history
+touch -c ~/.bash-logout
+touch -c ~/.bash-profile
+touch -f ~/.bash
+
+# inclusions
+source /gxbase/res/temp
+source /gxbase/res/bash-helpers
+source /gxbase/res/bash-settings
+source /gxbase/res/bash-prompt
+
+
+for i in ~/.bash-*; do source "$i"; done
+
+# pre-checks
+
+(check_hushlogon "$BASH_SOURCE" "$@") || {
+	return 0;
+}
+
+# variable declarations
+
+export XINIT_MODE=xinit
+export XINIT_DEVICE=":$(ps avfx -e | grep 'X .*[:][0-9] ' --count)"
+export XINIT_VT=vt12
+export HISTCONTROL=ignoreboth
+export HISTSIZE=1000
+export HISTFILESIZE=2000
+export LESSOPEN="| /usr/bin/lesspipe %s";
+export LESSCLOSE="/usr/bin/lesspipe %s %s";
+export PS1='$(_PS1)' 
+export PS2='$(_PS2)'
+export PS3='$(_PS3)'
+
+# function declarations
+
+
+
+# conditional statements
+
+# If not running interactively, don't do anything
+
+alias isinteractive='[[ ${-//[^i]} == i ]] && true || false'
+
+(isinteractive) && {
+
+	alias vim='vim_func -n'
+	alias ls='function _lstmp() { unset -f $0; echo "$LS_HEAD"; ls --color=auto "$@"; ERR=$?; echo "$LS_TAIL"; return $ERR; }; _lstmp'
+	alias grep='grep --color=auto'
+	alias fgrep='fgrep --color=auto'
+	alias egrep='egrep --color=auto'
+	alias ll='ls -alF'
+	alias la='ls -A'
+	alias l='ls -CF'
+	alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+	alias xh=xhost
+	alias dir='lsfunc -batchHs --color=always'
+	alias ls='lsfunc2'
+	alias grep='grep --color'
+	alias du='du --max-depth=1 -h'
+	alias df='df -h'
+	alias eb='eval `echo "vim ~/.bashrc $(for i in /gxbase/res/bash-*; do echo -ne \ -o\ \"$i\"; done)"`'
+	alias rls='source ~/.bashrc 1> /tmp/bash-stdoutput-last'
+	alias rgx='source /etc/bash_completion; source /gxbase/gxbase'
+	alias xtty='echo $(tty)|grep -q "pts"'
+
+}
+(xh 127.0.0.1) && {
+
+	xh 127.0.0.1
+	xh 192.168.2.103
+	xh 192.168.2.105
+	xh 192.168.2.106
+	xh 192.168.2.102
+
+}
+(xtty) && {
+	
+	alias nano=mousepad
+	alias vim='vim_func -'$( [[ $DISPLAY ]] && echo "g" || echo "n" )		
+
+} || {
+
+	alias startdwm='startx dwm'
+	alias startkde='startx startkde'
+	alias startlxde='startx startlxde'
+	# alias for non-pts terminals only	
+	alias xterm='startx xterm -c "xterm -fullscreen"'
+	alias st='startx st'
+	alias firefox='startx firefox'
+  alias chrome='startx chromium-browser'
+	alias pcsx='startx pcsx'
+	alias zsnes='startx zsnes'
+	alias gvim='startx /usr/bin/gvim_target'
+	alias gimp='startx gimp'
+	alias blender='startx blender'
+	alias modo='startx modo'
+	alias vlc='startx vlc'
+	alias firefoxp='startx firefox --private-window'
+}
+
+
+
+
+# process commands added by addbashcmd
+[[ -s /home/gabriel/.config/bash ]] && echo -ne "processing..."
+for i in /home/gabriel/.config/bash/*; do	
+	source "$i" &> /dev/null
+done
+
+[[ -s /home/gabriel/.config/bash ]] && echo " - done."
+#prevent multiple reloading the path, which would become quickly a bad thing if bashrc is reloaded several times by some script
+if [[ -z $PATH_IS_SET ]]; then
+	export PATH=/usr/autodesk/maya/bin:/usr/autodesk/Composite_2012/bin:/gxbase/res:/gxbase:/gxbase/bin:/home/gabriel/bin:$PATH
+	export PATH_IS_SET=1
+fi
+
+# keyboard bindings
+# do not use ^[x codes for these, because they will differ between terminal types and be uselessly unportable
+#bind '"0A": "example of a BAD binding declaration, do NOT uncomment this one!"
+
+if [[ $ENABLE_BINDINGS == YES ]]; then
+	bind '"\C-a": "ssh root@azura"'
+	bind '"\C-p": "ssh root@peryite"'
+	bind '"\C-f": "apt-cache search "'
+	bind '"\C-i": "apt-get install --noremove --yes"'
+	bind '"\C-l": "ls -C --color"'
+	bind '"\C-Up": "cd .."'
+	bind '"\C-Right": "cd 	"'
+else
+	if [[ ! -r ~/.hushlogin ]]; then
+		echo "(bindings are disabled, use the togglebindings command to change this setting)"
+	fi
+fi
+
+# correct should-be variables
+
+export LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu/:/lib:/lib/x86_64-linux-gnu/:/usr/local/lib:/lib64:/lib/i386-linux-gnu/:/usr/lib/i386-linux-gnu:$LD_LIBRARY_PATH
+export HOME=~
+export USERNAME=$(id -un)
+export GROUP=$(id -gn) 
+export GROUPS=($(id -G))
+
+# readonly  anyways: export UID=$(id -u)
+
+export LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;36:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;36:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:';
+export IFS=""
+export TMOUT=0
+alias date='date +"%c"'
+
+# protect some variables that should never change
+
+declare -rx HOME USERNAME GROUP GROUPS
+
+# disabled shell options                      # enabled shell options               
+                                                                                    
+shopt -u autocd                               ;shopt -s checkwinsize                 
+shopt -u cdable_vars                          ;shopt -s cmdhist                      
+                                               shopt -s complete_fullquote           
+shopt -u checkhash                            ;shopt -s direxpand                    
+shopt -u checkjobs                            ;shopt -s expand_aliases               
+shopt -u compat31                             ;shopt -s extdebug                     
+shopt -u compat32                             ;shopt -s extglob                      
+shopt -u compat40                             ;shopt -s extquote                     
+shopt -u compat41                             ;shopt -s force_fignore                
+shopt -u compat42                             ;shopt -s globstar                     
+shopt -u dirspell                             ;shopt -s histappend                   
+shopt -u dotglob                              ;shopt -s histreedit                   
+shopt -u execfail                             ;shopt -s interactive_comments         
+shopt -u globasciiranges                      ;shopt -s login_shell                  
+shopt -u gnu_errfmt                           ;shopt -s mailwarn                     
+shopt -u failglob                             ;shopt -s progcomp                     
+shopt -u histverify                           ;shopt -s promptvars                   
+shopt -u hostcomplete                         ;shopt -s sourcepath                   
+shopt -u huponexit                            ;shopt -s xpg_echo                     
+shopt -u lastpipe                             ;shopt -s cdspell
+shopt -u lithist              
+shopt -u no_empty_cmd_completion              
+shopt -u nocaseglob           
+shopt -u nocasematch                          
+shopt -u nullglob             
+shopt -u restricted_shell                     
+shopt -u shift_verbose        
+
+# disabled shell flags                        # enabled shell flags
+                                                                                  
+set +o allexport                              ;set -o braceexpand                 
+set +o errexit                                ;set -o emacs                       
+set +o errtrace                               ;set -o functrace                   
+set +o ignoreeof                              ;set -o hashall                     
+set +o keyword                                ;set -o histexpand                  
+set +o noclobber                              ;set -o history                     
+set +o noexec                                 ;set -o interactive-comments        
+set +o noglob                                 ;set -o monitor                     
+set +o nolog                                  
+set +o notify                 
+set +o nounset                                
+set +o onecmd                 
+set +o physical                               
+set +o pipefail               
+set +o posix                                  
+set +o privileged             
+set +o verbose                                
+set +o vi                     
+set +o xtrace
+
+
+
+
+           
+
+           
+
+           
+           
+           
+
+
+
+
+        
+        
+
+
+        
+
+        
+        
+
+        
+
+
+        
+
+        
+
+        
+
+
+

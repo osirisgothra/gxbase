@@ -1,0 +1,34 @@
+#!/bin/bash
+# bash-prompt
+#
+# dynamic bash prompts
+#
+
+function _PS1()
+{
+	ERR=$?
+	declare -xi CNT=0
+	echo -ne "Lv$SHLVL P$BASHPID $ERR $PWD $USERNAME $HOSTNAME: "
+	return $ERR
+}
+function _PS2()
+{
+	ERR=$?
+	((CNT++))
+	echo -ne "Inline Editor [ $CNT ]: "
+	return $ERR
+}
+function _PS3()
+{
+	ERR=$?
+	# show standard prompt, or a custom prompt if user sets one (gets removed)
+	echo -ne "${PS3_CUSTOMPROMPT-Make Selection: }"
+	# its better because PS3_CUSTOMPROMPT is deleted automatically each time
+	# and, user does not need to change PS3, ever so it will function correct
+	# no matter what :) Make sure PS1,2,3 are read only at this point
+	unset PS3_CUSTOMPROMPT
+	return $ERR
+}
+
+
+

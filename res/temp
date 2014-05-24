@@ -204,18 +204,20 @@ function choice()
 			[[ -z $DEFAULT ]] && { echo "warning: empty default, using first key as default: ${KEYS: 0:1}"; DEFAULT="${KEYS: 0:1}"; }
 			[[ $TIMEOUTSEC -gt $[ 60 * 24 ] ]] && { echo "warning: timeout exceeds one day!"; }
 			[[ $TIMEOURSEC -gt $[ 60 * 24 * 30 ] ]] && { echo "warning: timeout exceeds a month!"; } 
-					NUM="$#"
-					if [[ $# -lt 20 ]]; then suff=th;	else
-						case ${NUM: -1:1} in
-							1)suff=st;;
-							2)suff=nd;;
-							3)suff=rd;;
-							*)suff=th;;
-						esac
-					fi
-          echo "Warning: extra non-switch parameters (4th thru $#) were ignored!"
-					;;
-			esac
+			NUM="$#"
+			if [[ $# -lt 20 ]]; then 
+				suff=th;	
+			else
+				case ${NUM: -1:1} in
+					1)suff=st;;
+					2)suff=nd;;
+					3)suff=rd;;
+					*)suff=th;;
+				esac
+			fi
+			echo "Warning: extra non-switch parameters, argument${#/[^1]/s} were ignored!"
+					
+			
 		fi
 		
 	fi
@@ -251,3 +253,30 @@ function makebusyboxlinkshere()
 	fi
 	return 0
 }					
+
+function findwithchildren()
+{
+	declare -i FOUNDCOUNT=0
+	for i in `dirname $(locate *) | sort | uniq`; do 
+		for ((j=1;j<=#;j++)); do
+			FOUNDCOUNT=0
+			if [[ -d "$i/${!j}" ]]; then
+				(FOUNDCOUNT++)
+			fi			
+		done
+		if [[ $FOUNDCOUNT -eq $# ]]; then
+			echo "$i"
+		fi
+	done
+}
+
+# colorize [topic]
+function colorize()
+{
+	TOPIC="$*"
+	# if there is no topic, then use _ (underscores and worms and emdashes)
+	if [[ -z $TOPIC ]]; then
+		TOPIC="[-_~]"
+	fi
+	/bin/sed -r "s/$TOPIC/[32;1m\0[0m/g;s/[^\s0-9]*:/[1m\0[0m/g;s/[\:\.\<\>\(\)\=\/\,]/[30;1m\0[0m/g"
+}	

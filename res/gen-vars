@@ -1,0 +1,7 @@
+# eof color marker
+color=(black,red,green,yellow,blue,magenta,cyan,gray)
+attrib=(dark,light,blink,bold,underline,reverse,hidden)
+element=(unknown1,unknown2,fg,bg)
+sel256="38;4;"
+
+
