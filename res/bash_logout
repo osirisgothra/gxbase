@@ -1,3 +1,5 @@
+#!/bin/bash -e "echo \"for colorization, dont really run this as a script, shame on you!\""
+# 
 [[ $SHLVL -eq 1 ]] && { 
 	[ -x /usr/bin/clear_console ] && {
 		/usr/bin/clear_console -q

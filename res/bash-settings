@@ -1,2 +1,23 @@
 
+#!/bin/bash
+#
+# bash-settings
+#
+# bash-specific settings
+#
+# Put items like shopt and set -- commands in here
+# Also, items such as traps and bindings may go here
+# - traps only trap signals from THIS process
+# - settings do not carry to the next bash
+# - shell options are not automatically saved when changed
+#   from the command line! (TODO:change this)
+
+# settings (set -x)
+shopt -s interactive_comments
+
+# shell options (shopt -s/u xxx)
+
+# traps (trap [funcname] [SIG[name]|number])
+
+
 

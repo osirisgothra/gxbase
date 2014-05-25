@@ -1,0 +1,57 @@
+# .gxbaserc
+#
+# configuration and identification file for gxbase
+# essential for configuration
+# put user-specific .gxbaserc in ~/.gxbaserc
+#
+
+# dont change the flavor and id, they are used to identify the root directory where gxbase's files are on the host
+# you must link the /gxbase/res/bashrc to .bashrc if you plan to use it, from there you customize it for yourself
+# using the various tools provided by gxbase. It is NOT recommended to use gxbase AND another .bashrc as well.
+# if you MUST, then gxbase's bashrc would have to be sourced at the end of your .bashrc file: "source ~/.bashrc"
+# however many things will be overwritten if you do this. Use the merge .bashrc tool to import custom settings!
+# (the /etc/skel/.bashrc is very old and outdated, at most)
+# It is also recommended you use the provided /gxbase/res/etc/bashrc in place of /etc/bashrc if you can, it will
+# dramatically speed things up!
+
+# flavor: relfects the flavor, the repository in which this gxbase came from, so you can check for newer versions 
+#         with gxbupdate
+# gxbaseid: the identity that scripts use to identify this gxbase flavor, one-time generated time-based uuid (dont change!!)
+# release: the version number used in the version information when using gxver or the --version flags of gxbase commands
+#          this is first part of the true version shown there.
+# phase:   the phase of development: broken=not usable at all in current state    beta=complete, but not fully tested/debugged
+#                                     alpha=usable but not complete in any way    release=complete and tested up to standards
+#                                     final=not to be updated past current phase  forked=new developments, use this and define subphase
+#
+# subphase: use this for forked versions, you can define any terms you want here
+#           for the original gxbase, the only value I use is "notforked" 
+#           needed in order to relax some version dependant scripts, if they 
+#           come into existence
+# commit:   the commit number for this git branch, incremented each time a commit is done. Kind of like a build number but
+#           since no compiling of scripts is done, we don't call them builds.
+
+
+flavor="0-2-0"
+gxbaseid="a19b9402-e2e6-11e3-bd4a-00196605e97c"
+release="0.2.0.0"
+phase=alpha
+subphase=notforked
+commit=16
+
+# uidrange: change to lock out certain user groups
+# group: comma delimited list of groups allowed to use gxbase
+
+
+uidrange=0-9999
+group=users,root
+
+# fallbacks for users that didnt meet the requirements
+# 
+usrfallback="~/.bashrc"
+etcfallback="/etc/bash.bashrc"
+
+
+
+
+
+

@@ -1,0 +1,58 @@
+" 
+" editbashes
+"
+" script to edit the bash files in vim
+" in split for high-area monitors
+"
+" the layout is [bottom to top]:
+" -------------                                     
+" |   | 2 | 4 |      0 /gxbase/res/bash-helpers   
+" | 6 |-------|      1 /gxbase/res/bash-vars      
+" |   |       |      2 /gxbase/res/bash-settings                              
+" |---|   1   |      3 /gxbase/res/bash-prompt    
+" |   |       |      4 /gxbase/res/bash_logout                              
+" | 0 |-------|      5 /gxbase/res/bashrc               
+" |   |   3   |      6 /etc/bash.bashrc
+" |-----------|     
+" |     5     |                                  
+" -------------     
+"                                                
+"                   
+e /gxbase/res/bashrc
+split /gxbase/res/bash-helpers
+set wrap
+set mouse=a
+vsplit /gxbase/res/bash-prompt
+split /gxbase/res/bash-vars
+split /gxbase/res/bash-settings
+vsplit /gxbase/res/bash_logout
+exe 0 . "wincmd w"
+split /etc/bash.bashrc
+set wrap
+set mouse=a
+exe 99 . "wincmd w"
+hi ErrorMsg ctermbg=black
+hi Ignore ctermfg=gray
+hi String ctermfg=gray ctermbg=black
+hi Delimiter ctermfg=black cterm=bold
+hi Statement ctermfg=1 cterm=none
+map x :wqall
+imap x :wqall
+map s :wall
+imap s :walli
+" j down   k up   h left   l right 
+"`[1;3A up
+:map [1;3A :exec "winc k"
+:imap [1;3A :exec "winc k"i
+"`[1;3B down       
+:map [1;3B :exec "winc j"
+:imap [1;3B :exec "winc j"i
+"`[1;3D left
+:map [1;3D :exec "winc h"
+:imap [1;3D :exec "winc h"i
+"`[1;3C right
+:map [1;3C :exec "winc l"
+:imap [1;3C :exec "winc l"i
+:echo "[ALT+S] Save All Documents    [Alt+X] Save All & Quit VIM"
+
+

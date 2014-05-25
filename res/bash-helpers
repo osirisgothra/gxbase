@@ -13,6 +13,18 @@
 ## \brief check_hushlogin checks if .hushlogin is in effect (present)
 ## \returns 1 if not present, 0 if present (false,true respectively)
 ## 
+function nogui()
+{
+	if [[ $NOGUI ]]; then		
+		unset NOGUI
+	else
+		export NOGUI=on
+	fi;
+	echo "GUI commands are now ${NOGUI-off}."
+  [[ $NOGUI ]] && return 0
+	return 1	
+}
+
 function check_hushlogon() 
 {
 
@@ -49,6 +61,9 @@ function countof()
 # \brief vim_func [-g | -n] vim-command-line
 # runs vim [-n] or gvim [-g], and if not root, detects if sudoers and if is sudos the call
 # \returns nonzero if error, zero if success (some error codes may come from vim itself)
+# yes i know about the -gn flags for vim!
+# but, this bypasses that because i need to also
+# take into account whether or not NOGUI is enabled
 function vim_func()
 {
 	if [[ $1 == -n ]] || [[ $1 == -g ]]; then
@@ -56,6 +71,7 @@ function vim_func()
 	else
 		USUALFLAG=0
 	fi
+
 	if [[ $2 == ~/.bashrc ]] && [[ $USUALFLAG -eq 1 ]] && [[ $# -eq 2 ]]; then
 		# straight edit of bashrc (user typed: vim ~/.bashrc)	
 		# ignore flag and edit in-terminal
@@ -86,9 +102,11 @@ function vim_func()
 		fi
 	fi
 
-  if [[ "$1" == "-g" ]]; then
+  if [[ "$1" == "-g" ]] && [[ -z $NOGUI ]]; then		
+		# instead of using vim -g 
 		VIMCMD=gvim
 	else
+		# instead of using vim -n
 		VIMCMD=vim
 	fi
 	shift
@@ -193,7 +211,31 @@ function help()
 	fi
 	return $?
 }
+function ishell()
+{
+	case $- in
+		*i*) [[ $1 == interactive ]] && return 0;;
+		*P*) [[ $1 == physical ]] && return 0;;
+	  *p*) [[ $1 == privileged ]] && return 0;;
+  	*H*) [[ $1 == expandingexclamationmarks ]] && return 0;;
+		*m*) [[ $1 == monitoringjobs ]] && return 0;;
+		*h*) [[ $1 == hashingcommands ]] && return 0;;
+		*b*) [[ $1 == jobtermbgverbose ]] && return 0;;
+		*e*) [[ $1 == exitingonfailure ]] && return 0;;
+	esac
+	return 1
+}
 
+function xh()
+{
+	xhost "$@" &> /dev/null
+	return $?
+}
+function xtty()
+{
+	echo $(tty) | grep -q "pts"
+	return $?
+}
 
 ## \brief addbashcmd() add an alias plus make it persistent across new shells, restarts, etc (permanent)
 ## \returns whatever
@@ -226,7 +268,7 @@ function addbashcmd()
 	fi
 	RETVAL=0
   if [[ $CMD_STR ]]; then
-		mkdir /home/gabriel/.config/bash -p 2> /dev/null
+		mkdir ~/.config/bash -p 2> /dev/null
 		echo "Type a name for this command [needed if you want to delete it later]"
 		echo -ne "command identity: "
 		if [[ -z $1 ]]; then
@@ -237,7 +279,7 @@ function addbashcmd()
 		fi
 		if [[ $CMD_FNAME ]]; then
 			echo "writing new command, $CMD_FNAME..."
-			CMD_FDEST="/home/gabriel/.config/bash/$CMD_FNAME"
+			CMD_FDEST="${HOME}/.config/bash/$CMD_FNAME"
 			echo "$CMD_STR" > "$CMD_FDEST"
 			echo "synchronizing with .bashrc..."
 			pushd > /dev/null 2>&1
@@ -266,13 +308,13 @@ function addbashcmd()
 }
 function delbashcmd()
 {
-	if [[ ! -w /home/gabriel/.config/bash/$1 ]]; then
+	if [[ ! -w ${HOME}/.config/bash/$1 ]]; then
 		echo "Command not found, specify one that exists:"
-		ls /home/gabriel/.config/bash
+		ls ${HOME}/.config/bash
 	else
 		echo "Really delete it?"
 		if [[ $(read -sn1 R; echo ${R^^}) == Y ]]; then
-			if (rm -f "/home/gabriel/.config/bash/$1"); then
+			if (rm -f "${HOME}/.config/bash/$1"); then
 				echo "succeeded"
 			else
 				echo "did not succeed, check your permissions and the error string above, if any."
@@ -299,8 +341,8 @@ function vconf()
 
 	
 }
-function xvim() { sudo chown gabriel:gabriel "$@"; sudo chmod a+rw "$@"; vim `command ls -C "$@"`; sudo chmod a+x "$@"; return $?; }
-function makemine() { sudo chown $USERNAME:$USERNAME "$@"; echo "changed ownership to $USERNAME:$USERNAME"; }
+function xvim() { sudo chown ${USERNAME}:${USERNAME} "$@"; sudo chmod a+rw "$@"; vim `command ls -C "$@"`; sudo chmod a+x "$@"; return $?; }
+function makemine() { sudo chown ${USERNAME}:${USERNAME} "$@"; echo "changed ownership to ${USERNAME}:${USERNAME}"; }
 
 # if SESSNAME is not set, it will be set automatically to ~/.xsession-output which is probably NOT what you want because it can be overwritten if >1 sessions are in use from the same user
 function do_xinit()
