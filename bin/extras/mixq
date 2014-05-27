@@ -1,0 +1,217 @@
+#!/bin/bash
+#
+# /bin/mix
+#   
+#   change master volume setting based on the name of the link (this program's program_name)
+#   mix+ turns the volume up by 5, mix-- turns it down by 10, mix -10 does the same thing.
+#   Use any combination you want to adjust the volume or just type 'mix' to get the current
+#   volume. The default configuration should be enough to use this program unless you have
+#   more than 1 sound card installed (if you don't use your primary sound card). If you have
+#   >1 soundcards and use your primary card as the main, you shouldn't have to do any config-
+#   uration either.
+# 
+# Author:
+#    Gabriel Thomas Sharp <osirisgothra@hotmail.com>  
+# 
+# Copyright (C)2013 Paradisim Enterprises, LLC    <paradisim.twilightparadox.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file was created 
+# For more support, visit our homepage: http://paradisim.tk
+# Report any bugs to <bugs@paradisim.tk> or visit our FAQ on our website.
+#
+#
+
+# CONFIGURATION
+# -------------
+# put in  your preferred card # here, run 'alsamixer' and press F6 for a list of card numbers and their
+# effective sound card assignments, usually card 0 or 1 is the choice you want. If you set this value
+# to 1 (recommended), the card '1' will be tested, if it is there, it will be used, and if not, it will
+# fallback to 0. 
+#
+# IMPORTANT: if you dont know what your card is, please use card "1"
+#
+DEFAULT_CARD=1
+
+
+
+case $BASH_SOURCE in
+	*mix+)
+	if [[ $1 ]]; then
+		mix +$[ 0 + $1 ]
+	else
+		mix +5
+	fi
+	return 2> /dev/null
+	exit
+	;;
+	*mix-)
+	if [[ $1 ]]; then
+		mix -$[ 0 + $1 ]
+	else
+		mix -5
+	fi
+	return 2> /dev/null
+	exit
+	;;
+	*mix++)
+	if [[ $1 ]]; then
+		mix +$[ 0 + $1 * 2 ]
+	else
+		mix +15
+	fi
+	return 2> /dev/null
+	exit
+	;;
+	*mix--)
+	if [[ $1 ]]; then
+		mix -$[ 0 + $1 * 2 ]
+	else
+		mix -15
+	fi
+	return 2> /dev/null
+	exit
+	;;
+esac
+
+
+# quiet mode [ --quiet | -q ]
+BASENAME=`basename $BASH_SOURCE`
+#if [[ "$2" == "--card" ]]; then
+#	CARD=$[ $3 + 0 ]
+#else
+declare -i CARD=$DEFAULT_CARD
+#fi
+#
+
+declare -i ISVALIDMIXER_X="$(calc power(`amixer -c$CARD | grep "." --count`,0));"
+declare -i ISVALIDMIXER=$ISVALIDMIXER_X
+if [[ $ISVALIDMIXER -gt 0 ]]; then
+	CARD=0
+	echo "Warning: default card, $DEFAULT_CARD was not good, switching to zero (0) as a last resort."
+fi
+
+
+if [ $BASENAME == "mixq" ] || [ "$1" == "--quiet" ] || [ "$1"  == "-q" ]; then
+	function echo()
+	{
+		builtin echo $*
+		return 0
+	}
+	# shift even if it is mixq, when -q/--quiet flags are present
+	if [ "$1" == "--quiet" ] || [ "$1" == "-q"  ]; then
+		shift
+	fi
+fi
+
+# channel override [export MASTERCHANNEL=newchannel] or [ --channel= | -cName ]
+if [ -z "$MASTERCHANNEL" ]; then
+	CHANNEL=Master
+else
+	echo "Channel Override (via MASTERCHANNEL)"
+	CHANNEL="$MASTERCHANNEL"
+fi
+if [ "${1: 0:10}" == "--channel=" ] && [ "${#1}" -gt 10 ]; then
+	echo "Channel Override (via --channel= flag) -- overrides all others"
+	CHANNEL=${1: 10}
+	shift
+elif [ "${1: 0:2}" == "-c" ] && [ "${#1}" -gt 2 ]; then
+	echo "Channel Override (via -c flag) -- overrides all others"
+	CHANNEL=${1: 2}
+	shift
+fi
+
+
+if [[ "$1" == "-" && "$2" == "" ]]; then
+	echo 'minus!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!'
+	set -- -10
+elif [[ "$1" == "--" && "$2" == "" ]]; then
+	echo 'real minus!!!!!!'
+	set -- -1
+fi        
+
+echo "amixer -c $CARD sget Master | grep -Po stff" 
+CURVOL=`amixer -c $CARD sget Master | grep -Po '(?<=Playback )[0-9]+(?= \[)'`
+if [ ! -z "$*" ]; then
+	# test for inline negatives or positives first
+	TEST="$1"
+	echo "Parsing test value: $TEST"
+	if [ "${TEST: 0:1}" == "+" ] || [ "${TEST: 0:1}" == "-" ]; then
+		echo "Passed first check: $TEST"
+		if [ "$[ $TEST * -1 ]" == "${TEST: 1}" ] || [ "$[ $TEST * -1 ]" == "-${TEST: 1}" ]; then
+			# is a positive or negative, make adjustments to command line
+			if [ "${TEST: 0:1}" == "+" ]; then
+				echo "Modify command line: up ${TEST: 1}"
+				set up ${TEST: 1}
+			else
+				echo "Modify command line: dn ${TEST: 1}"
+				set dn ${TEST: 1}
+			fi
+		fi
+	fi
+	
+  
+  AMT=$[ $2 ]
+	if [ "$1" == "up" ] || [ "$1" == "+" ]; then
+		#echo "COMMAND: UP   VALUE: $2"
+		NEWVOL=$[ $AMT + $CURVOL ]
+	elif [ "$1" == "down" ] || [ "$1" == "dn" ] || [ "$1" == "-" ]; then
+		#echo "COMMAND: DOWN  VALUE: $2"
+		NEWVOL=$[ $CURVOL - $AMT ]
+	else
+		#echo "COMMAND: UNKNOWN (VALUE $2) NOACTION!"
+		NEWVOL=$CURVOL
+	fi
+	#echo "CURVOL:$CURVOL  NEWVOL:$NEWVOL"
+	echo "$CHANNEL: $CURVOL% -> $NEWVOL% "
+	amixer -c $CARD sset "$CHANNEL" $NEWVOL > /dev/null
+
+else
+	HI=[1m
+	LO=[30\;1m
+	NO=[0m
+	ER=[0\;31m
+	IN=[0\;32m
+	echo
+	echo -e "${ER}no arguments.$NO"
+	echo -e "\n\n\tsyntax:\tmix [-q | --quiet] [-cNewChannel | --channel=NewChannel] [up|down|dn|-|+] [0-100]"
+	echo 
+	echo -e "\texamples:\n\t\tmix up 10, mix down 10, mix + 25, mix - 50, mix +10, mix -10\n\t\tset the MASTERCHANNEL (by typing: export MASTERCHANNEL=newchannel) \n\t\tif your master channel has a name other than Master. \n\t\tNote that the --channel=Name or -cName flag overrides this variable."
+	echo
+	echo -e "${HI}IMPORTANT"
+	echo
+	echo -e "${NO}Unlike most unix programs, the order of command lines DOES matter. You cannot specify them out of order"
+	echo -e "for example: mix +20 -cMaster is NOT valid  however: mix -cMaster +20 IS valid!"
+	echo -e "also: mix -cMaster --quiet +20 is NOT valid either, use: mix --quiet -cMaster +20"
+	echo -e "(of course, -cMaster isnt needed since Master is the default channel name!)"
+	echo
+	echo -e "To permanantly set the new default override, edit the mix script or add this line to your /etc/bash.bashrc:"
+	echo
+	echo -e "\texport MASTERCHANNEL=mynewmasterchannel"
+	echo
+	echo -e "The the mix command will then always use that channel unless you use the [-cChannel] or [--channel=Channel] flags."
+	echo
+	echo
+	echo -e "$IN${HI}mix v0.1a script for bash >=3.0"
+	echo -e "${IN}  Written by Gabriel Thomas Sharp <osirisgothra@hotmail.com>"
+	echo -e "  Component of the GXBASE extended bash script library."
+	echo -e "  Latest Versions are available from <http://paradisim.tk/code.asp?name=gxbase&q=latest>"
+	echo -e "  You can contact me also at <gabriel@paradisim.tk> as osirisgothra at <stackoverflow.com>"
+	echo -e "\n${LO}(stackoverflow(tm) is a stackexchange(tm) website, and is not affiliated with any paradisim site."
+	echo -e "All Code is Intellectual Property of Paradisim Enterprises, LLC (C)1997-2013 Gabriel T. Sharp, All Rights Reserved"
+	echo -e "Please read the LICENSE file attached with the GXBASE distribution, or http://paradisim.tk/licenses.asp?q=gxbase"
+	echo -e "${IN}All Licenses, even under the GNU GPL3, can be changed to another license, without notice, by the author, ${ER}at any time.${NO}"
+fi
+

@@ -1,0 +1,85 @@
+#!/bin/bash -i
+#
+# sins
+# 
+# swap item name(s)
+#
+# renames two file's names to be the same as:
+# take FILEA and FILEB, 
+# now call FILEA by the name of FILEB
+# now call FILEB by the name of FILEA
+# remove temporaries
+# todo: one file only, reverse the name
+#
+if [[ ${1,,} == --help ]] || [[ ${1,,} == --version ]]; then
+	echo "sins - script components - (c)2014 Gabriel T. Sharp - Part of GxBase"
+	echo ""
+	# help is displayed after this block
+elif [[ $# -ne 2 ]]; then
+	echo "Insufficient arguments for an operation!"
+
+elif [[ -w $1 ]] && [[ -w $2 ]] && [[ -w ./. ]]; then
+	echo -ne "About to swap file/folder named \"$1\" to \"$2\", is this what you want? "
+	if (choice); then
+	  # ok, rename files, using a random number to scramble the tempfile's name
+    # in case of paralell or simmilar names, this makes it thread safe to use
+    # but you shouldnt operate on the same file at the same time, for obvious reasons!
+		TEMPSUFFIX=$RANDOM
+	  if (mv "$1" "${1}_TEMP_$TEMPSUFFIX" -fv); then
+		  if (mv "$2" "$1" -fv); then
+				if (mv "${1}_TEMP_$TEMPSUFFIX" "$2" -fv); then
+					if [[ -d "$1" ]] && [[ -d "$2" ]]; then
+						echo 'directories swapped.'
+					elif [[ -d "$2" ]] || [[ -d "$1" ]]; then
+						echo 'file <-> directory names swapped.'
+					else
+						echo 'filenames swapped.'
+					fi
+				else
+					echo 'one copy failed! (one renamed okay, but the other one was named to a temporary file, ${1}_TEMP_'${TEMPSUFFIX}'), please check files/dirs!'
+				fi
+			else
+				echo 'both copies failed (but one renamed to temporary file, '${1}_TEMP_${TEMPSUFFIX}'), please check your files/dirs!'
+			fi
+		else
+			echo 'both copies failed (and no files were changed).'
+		fi
+	else
+		echo 'user abort (no selected, nothing done).'
+	fi
+else
+	echo 'operation not possible: The source, destination, and the directory in which they reside in, must all be writable for this kind of operation to be possible.'
+fi
+## HELP AND RELATED HANDLER #######################################################
+if [[ ${1,,} == --help ]]; then
+cat <<-EOF_MARKER
+Usage:
+ sins [--help] <file|dir> <target>
+
+Options:
+ <file|dir>     A file or directory whose name will be swapped with the target.
+ <target>       The target whose name will be swapped with the source.
+
+ --help         display this help and exit
+ --version      [disabled] display this version information and exit
+
+Renames file or directory to <target>'s name and assigns <target>'s name to the
+orginal file or directory's name. 
+
+For example: 
+    sins FILEA.TXT FILEB.TXT 
+		
+	This renames FILEA.TXT to FILEB.TXT and vice-versa.
+
+For further information, please read see the sins(1) manual page or info document.
+EOF_MARKER
+elif [[ $1 == --version ]]; then
+	echo "GXBASE Version (from system):"
+	${GXBASE_ROOT}/version.sh
+	echo 'sins version: 1 floating version (attached to version of gxbase)'
+elif [[ $? -eq 0 ]]; then
+	echo 'command is completed without error, you can also use sins --help for further information!'
+else
+	echo 'return command/error code: '$?'.'
+	echo 'type sins --help for more information'
+fi

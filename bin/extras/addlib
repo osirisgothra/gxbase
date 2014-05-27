@@ -1,0 +1,13 @@
+#!/bin/bash
+# addlib microscript
+# used to copy libraries with destination and source checking from current directory
+# to destination without overwritting any
+SRC=.
+shopt -s nullglob
+[[ -z *.so* ]] && { echo "Error: no libraries in this directory!"; exit 1; }
+echo "enter destination to copy libraries to:"
+read DST
+[[ -d $DST ]] && [[ -w $DST ]] && cp --no-clobber -vf ${SRC}*.so /${DST}/qtcreator/bin/plugins/designer || echo "Could not write to destination $DST"
+[[ $? -ne 0 ]] && echo "COMPLETED WITH ERRORS!"
+echo "MAKE SURE YOU CHECK YOUR LIBRARIES BEFORE USING!"
+exit $?

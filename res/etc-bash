@@ -1,0 +1,178 @@
+#
+#
+# System-wide .bashrc file for interactive bash(1) shells.
+# 
+# NOTE: this bash.bashrc is not compatible with shells other than bash!!
+# Distributed with GXBASE (gitorious.org/gxbase)
+# Much of this script is originally from the bash.bashrc distributed with bash
+# and most standard linux distributions. The credit for those parts are to their
+# respective authors. See the bash and distribution manpages for author and 
+# applicable licensing information.
+#
+# The rewritten portions of this script are annotated with a BEGIN and END tag
+# and are the work of Gabriel T. Sharp <osirisgotra@hotmail.com> so please make
+# sure not to direct questions about his work to the bash and ld authors.
+#
+# Some of the more "minorly" rewritten parts do the same thing but are rewritten in
+# "nondepreciated" bash to modernize the script as the bash documentation suggests.
+# However, since the code result is identical, I do not take credit for these parts
+# (where possible). 
+#
+
+# If not running interactively, don't do anything 
+[[ -z ${-//[^i]} ]] && return
+
+# BEGIN alteration
+# required for extended processing of CNF information (see below)
+shopt -s extdebug
+# END
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize
+
+# BEGIN overkill: changed to reduce comparisons required
+# set variable identifying the chroot you work in (used in the prompt below)
+if [[ -r /etc/debian_chroot ]]; then
+	debian_chroot=${debian_chroot:-$(cat /etc/debian_chroot)}
+fi
+# END
+
+# set a fancy prompt (non-color, overwrite the one in /etc/profile)
+PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+
+# Commented out, don't overwrite xterm -T "title" -n "icontitle" by default.
+# If this is an xterm set the title to user@host:dir
+#case "$TERM" in
+#xterm*|rxvt*)
+#    PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
+#    ;;
+#*)
+#    ;;
+#esac
+
+# enable bash completion in interactive shells
+#if ! shopt -oq posix; then
+#  if [ -f /usr/share/bash-completion/bash_completion ]; then
+#    . /usr/share/bash-completion/bash_completion
+#  elif [ -f /etc/bash_completion ]; then
+#    . /etc/bash_completion
+#  fi
+#fi
+
+# sudo hint
+if [ ! -e "$HOME/.sudo_as_admin_successful" ] && [ ! -e "$HOME/.hushlogin" ] ; then
+    case " $(groups) " in *\ admin\ *)
+    if [ -x /usr/bin/sudo ]; then
+	cat <<-EOF
+	To run a command as administrator (user "root"), use "sudo <command>".
+	See "man sudo_root" for details.
+	
+	EOF
+    fi
+    esac
+fi
+
+
+####################### BEGIN bash.bashrc CUSTOMIZATIONS #####################################################################################
+
+if [[ -x /usr/lib/command-not-found ]] || [[ -x /usr/share/command-not-found/command-not-found ]]; then
+
+	#
+	# command_not_found_handle [command name] [args]
+	# requires the command_not_found python script
+	#
+	function command_not_found_handle()
+	{
+		# prevent interaction when not in interactive mode
+		case $- in *i*) 
+			true #is interactive, go ahead and continue execution
+			;;		
+		*)
+			# not interactive, do not attempt interaction mode
+			echo "$BASH_SOURCE: command not found: $* (non interactive)"
+			return 127;;
+		esac
+		# PREVENT interactive install mode when extdebug is disabled
+		# because using it recklessly in scripts without this extra
+		# information could cause bad things to happen, like big unwanted
+		# programs being installed. Note that never would the situation
+		# cause anything to be uninstalled or removed, and all installs
+		# are logged and marked so they can be undone easily.
+		if (! shopt -q extdebug); then
+			echo "$BASH_SOURCE: command not found: $*"
+			echo "Notice: extdebug is disabled, it is needed for the GXBASE interactive installer to work!"
+			return 127
+		fi
+    #prevent interaction when sourcing from .bashrc
+		# this MUST have extdebug on
+		if [[ $BASH_ARGV[*] ]]; then
+			for ((i=0;i<=$BASH_ARGC;i++)); do
+				j=${BASH_ARGV[i]}	  		
+				if [[ $j ]] &&  [[ $(basename $j) == ".bashrc" ]]; then					
+					echo "COMMAND NOT FOUND: $1 (bashrc loop prevention)"
+					return 127
+				fi
+			done
+		fi
+
+			
+		if [[ $DO_NOT_CNF == YES ]]; then
+			echo "Command not found (loop prevention)"
+			return 127
+		fi
+		# check because c-n-f could've been removed in the meantime
+  	if [ -x /usr/lib/command-not-found ]; then			
+			RESPONSE=$(/usr/lib/command-not-found -- "$1" 2>&1 | tr '\n' ' ')			
+			echo "$RESPONSE"
+			if (echo "$RESPONSE" | grep -q "apt-get"); then
+				TMOUT=5
+				echo -ne "Want to install it? Chosing Yes In 5 Seconds... [[y]/n]:"
+				REPLY=y
+				if [[ $(read -sn1 | echo $REPLY) == y ]]; then
+					INSTALL=YES				
+					echo "Installing (removal of packages disabled)"
+					
+				else
+					INSTALL=NO
+					echo "Cancelled"
+				fi
+				unset TMOUT
+				if [[ $INSTALL == YES ]]; then
+					INSTALLCMD=$(echo $RESPONSE | grep -o "apt-get.*")
+					PKGNAME=$(echo INSTALLCMD | grep -Po "(?<=apt-get install ).*")
+					echo "Checking existence of package: $PKGNAME"
+					if (apt-cache madison $PKGNAME -qq &> /dev/null); then
+						echo "Package exists, starting download and install..."
+						if (eval $INSTALLCMD --no-remove --yes); then
+							echo "Updating auto-install records..."
+							echo "$(date): $PKGNAME" >> ~/.autoinstalledpackages
+							echo "Install Succeeded!"							
+							echo "now running the command as originally requested... [press CTRL+BREAK or CTRL+C in 2 seconds to abort it]"
+							sleep 2
+							# use DO_NOT_CNF to prevent eternal loops in case some quirk manages to give us a bad exit code
+							export DO_NOT_CNF=YES
+							command "$@"
+							ERR=$?
+							export DO_NOT_CNF=NO
+							return $ERR
+						else
+							echo "Error: installer reported failure, you will need to install it manually!"
+							return 127
+						fi
+					else
+						echo "Error: package $PKGNAME does not have any actual packages assigned to it"
+						echo "       probably because it is either unsupported, depreciated, or virtual!"
+					fi
+				fi							
+			fi
+	    return $?
+    elif [ -x /usr/share/command-not-found/command-not-found ]; then
+		   /usr/share/command-not-found/command-not-found -- "$1"
+       return $?
+		else
+		   printf "%s: command not found\n" "$1" >&2
+		   return 127
+		fi
+	}
+fi

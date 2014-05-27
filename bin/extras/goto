@@ -1,0 +1,26 @@
+#!/bin/bash
+basedir=`dirname $BASH_SOURCE`
+location=$(zenity --list --text "Where do you want to go?" --column "Go Here" --separator=: `cat $basedir/goto.list` --height=800 --multiple)
+if [ $? -eq 0 ]; then
+  if [ "$location" == "click-here-to-edit-this-list" ]; then
+		location=$basedir/bin/goto.list
+		for i in gedit kate gvim kwrite; do
+			if [ -x /usr/bin/$i ]; then
+				opener=/usr/bin/$i
+				break
+			fi
+		done
+		if [ -x "$opener" ]; then
+			$opener $location
+		else
+			alert "Sorry no program is available to edit files of text."
+   	 zenity --info --text "Sorry no program is available to edit files of text."
+			xterm -e bash -c "echo Sorry_no_program_to_edit_text; read"
+		fi
+
+
+			
+	else
+		dolphin `echo $location | sed 'y/:/ /'`
+	fi
+fi

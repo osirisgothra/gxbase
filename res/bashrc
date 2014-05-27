@@ -25,25 +25,21 @@ while [[ ${-//[^i]} ]]; do {
 #fi
 
 	# message of the day while loading
-	[[ -r /etc/motd ]] && cat /etc/motd
+	# but login shells do this already, so not if in a login shell
+	# note that hushlogin will silence all output, so no need to do anything here
+	if [[ ${0: 0:1} != "-" ]]; then
+		# only if it exists
+		[[ -r /etc/motd ]] && cat /etc/motd
+	fi
 
-
-
-	# touches
-	touch -f ~/.bash-aliases
-	touch -f ~/.bash-helpers
-	touch -f ~/.bash-settings
-	touch -f ~/.bash-vars
-	touch -c ~/.bash-history
-	touch -c ~/.bash-logout
-	touch -c ~/.bash-profile
-	touch -f ~/.bash
 
 	# inclusions
 	source ${GXBASE_ROOT}/res/temp
 	source ${GXBASE_ROOT}/res/bash-helpers
 	source ${GXBASE_ROOT}/res/bash-settings
 	source ${GXBASE_ROOT}/res/bash-prompt
+	source ${GXBASE_ROOT}/res/bash-aliases
+	source ${GXBASE_ROOT}/res/bash-traps
 
 
 	for i in ~/.bash-*; do source "$i"; done
@@ -74,42 +70,40 @@ while [[ ${-//[^i]} ]]; do {
 
 	# conditional statements
 
-	(ishell interactive) && {
+	case ${DISPLAY:-none} in
+		none)
+			echo "Terminal Session Detected"
+			;;
+		\:[0-9]*)
+			echo "Checking for X Session..."
+			(xh 127.0.0.1) && {
 
-		alias vim='vim_func -n'
-		alias ls='function _lstmp() { unset -f $0; echo "$LS_HEAD"; ls --color=auto "$@"; ERR=$?; echo "$LS_TAIL"; return $ERR; }; _lstmp'
-		alias grep='grep --color=auto'
-		alias fgrep='fgrep --color=auto'
-		alias egrep='egrep --color=auto'
-		alias ll='ls -alF'
-		alias la='ls -A'
-		alias l='ls -CF'
-		alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-		alias dir='lsfunc -batchHs --color=always'
-		alias ls='lsfunc2'
-		alias grep='grep --color'
-		alias du='du --max-depth=1 -h'
-		alias df='df -h'
-		alias eb='vim -n -c ":so $GXBASE_ROOT/res/editbashes"'
-		alias rls='source ~/.bashrc 1> /tmp/bash-stdoutput-last'
-		alias rgx='source /etc/bash_completion; source ${GXBASE_ROOT}/startgxbase'
+				echo "X Session Detected"
+				xh 127.0.0.1
+				# add your own hosts here that you want connections allowed to
+				xh 192.168.2.103
+				xh 192.168.2.105
+				xh 192.168.2.106
+				xh 192.168.2.102
+			}
+			;;
+		*)
+			echo "Unknown Session Type: DISPLAY=${DISPLAY}"
+			;;
+	esac
 
-	}
-	(xh 127.0.0.1) && {
-
-		xh 127.0.0.1
-		xh 192.168.2.103
-		xh 192.168.2.105
-		xh 192.168.2.106
-		xh 192.168.2.102
-
-	}
-	(xtty) && {
-		
+	case "$(tty)" in
+	
+		*dev*pt*)
+		# ttys @ /dev/pts/XX or /dev/ptyXX
 		alias nano=mousepad
-		alias vim='vim_func -'$( [[ $DISPLAY ]] && echo "g" || echo "n" )		
+		alias vim='vim_func -'$( [[ $DISPLAY ]] && echo "g" || echo "n" )' '
+		;;
 
-	} || {
+		*dev*tty[0-9]*)
+	
+
+		# ttys @ /dev/ttyXX
 
 		alias startdwm='startx dwm'
 		alias startkde='startx startkde'
@@ -127,24 +121,33 @@ while [[ ${-//[^i]} ]]; do {
 		alias modo='startx modo'
 		alias vlc='startx vlc'
 		alias firefoxp='startx firefox --private-window'
-	}
+		;;
+
+		*)
+		echo "Warning: TTY is nonstandard"
+		;;
+	esac
 
 
 
 
-	# process commands added by addbashcmd
-	[[ -s /home/${USERNAME}/.config/bash ]] && echo -ne "processing..."
+	# process commands added by addbashcmd	
 	for i in /home/${USERNAME}/.config/bash/*; do	
 		source "$i" &> /dev/null
 	done
 
-	[[ -s /home/${USERNAME}/.config/bash ]] && echo " - done."
-	#prevent multiple reloading the path, which would become quickly a bad thing if bashrc is reloaded several times by some script
+	#prevent
+	# - duplicate paths
+	# - missing paths in PATH
+	unset oIFS
+	[[ ! -z "$IFS" ]] && oIFS="$IFS"
+	IFS=":"
 	if [[ -z $PATH_IS_SET ]]; then
 		# you may not want all of this	
 		export PATH=/usr/autodesk/maya/bin:/usr/autodesk/Composite_2012/bin:${GXBASE_ROOT}/res:${GXBASE_ROOT}:${GXBASE_ROOT}/bin:/home/${USERNAME}/bin:$PATH
 		# and because of this, I've added this check script to remove any paths that don't exist from your path, to prevent
 		# system speed problems due to my arrogant additions! 
+		
 		IFS=":"
 		for i in $PATH; do
 			if [[ -d $i ]]; then
@@ -158,7 +161,8 @@ while [[ ${-//[^i]} ]]; do {
 		unset NEWPATH
 		export PATH_IS_SET=1
 	fi
-
+	[[ ! -z "$oIFS" ]] && IFS=$oIFS
+	
 	# keyboard bindings
 	# do not use ^[x codes for these, because they will differ between terminal types and be uselessly unportable
 	#bind '"0A": "example of a BAD binding declaration, do NOT uncomment this one!"
@@ -171,13 +175,14 @@ while [[ ${-//[^i]} ]]; do {
 		bind '"\C-l": "ls -C --color"'
 		bind '"\C-Up": "cd .."'
 		bind '"\C-Right": "cd 	"'
-	else
+	
 		if [[ ! -r ~/.hushlogin ]]; then
-			echo "(bindings are disabled, use the togglebindings command to change this setting)"
+			echo "Binding Enabled: Type bind -p for a list"
 		fi
 	fi
-
-	# correct should-be variables
+	
+	# create variables that are expected
+	# (usually already there, but some programs like to mess with them)
 
 	export LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu/:/lib:/lib/x86_64-linux-gnu/:/usr/local/lib:/lib64:/lib/i386-linux-gnu/:/usr/lib/i386-linux-gnu:$LD_LIBRARY_PATH
 	export HOME=~
@@ -196,6 +201,7 @@ while [[ ${-//[^i]} ]]; do {
 
 	declare -rx HOME USERNAME GROUP GROUPS
 
+	# Shell Configuration
 	# disabled shell options                      # enabled shell options               
 																																											
 	shopt -u autocd                               ;shopt -s checkwinsize                 

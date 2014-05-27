@@ -1,0 +1,3 @@
+#!/bin/bash
+declare -f > /tmp/funcs.txt
+

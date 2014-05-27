@@ -1,0 +1,69 @@
+#!/bin/bash
+function run_normal()
+{
+	unset -f $0
+	echo "[1;31mno[0m"
+	echo
+	echo "running detached/disowned..."
+	echo
+	/usr/bin/vlc "$@" & disown %
+	echo
+	echo -ne "\n\n[1;33m...PLEASE WAIT SOME SECONDS, WILL CLEAN UP THE TERMINAL...[0m\n\n"
+	sleep 5
+	clear
+	echo "$(tty): user $USER finished $HOSTNAME execution on $(date)"
+}
+
+echo
+echo -ne "Specify start/stop times? [y/n] [ENTER=no]: "
+#
+# if      $DONT_ASK_VLC variable is declared
+# or      ~/.dontaskvlc file is present
+# then it ignores the question and never asks
+# HOWEVER
+# if		  ~/.askvlc file exists (and all other conds above are NOT)
+# then the question is asked EVERY time
+if [[ -z $DONT_ASK_VLC ]] && [[ ! -r ~/.dontaskvlc ]]; then
+	if [[ -r ~/.askvlc ]] || [[ $(read -sn1 r; echo $r) == y ]]; then
+		echo "[1;32myes[0m"
+		unset SM SS EM ES LOOPED
+    # integer, not exported		
+		declare -i +x SM SS EM ES
+		while (((EM*60+ES)<=(SM*60+SS))); do
+			if [[ $LOOPED -eq 1 ]]; then 
+				echo
+				echo "BAD VALUES, TIME RANGE MUST BE POSITIVE AND START MUST COME BEFORE END! TRY AGAIN!"
+				echo
+			fi
+		echo -ne "Start time Minutes: "
+		read SM
+		echo -ne "           Seconds: "
+		read SS
+		echo -ne "  End time minutes: "
+		read EM
+		echo -ne "           seconds: "
+		read ES
+		echo
+		START_TIME=$[ ($SM * 60) + $SS ]
+		STOP_TIME=$[ ($EM * 60) + $ES ]
+		echo "Start Time: $START_TIME (+$SM:$SS minutes)"
+		echo "Stop Time:  $STOP_TIME (+$EM:$ES minutes)"
+		LOOPED=1
+		done
+		echo
+		echo -ne "Okay? ENTER=YES  CTRL+C=CANCEL: "
+		read IGNORED_VARIABLE_VLC
+		echo
+		echo "running detached/disowned..."
+		echo
+		/usr/bin/vlc "$@" --start-time=$START_TIME --stop-time=$STOP_TIME & disown %
+		echo
+		echo "result ($?) done."
+		echo
+	else
+		run_normal "$@"
+	fi
+else
+	run_normal "$@"
+fi
+echo

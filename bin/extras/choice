@@ -1,0 +1,61 @@
+#!/bin/bash
+# choice
+# a simple yes/no choice script
+# case-insensitive, no prompt
+
+# -OPTS=`getopts -c choice --long prompt:,title:,file:,yestxt:,notxt:
+
+function makechoice()
+{
+	#if [ -r "$CHOICEFILE" ]; then
+	#	CHOICEPROMPT=`cat $CHOICEFILE`
+	#fi
+	if [ -z "$CHOICEPROMPT" ] && [ "$1" ] && [ ! -r "$CHOICEFILE" ]; then
+		CHOICEPROMPT="$*"	
+	fi
+	if (tty -s); then
+
+		# TTY -- TEXT CONSOLE -- NO GUI/NO NEED
+
+		if [ ! -z "$CHOICEPROMPT" ]; then
+			echo -n "$CHOICEPROMPT"
+		elif [ -r "$CHOICEFILE" ]; then
+			echo "${CHOICETITLE:-Proceed with this action?}"
+			cat "$CHOICEFILE"
+			echo "[Y=${CHOICEYESTXT:Yes} N=${CHOICENOTXT:No}]"
+		else
+			echo "[Y/N]?"
+		fi
+		unset REPLY
+		while [ "${REPLY^^}" != "Y" ] && [ "${REPLY^^}" != "N" ]; do
+			read -sn1
+		done
+		if [ "${REPLY^^}" == "Y" ]; then
+			true
+			return 0
+			(exit 0)
+		else
+			false
+			return 1
+			(exit 1)
+		fi
+	else
+		
+		# NO TTY --- GUI --- USE ZENITY
+
+		if [ ! -z "$CHOICEFILE" ]; then
+			# use special kind, that supports text viewing..
+			zenity --text-info --title="${CHOICETITLE:-Do you wish to perform this action?}" --ok-label="${CHOICEYESTXT:-Yes}" --cancel-label="${CHOICENOTXT:-No}" --file-selection "${CHOICEFILE}"
+			return $?
+		elif [ -z "$CHOICEPROMPT" ]; then
+			CHOICEPROMPT="Do you wish to perform this action?" 	
+		fi
+		zenity --question --text="$CHOICEPROMPT"
+		return $?
+	fi
+}
+makechoice $@
+retval=$?
+unset makechoice
+(exit $retval)
+

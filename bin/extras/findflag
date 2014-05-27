@@ -1,0 +1,20 @@
+#!/bin/bash
+ID=$1
+shift
+rm ${ID}-found.flags -f
+rm ${ID}-found.params -f
+if [ "$1" == "flags-reset" ]; then
+	return 0;
+else
+	# only if we are not resetting, do we work with the flags
+	while [[ "$1" != "" ]]; do	
+
+	if [[ "${1: 0:1}" == "-" && "${#1}" -gt "2" ]]; then
+		echo "$1" >> ${ID}-found.flags
+	else
+		echo "$1" >> ${ID}-found.params
+	fi
+	shift
+
+	done
+fi

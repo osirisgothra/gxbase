@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# word
+#
+# Shell script to start Microsoft Word 2010
+#
+# (C)2010 Microsoft Corporation, All Rights Reserved
+#
+
+
+echo "Launching Microsoft Word 2010..."
+wine "C:\\Program Files\\Microsoft Office\\OFFICE14\\WINWORD.EXE $*"

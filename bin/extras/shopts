@@ -1,0 +1,10 @@
+#!/bin/bash
+IFS='
+'
+for j in `shopt | tr -s '\t ' ' ' | awk '{ print $1; }'`; do
+  echo -ne "$j \""
+  echo -ne "$(whatisbi $j)\" "
+  shopt -q $j
+  [ $? -eq 0 ] && echo "on" || echo "off"
+done
+unset IFS

@@ -5,3 +5,24 @@
 # various (non-prompt) variables you may want to set or have set
 #
 #
+if [[ $GXBASE_RES_BASHVARS ]]; then
+export GXBASE_RES_BASHVARS+=DEFINED
+
+# GXBASE_ROOT                                                               v--   1 for "bash-vars" in BASH_SOURCE, 2: for "res" in $GXBASE_ROOT/res
+[[ -z $GXBASE_ROOT ]] && export GXBASE_ROOT="$(readlink -m $BASH_SOURCE/../..)"
+
+# each 1st line contains an embedded conditional, only use : when already not zero length!!
+
+# PATH Extras
+PATH+="${PATH+:}$GXBASE_ROOT/bin"
+PATH+=":$GXBASE_ROOT/bin/extras"
+PATH+=":$GXBASE_ROOT/res"
+PATH+=":$GXBASE_ROOT"
+
+# LIBPATH Extras
+LD_LIBRARY_PATH+="${LD_LIBRARY_PATH+:}$GXBASE_ROOT/lib"
+
+else
+	logger "$BASH_SOURCE: Already defined"
+fi
+
