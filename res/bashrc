@@ -11,18 +11,22 @@
 # for examples
 # 
 
-
 while [[ ${-//[^i]} ]]; do {
+	
+	[[ -r ~/.hushlogin ]] && [[ "$1" != "--hush" ]] && { "$BASH_SOURCE" "--hush" "$@" &> /dev/null; return $?; }
 
 	# gxbase placement assessment
 	GXBASE_ROOT=$(dirname `dirname $(readlink -e $BASH_SOURCE)`)
-#if [[ -r ${GXBASE_ROOT}/.gxbrc ]]; then
-#	GXBASE_UUID=STR_PLACEHOLDER
-#fi
-#if [[ $GXBASE_UUID != a19b9402-e2e6-11e3-bd4a-00196605e97c ]]; then
-#	echo "GXBASE UUID mismatch, cannot continue, aborting."
-#	break
-#fi
+
+	# DISABLED WHILE IN ALPHA
+	#if [[ -r ${GXBASE_ROOT}/.gxbrc ]]; then
+	#	GXBASE_UUID=STR_PLACEHOLDER
+	#fi
+	#if [[ $GXBASE_UUID != a19b9402-e2e6-11e3-bd4a-00196605e97c ]]; then
+	#	echo "GXBASE UUID mismatch, cannot continue, aborting."
+	#	break
+	#fi
+
 
 	# message of the day while loading
 	# but login shells do this already, so not if in a login shell
@@ -32,43 +36,21 @@ while [[ ${-//[^i]} ]]; do {
 		[[ -r /etc/motd ]] && cat /etc/motd
 	fi
 
-
-	# inclusions
+	# inclusions 
+	#    the order is very important (temp is for alpha releases only)
 	source ${GXBASE_ROOT}/res/temp
 	source ${GXBASE_ROOT}/res/bash-helpers
+	source ${GXBASE_ROOT}/res/bash-vars
 	source ${GXBASE_ROOT}/res/bash-settings
 	source ${GXBASE_ROOT}/res/bash-prompt
 	source ${GXBASE_ROOT}/res/bash-aliases
 	source ${GXBASE_ROOT}/res/bash-traps
 
-
+	# home-based additional source files
 	for i in ~/.bash-*; do source "$i"; done
 
-	# pre-checks
-
-	(check_hushlogon "$BASH_SOURCE" "$@") || {
-		return 0;
-	}
-
-	# variable declarations
-
-	export XINIT_MODE=xinit
-	export XINIT_DEVICE=":$(ps avfx -e | grep 'X .*[:][0-9] ' --count)"
-	export XINIT_VT=vt12
-	export HISTCONTROL=ignoreboth
-	export HISTSIZE=1000
-	export HISTFILESIZE=2000
-	export LESSOPEN="| /usr/bin/lesspipe %s";
-	export LESSCLOSE="/usr/bin/lesspipe %s %s";
-	export PS1='$(_PS1)' 
-	export PS2='$(_PS2)'
-	export PS3='$(_PS3)'
-
-	# function declarations
-
-
-
-	# conditional statements
+	# detect session type
+	# - uses DISPLAY to determine if access can be given to the X session
 
 	case ${DISPLAY:-none} in
 		none)
@@ -80,6 +62,8 @@ while [[ ${-//[^i]} ]]; do {
 
 				echo "X Session Detected"
 				xh 127.0.0.1
+
+				# these are examples of extra hosts you could have added to the access list:
 				# add your own hosts here that you want connections allowed to
 				xh 192.168.2.103
 				xh 192.168.2.105
@@ -92,168 +76,44 @@ while [[ ${-//[^i]} ]]; do {
 			;;
 	esac
 
-	case "$(tty)" in
-	
-		*dev*pt*)
-		# ttys @ /dev/pts/XX or /dev/ptyXX
-		alias nano=mousepad
-		alias vim='vim_func -'$( [[ $DISPLAY ]] && echo "g" || echo "n" )' '
-		;;
-
-		*dev*tty[0-9]*)
-	
-
-		# ttys @ /dev/ttyXX
-
-		alias startdwm='startx dwm'
-		alias startkde='startx startkde'
-		alias startlxde='startx startlxde'
-		# alias for non-pts terminals only	
-		alias xterm='startx xterm -c "xterm -fullscreen"'
-		alias st='startx st'
-		alias firefox='startx firefox'
-		alias chrome='startx chromium-browser'
-		alias pcsx='startx pcsx'
-		alias zsnes='startx zsnes'
-		alias gvim='startx /usr/bin/gvim_target'
-		alias gimp='startx gimp'
-		alias blender='startx blender'
-		alias modo='startx modo'
-		alias vlc='startx vlc'
-		alias firefoxp='startx firefox --private-window'
-		;;
-
-		*)
-		echo "Warning: TTY is nonstandard"
-		;;
-	esac
-
-
-
-
-	# process commands added by addbashcmd	
+	# addbashcmd() loader
+	#  - processes commands added by the addbashcmd alias adding command (bash-helpers)
 	for i in /home/${USERNAME}/.config/bash/*; do	
 		source "$i" &> /dev/null
 	done
 
-	#prevent
+  # font checker
+	# - when default font exists, load it
+	if [[ -r /usr/share/consolefonts/default.psf || -r /usr/share/consolefonts/default.psf.gz ]]; then
+		# setfont only works by default if there is a "default.psf" in the consolefont directory
+		setfont
+	fi
+
+
+	# PATH checker
+	# prevents:
 	# - duplicate paths
 	# - missing paths in PATH
+	# - actual additions to path now done in bash-vars
 	unset oIFS
 	[[ ! -z "$IFS" ]] && oIFS="$IFS"
-	IFS=":"
-	if [[ -z $PATH_IS_SET ]]; then
-		# you may not want all of this	
-		export PATH=/usr/autodesk/maya/bin:/usr/autodesk/Composite_2012/bin:${GXBASE_ROOT}/res:${GXBASE_ROOT}:${GXBASE_ROOT}/bin:/home/${USERNAME}/bin:$PATH
-		# and because of this, I've added this check script to remove any paths that don't exist from your path, to prevent
-		# system speed problems due to my arrogant additions! 
-		
-		IFS=":"
-		for i in $PATH; do
-			if [[ -d $i ]]; then
-				if [[ $NEWPATH ]]; then
-					NEWPATH+=":"
+	IFS=":"	
+ 	for i in $PATH; do
+ 		if [[ -d $i ]]; then
+			if (echo "$NEWPATH" | grep -qP "(:|^)$i(:|$)"); then
+				echo "Warning: duplicate path ignored: $i"
+			else
+	 			if [[ $NEWPATH ]]; then
+					NEWPATH+=":$i"
+				else
+					NEWPATH+="$i"
 				fi
-				NEWPATH+=$i
 			fi
-		done
-		PATH=$NEWPATH
-		unset NEWPATH
-		export PATH_IS_SET=1
-	fi
-	[[ ! -z "$oIFS" ]] && IFS=$oIFS
-	
-	# keyboard bindings
-	# do not use ^[x codes for these, because they will differ between terminal types and be uselessly unportable
-	#bind '"0A": "example of a BAD binding declaration, do NOT uncomment this one!"
-
-	if [[ $ENABLE_BINDINGS == YES ]]; then
-		bind '"\C-a": "ssh root@azura"'
-		bind '"\C-p": "ssh root@peryite"'
-		bind '"\C-f": "apt-cache search "'
-		bind '"\C-i": "apt-get install --noremove --yes"'
-		bind '"\C-l": "ls -C --color"'
-		bind '"\C-Up": "cd .."'
-		bind '"\C-Right": "cd 	"'
-	
-		if [[ ! -r ~/.hushlogin ]]; then
-			echo "Binding Enabled: Type bind -p for a list"
 		fi
-	fi
-	
-	# create variables that are expected
-	# (usually already there, but some programs like to mess with them)
-
-	export LD_LIBRARY_PATH=/usr/lib:/usr/lib/x86_64-linux-gnu/:/lib:/lib/x86_64-linux-gnu/:/usr/local/lib:/lib64:/lib/i386-linux-gnu/:/usr/lib/i386-linux-gnu:$LD_LIBRARY_PATH
-	export HOME=~
-	export USERNAME=$(id -un)
-	export GROUP=$(id -gn) 
-	export GROUPS=($(id -G))
-
-	# readonly  anyways: export UID=$(id -u)
-
-	export LS_COLORS='rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:su=37;41:sg=30;43:ca=30;41:tw=30;42:ow=34;42:st=37;44:ex=01;32:*.tar=01;31:*.tgz=01;36:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.lzma=01;31:*.tlz=01;31:*.txz=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.dz=01;31:*.gz=01;36:*.lz=01;31:*.xz=01;31:*.bz2=01;31:*.bz=01;31:*.tbz=01;31:*.tbz2=01;31:*.tz=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.war=01;31:*.ear=01;31:*.sar=01;31:*.rar=01;31:*.ace=01;31:*.zoo=01;31:*.cpio=01;31:*.7z=01;31:*.rz=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.svg=01;35:*.svgz=01;35:*.mng=01;35:*.pcx=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.m2v=01;35:*.mkv=01;35:*.webm=01;35:*.ogm=01;35:*.mp4=01;35:*.m4v=01;35:*.mp4v=01;35:*.vob=01;35:*.qt=01;35:*.nuv=01;35:*.wmv=01;35:*.asf=01;35:*.rm=01;35:*.rmvb=01;35:*.flc=01;35:*.avi=01;35:*.fli=01;35:*.flv=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.yuv=01;35:*.cgm=01;35:*.emf=01;35:*.axv=01;35:*.anx=01;35:*.ogv=01;35:*.ogx=01;35:*.aac=00;36:*.au=00;36:*.flac=00;36:*.mid=00;36:*.midi=00;36:*.mka=00;36:*.mp3=00;36:*.mpc=00;36:*.ogg=00;36:*.ra=00;36:*.wav=00;36:*.axa=00;36:*.oga=00;36:*.spx=00;36:*.xspf=00;36:';
-	export IFS=""
-	export TMOUT=0
-	alias date='date +"%c"'
-
-	# protect some variables that should never change
-
-	declare -rx HOME USERNAME GROUP GROUPS
-
-	# Shell Configuration
-	# disabled shell options                      # enabled shell options               
-																																											
-	shopt -u autocd                               ;shopt -s checkwinsize                 
-	shopt -u cdable_vars                          ;shopt -s cmdhist                      
-																								 shopt -s complete_fullquote           
-	shopt -u checkhash                            ;shopt -s direxpand                    
-	shopt -u checkjobs                            ;shopt -s expand_aliases               
-	shopt -u compat31                             ;shopt -s extdebug                     
-	shopt -u compat32                             ;shopt -s extglob                      
-	shopt -u compat40                             ;shopt -s extquote                     
-	shopt -u compat41                             ;shopt -s force_fignore                
-	shopt -u compat42                             ;shopt -s globstar                     
-	shopt -u dirspell                             ;shopt -s histappend                   
-	shopt -u dotglob                              ;shopt -s histreedit                   
-	shopt -u execfail                             ;shopt -s interactive_comments         
-	shopt -u globasciiranges                      ;shopt -s login_shell                  
-	shopt -u gnu_errfmt                           ;shopt -s mailwarn                     
-	shopt -u failglob                             ;shopt -s progcomp                     
-	shopt -u histverify                           ;shopt -s promptvars                   
-	shopt -u hostcomplete                         ;shopt -s sourcepath                   
-	shopt -u huponexit                            ;shopt -s xpg_echo                     
-	shopt -u lastpipe                             ;shopt -s cdspell
-	shopt -u lithist              
-	shopt -u no_empty_cmd_completion              
-	shopt -u nocaseglob           
-	shopt -u nocasematch                          
-	shopt -u nullglob             
-	shopt -u restricted_shell                     
-	shopt -u shift_verbose        
-
-	# disabled shell flags                        # enabled shell flags
-																																										
-	set +o allexport                              ;set -o braceexpand                 
-	set +o errexit                                ;set -o emacs                       
-	set +o errtrace                               ;set -o functrace                   
-	set +o ignoreeof                              ;set -o hashall                     
-	set +o keyword                                ;set -o histexpand                  
-	set +o noclobber                              ;set -o history                     
-	set +o noexec                                 ;set -o interactive-comments        
-	set +o noglob                                 ;set -o monitor                     
-	set +o nolog                                  
-	set +o notify                 
-	set +o nounset                                
-	set +o onecmd                 
-	set +o physical                               
-	set +o pipefail               
-	set +o posix                                  
-	set +o privileged             
-	set +o verbose                                
-	set +o vi                     
-	set +o xtrace
-
+	done
+	PATH=$NEWPATH
+	unset NEWPATH
+	[[ ! -z "$oIFS" ]] && IFS=$oIFS
 	break
 
 } done

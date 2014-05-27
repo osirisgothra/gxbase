@@ -1,80 +1,62 @@
+#!/bin/bash -e "echo \"don't execute this directly!\""
 #
+# origin name: /gxbase/res/bashrc (gxbase = wherever your GXBASE_ROOT lies)
+# linked name: /etc/bash.bashrc
+#
+# To use an origin script you must create a symbolic link to it with the 'linked name'.
 #
 # System-wide .bashrc file for interactive bash(1) shells.
 # 
 # NOTE: this bash.bashrc is not compatible with shells other than bash!!
 # Distributed with GXBASE (gitorious.org/gxbase)
-# Much of this script is originally from the bash.bashrc distributed with bash
+# Some parts of this script may be originally from the bash.bashrc distributed with bash
 # and most standard linux distributions. The credit for those parts are to their
 # respective authors. See the bash and distribution manpages for author and 
 # applicable licensing information.
 #
-# The rewritten portions of this script are annotated with a BEGIN and END tag
-# and are the work of Gabriel T. Sharp <osirisgotra@hotmail.com> so please make
-# sure not to direct questions about his work to the bash and ld authors.
-#
-# Some of the more "minorly" rewritten parts do the same thing but are rewritten in
-# "nondepreciated" bash to modernize the script as the bash documentation suggests.
-# However, since the code result is identical, I do not take credit for these parts
-# (where possible). 
+# The rewritten majority of this script (which is almost all of it now) is not affiliated
+# with the previous authors in any way, shape, or form. Note that this script is purely
+# EXPERIMENTAL and I take NO RESPONSIBILITY in what might happen to you or yours while
+# running this script. By using you agree that you use this of your own free will at your OWN RISK.
+# If you have any questions about GXBASE and the related scripts in it's repository tree, be
+# sure not to direct questions about this work to the bash and ld authors, direct them to:
+# osirisgothra@hotmail.com
 #
 
-# If not running interactively, don't do anything 
 [[ -z ${-//[^i]} ]] && return
 
-# BEGIN alteration
-# required for extended processing of CNF information (see below)
 shopt -s extdebug
-# END
-
-# check the window size after each command and, if necessary,
-# update the values of LINES and COLUMNS.
 shopt -s checkwinsize
 
-# BEGIN overkill: changed to reduce comparisons required
-# set variable identifying the chroot you work in (used in the prompt below)
 if [[ -r /etc/debian_chroot ]]; then
 	debian_chroot=${debian_chroot:-$(cat /etc/debian_chroot)}
+elif ! shopt -oq posix; then
+  if [[ -f /usr/share/bash-completion/bash_completion ]]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [[ -f /etc/bash_completion ]]; then
+    . /etc/bash_completion
+  fi
 fi
-# END
 
-# set a fancy prompt (non-color, overwrite the one in /etc/profile)
-PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-
-# Commented out, don't overwrite xterm -T "title" -n "icontitle" by default.
-# If this is an xterm set the title to user@host:dir
-#case "$TERM" in
-#xterm*|rxvt*)
-#    PROMPT_COMMAND='echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD}\007"'
-#    ;;
-#*)
-#    ;;
-#esac
-
-# enable bash completion in interactive shells
-#if ! shopt -oq posix; then
-#  if [ -f /usr/share/bash-completion/bash_completion ]; then
-#    . /usr/share/bash-completion/bash_completion
-#  elif [ -f /etc/bash_completion ]; then
-#    . /etc/bash_completion
-#  fi
-#fi
-
-# sudo hint
-if [ ! -e "$HOME/.sudo_as_admin_successful" ] && [ ! -e "$HOME/.hushlogin" ] ; then
-    case " $(groups) " in *\ admin\ *)
-    if [ -x /usr/bin/sudo ]; then
-	cat <<-EOF
-	To run a command as administrator (user "root"), use "sudo <command>".
-	See "man sudo_root" for details.
-	
-	EOF
-    fi
-    esac
+if (groups | grep -q sudo) && [[ ! -r ~/.hushlogin ]]; then
+    case " $(groups) " in 
+			# i guess standard bashrc only want this information emitted to users in the 'admin' group
+			# so i decided to keep it this way as to not invite problems into the script by accidental members
+			*" admin "*)
+			  if [ -x /usr/bin/sudo ]; then
+					echo 'To run a command as administrator (user "root"), use "sudo <command>".'
+					echo 'See "man sudo_root" for details.'					
+		    fi
+				;;				
+	    esac
 fi
 
 
 ####################### BEGIN bash.bashrc CUSTOMIZATIONS #####################################################################################
+
+# these are experimental, dont use if you dont want problems potentially out of nowhere
+# however they should not physically harm your computer but data loss can occur due to 
+# this especially in the case of AUTOMATED systems!
 
 if [[ -x /usr/lib/command-not-found ]] || [[ -x /usr/share/command-not-found/command-not-found ]]; then
 
@@ -109,7 +91,7 @@ if [[ -x /usr/lib/command-not-found ]] || [[ -x /usr/share/command-not-found/com
 		if [[ $BASH_ARGV[*] ]]; then
 			for ((i=0;i<=$BASH_ARGC;i++)); do
 				j=${BASH_ARGV[i]}	  		
-				if [[ $j ]] &&  [[ $(basename $j) == ".bashrc" ]]; then					
+				if [[ $j ]] && [[ $(basename "$j") == ".bashrc" ]]; then					
 					echo "COMMAND NOT FOUND: $1 (bashrc loop prevention)"
 					return 127
 				fi
@@ -128,22 +110,24 @@ if [[ -x /usr/lib/command-not-found ]] || [[ -x /usr/share/command-not-found/com
 			if (echo "$RESPONSE" | grep -q "apt-get"); then
 				TMOUT=5
 				echo -ne "Want to install it? Chosing Yes In 5 Seconds... [[y]/n]:"
-				REPLY=y
+				REPLY=n
 				if [[ $(read -sn1 | echo $REPLY) == y ]]; then
 					INSTALL=YES				
-					echo "Installing (removal of packages disabled)"
-					
+					echo "Installing (removal of packages disabled)"					
 				else
 					INSTALL=NO
 					echo "Cancelled"
 				fi
 				unset TMOUT
-				if [[ $INSTALL == YES ]]; then
+				if [[ $INSTALL == "YES" ]]; then
 					INSTALLCMD=$(echo $RESPONSE | grep -o "apt-get.*")
 					PKGNAME=$(echo INSTALLCMD | grep -Po "(?<=apt-get install ).*")
 					echo "Checking existence of package: $PKGNAME"
 					if (apt-cache madison $PKGNAME -qq &> /dev/null); then
 						echo "Package exists, starting download and install..."
+						if [[ $UID -gt 0 ]]; then
+							INSTALLCMD="sudo $INSTALLCMD"
+						fi
 						if (eval $INSTALLCMD --no-remove --yes); then
 							echo "Updating auto-install records..."
 							echo "$(date): $PKGNAME" >> ~/.autoinstalledpackages
@@ -175,4 +159,5 @@ if [[ -x /usr/lib/command-not-found ]] || [[ -x /usr/share/command-not-found/com
 		   return 127
 		fi
 	}
+
 fi

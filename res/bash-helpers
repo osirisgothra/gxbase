@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -- Don't Execute Directly, Please note that this is an
 #
 # bash-helpers
 #
@@ -9,11 +9,10 @@
 # them up by including them in the project.                  
 #                                                              
 
-##
-## \brief check_hushlogin checks if .hushlogin is in effect (present)
-## \returns 1 if not present, 0 if present (false,true respectively)
-## 
-function nogui()
+#
+# guioff - enabled/disables GUI features of commands that support this variable
+#
+function guioff()
 {
 	if [[ $NOGUI ]]; then		
 		unset NOGUI
@@ -23,27 +22,6 @@ function nogui()
 	echo "GUI commands are now ${NOGUI-off}."
   [[ $NOGUI ]] && return 0
 	return 1	
-}
-
-function check_hushlogon() 
-{
-
-	if [[ $BASH_REDIRECTING ]]; then
-		return 0
-	else
-		if [[ -r ~/.hushlogin ]]; then  	
-			for NEWVAR in stdout stderr
-			do
-				eval export BASH_REDIRECT_TO_${NEWVAR^^}=~/bash-login.${NEWVAR,,}
-			done 
-			declare -x BASH_REDIRECTING=YES
-			eval source "$@" > $BASH_REDIRET_TO_STDOUT 2> $BASH_REDIRECT_TO_STDERR
-			unset BASH_REDIRECTING
-			return 1
-		else
-			return 0
-		fi
-	fi
 }
 
 ##

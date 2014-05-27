@@ -1,0 +1,25 @@
+#!/bin/bash -c "echo \"dont run directly!\""
+#
+#
+
+# keyboard bindings
+# do not use ^[x codes for these, because they will differ between terminal types and be uselessly unportable
+#bind '"0A": "example of a BAD binding declaration, do NOT uncomment this one!"
+
+if [[ $ENABLE_BINDINGS == YES ]]; then
+	# these are just some examples, you can set your own
+	bind '"\C-b\C-a": "ssh root@azura"'
+	bind '"\C-b\C-p": "ssh root@peryite"'
+ 	bind '"\C-b\C-f": "apt-cache search "'
+ 	bind '"\C-b\C-i": "apt-get install --noremove --yes"'
+ 	bind '"\C-b\C-l": "ls -C --color"'
+ 	bind '"\C-b\C-Up": "cd .."'
+ 	bind '"\C-b\C-Right": "cd 	"'
+	bind '"\C-b\C-b": "bind -p"'
+
+	# TODO: a prettier way to show bindings than that ugly list (this does exist in 0.1.0-5 in func.d somewhere i think)
+ 	if [[ ! -r ~/.hushlogin ]]; then
+ 		echo "Extra keyboard shortcuts are enabled: Press [Ctrl+[BB]] For a List!"
+ 	fi
+
+fi
