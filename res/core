@@ -24,7 +24,7 @@ fi
 # gx.assert [name] [type] [required|needed|essential|..etc]
 function gx.assert()
 {
-	if [[ $3 ]]; then
+	if [[ ${3} ]]; then
 		echo "assert failed: $2 $1 $3 but not present!"
 		exit 3
 	elif [[ -z ${!1} ]]; then

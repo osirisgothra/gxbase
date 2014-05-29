@@ -28,8 +28,8 @@
 	shopt -u compat40                             ;shopt -s extquote                     
 	shopt -u compat41                             ;shopt -s force_fignore                
 	shopt -u compat42                             ;shopt -s globstar                     
-	shopt -u dirspell                             #;shopt -s histappend                   
-	shopt -u dotglob                              #;shopt -s histreedit                   
+	shopt -u dirspell                             ;shopt -s histappend                   
+	shopt -u dotglob                              ;shopt -s histreedit                   
 	shopt -u execfail                             ;shopt -s interactive_comments         
 	shopt -u globasciiranges                      ;shopt -s login_shell                  
 	shopt -u gnu_errfmt                           ;shopt -s mailwarn                     
@@ -52,8 +52,8 @@
 	set +o errexit                                ;set -o emacs                       
 	set +o errtrace                               ;set -o functrace                   
 	set +o ignoreeof                              ;set -o hashall                     
-	set +o keyword                                #;set -o histexpand                  
-	set +o noclobber                              #;set -o history                     
+	set +o keyword                                ;set -o histexpand                  
+	set +o noclobber                              ;set -o history                     
 	set +o noexec                                 ;set -o interactive-comments        
 	set +o noglob                                 ;set -o monitor                     
 	set +o nolog                                  
@@ -68,8 +68,5 @@
 	set +o vi                     
 	set +o xtrace
 
-	#hash additions
-
-	
 
 

@@ -29,20 +29,14 @@
 #!gxbase-stub=help-end
 #   (*=not related to the "gxcmd" command in the 'ggxcmd' project at http://sourceforge.net/ggxcmd)
 
+unset IFS
+
 
 # 0 source checks 
 
 # 0.1 - guard when sourced -- so we can use exit later safely
-case $- in 	*i*) 	alias exit="unalias exit;return";; esac
+case $- in 	*i*) 	$BASH_SOURCE "$@"; return $?;; esac
 
-# 0.2 - guard when GXBASE_LOADING is not present
-#f [[ ! -d $GXBASE_ROOT ]] || [[ -z $GXBASE_LOADING; then
-#echo "warning: g
-# TODO: finish this
-
-# 1 primary stuff, must be first because it is used by this file too (and most other components!)
-
- 
 
 # uniqsessidv (echos to stdout)
 function uniqsessid()
@@ -63,87 +57,63 @@ function uniqsessidv()
 	return $PRESERVED_ERR
 }
 
+# getrainge [filespec] [regex1-start] [regext-end] [skip-at-begining(0)] [stop-short-of-lines(0)]
+function getrange()
+{
+	FILESPEC="$1"
+	REGEX1="$2"
+	REGEX2="$3"
+	declare -i SKIP_START=0
+	declare -i SKIP_END=0
+	TMPFILE=$(tempfile --suffix=getrange.gxbasedata)
+	
+	cat $FILESPEC | grep "$REGEX1" -A$[ `cat gxcmd | grep "$REGEX2" --line-number | grep "[0-9]*" -o` - `cat $FILESPEC | grep $REGEX1 --line-number | grep "[0-9]*" -o` ] > $TMPFILE
+
+#	if [[ $SKIP_START > 0 ]] || [[ $SKIP_END > 0 ]]; then
+#		SKIP_END=$[ $(cat "$TMPFILE" | wc --lines) - $SKIP_END ]
+#	fi
+
+	return 0;
+}
+
 # experimental (you may need to edit your /etc/sensors.conf to get this to work right)
 function cputemp()
 {
-	unset FLGS NODEC
-  ARGS=`getopt -n $FUNCNAME-${LINENO[*]} -o fdhzvi: -l no-decimal,fahrenheit,help,horiz,vert,index: -- "$@"`
-	[[ $? -ne 0 ]] &&	return $?
-	declare -i IDX=0
-	eval set -- "$ARGS"
-	while [[ $1 != '--' ]]; do
-		case ${1//-/} in
-			h|help)
-				echo "$BASH_SOURCE -- $0 -hzv -i[= ][index] -fd --horiz --vert --index [index] --fahrenheit --no-decimal"
-				return 0
-				;;
-			z|horiz)
-				ISHORIZ=1
-				;;
-			f|fahrenheit)
-				FLGS="-f"
-				;;
-			v|vert)
-				unset ISHORIZ
-				;;
-			i|index)
-				IDX=$2
-				((IDX++))
-				# one more for $2 as well
-				shift 
-				;;
-			d|nodecimal)
-				NODEC=1
-				;;
-			*)
-				echo "internal error: $0 [$1]"
-				return 126
-				;;
-		esac
-		shift
-	done	
+	if [[ $# -gt 1 ]]; then
+		echo "too many arguments"
+	elif [[ $# -eq 0 ]]; then
+		set -- -h
+	fi
+	case $1 in
+		-h)
+			ISHORIZ=1;;
+		-v)
+			unset ISHORIZ;;
+		*)
+			echo "bad options: $1, must be -h or -v (or none)"
+			return 1;;
+	esac
 	# TODO: need to tweak color for ALARM states but didnt add it, it doesnt work for things like the STDOUT plasmoid
 	#       maybe add a flag for colorized temps at alarm state (and maybe need a COLOR STDOUT plasmoid, or cairodock, etc)
- 	for i in `sensors $FLGS | grep -P "(temp[0]|Mainboard|CPU [12]|thermistor)" | grep -P "\s\s+[-+][0-9]{1,3}...[CF]" -o | tr -d ' '`; do 	
-		if [[ $NODEC == 1 ]]; then
-			ITEMS+=(${i//\.[0123456789]/})
-		else
- 			ITEMS+=($i)
-		fi
-	done
-	
-	# debug: echo -en "\nITEMS: ${ITEMS[*]}   IDX: $IDX  ISHORIZ: ${ISHORIZ-not set}"
-	if [[ $IDX -gt 0 ]] && [[ $IDX -le ${#ITEMS[@]} ]]; then
-		# convert back to 0-based for actual use
-		echo -ne "${ITEMS[IDX-1]}"
+	if [[ $ISHORIZ ]]; then
+		sensors | grep -P "(temp[0]|Mainboard|CPU [12]|thermistor)" | grep -P "\s\s+[-+][0-9]{1,3}...[CF]" -o | tr -d ' ' | tr '\n' ' '
+		unset ISHORIZ
 	else
-		if [[ $IDX -ge ${#ITEMS[@]} ]]; then
-			echo "INDEX out of range ($IDX), displaying all values!"
-		fi
-		ISFIRST=1
-		for ((j=${#ITEMS[@]};j>=0;j--)); do
-			if [[ -z $ISFIRST ]]; then
-				if [[ $ISHORIZ == 1 ]]; then
-					echo -ne " "
-				else
-					echo -ne "\n"
-				fi
-			else
-				unset ISFIRST
-			fi
-			echo -ne "${ITEMS[$j]}"
-		done
+		sensors | grep -P "(temp[0]|Mainboard|CPU [12]|thermistor)" | grep -P "\s\s+[-+][0-9]{1,3}...[CF]" -o | tr -d ' '
 	fi
 	return $?
 }
 
 ARGS=`getopt -l help -o h -n gxcmd -- "$@"`
 if [[ $? == 0 ]]; then
+
 	eval set -- "$ARGS"
+
 	while [[ $1 != "--" ]]; do
 		case $1 in
 			--help|-h)
-				echo "help placeholder here"
+				# shell magic to print a range of lines based on two regular expressions
+       	echo "Help Placeholder"
 				exit 0
 				;;
 			*)
@@ -156,6 +126,7 @@ if [[ $? == 0 ]]; then
 	shift
 
 	CMD_VALID=0
+
 	for CMD in help `cat $BASH_SOURCE | grep -Po "(?<=function )[^\(]*"`; do
 		if [[ $1 == $CMD ]]; then
 			CMD_VALID=1
@@ -166,15 +137,19 @@ if [[ $? == 0 ]]; then
 
 	if [[ $CMD_VALID -eq 1 ]]; then
 		if [[ $CMD == help ]]; then
-			echo "help not available yet"
+			$BASH_SOURCE --help			
 			exit 0
 		else
 			# function command
-			$CMD "$@"
+			$CMD $@
 			exit $?
 		fi
 	else
-		echo "Bad command given ($1)"
+		if [[ $1 ]]; then
+			echo "Bad command given $1"
+		else
+			echo "Requires a command name or --help"
+		fi
 	fi
 else
 	exit 2

@@ -138,7 +138,7 @@ if [[ -x /usr/lib/command-not-found ]] || [[ -x /usr/share/command-not-found/com
 							export DO_NOT_CNF=YES
 							command "$@"
 							ERR=$?
-							export DO_NOT_CNF=NO
+							export DO_NOT_CNF=NO							
 							return $ERR
 						else
 							echo "Error: installer reported failure, you will need to install it manually!"
@@ -150,7 +150,7 @@ if [[ -x /usr/lib/command-not-found ]] || [[ -x /usr/share/command-not-found/com
 					fi
 				fi							
 			fi
-	    return $?
+	    return 127
     elif [ -x /usr/share/command-not-found/command-not-found ]; then
 		   /usr/share/command-not-found/command-not-found -- "$1"
        return $?

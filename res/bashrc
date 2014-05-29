@@ -1,4 +1,4 @@
-#!/bin/echo "Does not execute as a script"
+#!/bin/bash  -e "Do not execute directly!"
 #
 # GXBASE:RES:bashrc
 #
@@ -27,6 +27,14 @@ while [[ ${-//[^i]} ]]; do {
 	#	break
 	#fi
 
+	# load gxbase
+  GXBASE_LOADING=TRUE
+	
+
+	
+
+
+  unset GXBASE_LOADING
 
 	# message of the day while loading
 	# but login shells do this already, so not if in a login shell
@@ -115,5 +123,7 @@ while [[ ${-//[^i]} ]]; do {
 	unset NEWPATH
 	[[ ! -z "$oIFS" ]] && IFS=$oIFS
 	break
+  # always load history last
+	history -n                
 
 } done

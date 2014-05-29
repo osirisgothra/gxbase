@@ -9,26 +9,34 @@ if [[ -z $GXBASE_RES_BASHALIASES ]]; then
 
 	# note: do not export GXBASE_RES_BASHALIASES because aliases do not export!
 
+  # aliases, unconditional
 
-  # aliases unconditional
-
-	alias vim='vim_func -n'
-	alias ls='function _lstmp() { unset -f $0; echo "$LS_HEAD"; ls --color=auto "$@"; ERR=$?; echo "$LS_TAIL"; return $ERR; }; _lstmp'
-	alias grep='grep --color=auto'
-	alias fgrep='fgrep --color=auto'
-	alias egrep='egrep --color=auto'
-	alias ll='ls -alF'
-	alias la='ls -A'
-	alias l='ls -CF'
-	alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-	alias dir='lsfunc -batchHs --color=always'
-	alias ls='lsfunc2'
-	alias grep='grep --color'
-	alias du='du --max-depth=1 -h'
-	alias df='df -h'
-	alias eb='vim -n -c ":so $GXBASE_ROOT/res/editbashes"'
-	alias rls='source ~/.bashrc 1> /tmp/bash-stdoutput-last'
-	alias rgx='source /etc/bash_completion; source ${GXBASE_ROOT}/startgxbase'
+	[[ $GXCNF_VIMFUNC ]] && alias vim='vim_func -n'
+	[[ $GXCNF_LSFUNC == 1 ]] && alias ls='function _lstmp() { unset -f $0; echo "$LS_HEAD"; ls --color=auto "$@"; ERR=$?; echo "$LS_TAIL"; return $ERR; }; _lstmp'
+  [[ $GXCNF_LSFUNC == 2 ]] && alias ls='ls_func'
+  [[ $GXCNF_NOCOLOR ]] || {
+		alias grep='grep --color=auto'
+		alias fgrep='fgrep --color=auto'
+		alias egrep='egrep --color=auto'
+	}
+	[[ $GXCNF_NOLSEXTRAS ]] || {
+		alias ll='ls -alF'
+		alias la='ls -A'
+		alias l='ls -CF'
+		alias dir='lsfunc -batchHs --color=always'
+	}
+	[[ -x /usr/bin/notify-send ]] &&  {
+		alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+  }
+	[[ $GXCNF_NOHREXTRAS ]] || {	
+		alias du='du --max-depth=1 -h'
+		alias df='df -h'
+		alias date='date +"%c"'
+	}
+	[[ $GXCNF_NOGXDEVALIASES ]] || {
+		alias eb='vim -n -c ":so $GXBASE_ROOT/res/editbashes"'	
+		alias rgx='source /etc/bash_completion; source ${GXBASE_ROOT}/res/bashrc'
+	}
 
 	# conditional aliases (and overrides to unconditionals)
 
@@ -37,15 +45,16 @@ if [[ -z $GXBASE_RES_BASHALIASES ]]; then
 		*dev*pt*)
 
 			# ttys @ /dev/pts/XX or /dev/ptyXX
-
-			alias nano=mousepad
-			alias vim='vim_func -'$( [[ $DISPLAY ]] && echo "g" || echo "n" )' '
+			
+			[[ $GXCNF_NANOALT ]] && alias nano=mousepad
+			[[ $GXCNF_VIMFUNC ]] && alias vim='vim_func -'$( [[ $DISPLAY ]] && echo "g" || echo "n" )' '
 			;;
 
 		*dev*tty[0-9]*)
 
 			# ttys @ /dev/ttyXX
 
+			[[ $GXCNF_STARTX_IPS ]] && {
 			alias startdwm='startx dwm'
 			alias startkde='startx startkde'
 			alias startlxde='startx startlxde'
@@ -61,6 +70,8 @@ if [[ -z $GXBASE_RES_BASHALIASES ]]; then
 			alias modo='startx modo'
 			alias vlc='startx vlc'
 			alias firefoxp='startx firefox --private-window'
+			}
+
 			;;
 
 		*)	
