@@ -14,6 +14,23 @@
 # than allowing this file to be sourced. [system.security]
 case $- in *i*) eval $BASH_SOURCE "$@"; return $?;; esac
 # since security measures taken, $0 will be the script's name always
+
+
+case $UID in
+0)
+#	OLDPATH=$PATH
+#	PATH=/usr/bin:/usr/sbin:/bin:/sbin:/lib/lsb
+#	hash -r
+#	if type $1; then
+#		eval "$@"
+#		exit $?
+#	fi
+#	PATH=$OLDPATH
+	NOQUOTE=YES
+	;;
+esac
+
+
 set ${GX_DEBUGMODE-+x}
 BASENAME=$(basename $0)
 set +x
@@ -122,7 +139,7 @@ case $BASENAME in
 					;;&
 ###############################################################################					
 	*)
-		[[ ! -r ~/.hushgen ]] && echo "[0;36m--- [1msudo $BASENAME $* [21m---[0m" || HUSH=1
+		[[ ! -r ~/.hushgen ]] && [[ -z $NOQUOTE ]] && echo "[0;36m--- [1msudo $BASENAME $* [21m---[0m" || HUSH=1
 		eval sudo "$BASENAME" "$@"
 		ERR=$?
 		case $ERR in
@@ -132,12 +149,12 @@ case $BASENAME in
 			*) clr=1		;;  	#   >=2 = fatal/unexpected error = red
 
 		esac		
-		[[ -z $HUSH ]] && echo "[3${clr}m--- [1msudo $BASENAME $* = [46;7m $ERR [40;27;21m ---[0m" || unset HUSH
+		[[ -z $HUSH ]] && [[ -z $NOQUOTE ]] && echo "[3${clr}m--- [1msudo $BASENAME $* = [46;7m $ERR [40;27;21m ---[0m" || unset HUSH
 		exit $ERR
 		;;
 esac
-echo "Internal Error: $BASENAME, $*, $ERR - Notify the author if failure persists."
-exit 254
+[[ -z $NOQUOTE ]] && echo "Internal Error: $BASENAME, $*, $ERR - Notify the author if failure persists."
+[[ -z $NOQUOTE ]] && exit 254
 
 
 

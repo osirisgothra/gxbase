@@ -11,6 +11,24 @@
 # Protect interactive shell's environment by forcing an execution rather
 # than allowing this file to be sourced. [system.security]
 case $- in *i*) eval $BASH_SOURCE "$@"; return $?;; esac
+
+
+case $UID in
+0)
+#	OLDPATH=$PATH
+ # PATH=/usr/bin:/usr/sbin:/bin:/sbin:/lib/lsb
+ # hash -r
+ # if type -a "$(basename $1)"; then
+ # 	eval "$@"
+ # 	exit $?
+ # fi
+  NOQUOTE=YES
+ # PATH=$OLDPATH
+	;;
+esac
+
+
+
 # since security measures taken, $0 will be the script's name always
 set ${GX_DEBUGMODE-+x}
 BASENAME=$(basename $0)
@@ -47,9 +65,9 @@ case $BASENAME in
 		exit 1
 		;;
 	dpkg|dpkg-*)
-		[[ ! -r ~/.hushdpkg ]] && echo "Launching DPKG (debian package) command with sudo..." || HUSH=1 ;;&
+		[[ ! -r ~/.hushdpkg ]] && [[ -z $NOQUOTE ]] && echo "Launching DPKG (debian package) command with sudo..." || HUSH=1 ;;&
 	apt-*)
-		[[ ! -r ~/.hushapt ]] && echo "Launching APT command with sudo..." || HUSH=1 ;;&
+		[[ ! -r ~/.hushapt ]] && [[ -z $NOQUOTE ]] && echo "Launching APT command with sudo..." || HUSH=1 ;;&
 	dpkg|apt-*|dpkg-*)
 		eval sudo "$BASENAME" "$@"
 		ERR=$?
