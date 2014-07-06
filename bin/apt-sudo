@@ -7,10 +7,11 @@
 # This is a multi-call script, if you want to sudoize an apt-command, please 
 #  make a symbolic link to this file (example: ln -s /$PWD/apt-sudo aot-get) 
 #
-
+# 6/28/14 - fixed eval statements (eval should not be used unless sanitation is performed!)
+#
 # Protect interactive shell's environment by forcing an execution rather
 # than allowing this file to be sourced. [system.security]
-case $- in *i*) eval $BASH_SOURCE "$@"; return $?;; esac
+case $- in *i*) "$BASH_SOURCE" "$@"; return $?;; esac
 
 
 case $UID in
@@ -19,7 +20,7 @@ case $UID in
  # PATH=/usr/bin:/usr/sbin:/bin:/sbin:/lib/lsb
  # hash -r
  # if type -a "$(basename $1)"; then
- # 	eval "$@"
+ # 	"$@"
  # 	exit $?
  # fi
   NOQUOTE=YES
@@ -69,7 +70,7 @@ case $BASENAME in
 	apt-*)
 		[[ ! -r ~/.hushapt ]] && [[ -z $NOQUOTE ]] && echo "Launching APT command with sudo..." || HUSH=1 ;;&
 	dpkg|apt-*|dpkg-*)
-		eval sudo "$BASENAME" "$@"
+		sudo "$BASENAME" "$@"
 		ERR=$?
 		[[ -z $HUSH ]] && echo "APT Command Returned With Value: [1m$ERR[0m"
 		exit $ERR;;

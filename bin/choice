@@ -5,6 +5,12 @@
 
 # -OPTS=`getopts -c choice --long prompt:,title:,file:,yestxt:,notxt:
 
+function echo()
+{
+	builtin echo -ne "$@"
+}
+
+
 function makechoice()
 {
 	#if [ -r "$CHOICEFILE" ]; then

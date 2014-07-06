@@ -1,0 +1,36 @@
+typical startup when running an [xterm] with /bin/bash in it's default state with only a few extra things installed (but all standard,
+no weird customized scripts) we are NOT running as a login shell here:
+
+/etc/bash.bashrc 																						bash
+/home/gabriel/.bashrc 																		  bash 
+/usr/share/bash-completion/bash_completion 									called by /home/gabriel/.bashrc
+/etc/bash_completion.d/adb 									 		 							called by /usr/share/bash-completion/bash_completion
+/etc/bash_completion.d/apport_completion 											called by /usr/share/bash-completion/bash_completion
+/etc/bash_completion.d/axi-cache 															called by /usr/share/bash-completion/bash_completion
+/etc/bash_completion.d/cmake                                  called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/cpack                                  called by /usr/share/bash-completion/bash_completion
+/etc/bash_completion.d/cryptdisks                             called by /usr/share/bash-completion/bash_completion   
+/etc/bash_completion.d/ctest                                  called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/debconf                                called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/desktop-file-validate                  called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/devscripts.chdist                      called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/devscripts.pkgnames                    called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/dput                                   called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/gem1.9.1                               called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/git-prompt                             called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/grub                                   called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/initramfs-tools                        called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/inkscape                               called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/insserv                                called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/libreoffice.sh                         called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/licensing                              called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/mercurial                              called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/pon                                    called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/pulseaudio-bash-completion.sh          called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/schroot                                called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/subversion                             called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/ufw                                    called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/upstart                                called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/valgrind                               called by /usr/share/bash-completion/bash_completion 
+/etc/bash_completion.d/vim-addon-manager											called by /usr/share/bash-completion/bash_completion
+

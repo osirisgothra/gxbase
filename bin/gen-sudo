@@ -9,24 +9,16 @@
 # This is a multi-call script, if you want to sudoize an apt-command, please 
 #  make a symbolic link to this file (example: ln -s /$PWD/apt-sudo aot-get) 
 #
-
+# 6/28/14 - fixed eval statements (eval should not be used unless sanitation is performed!)
+#
 # Protect interactive shell's environment by forcing an execution rather
 # than allowing this file to be sourced. [system.security]
-case $- in *i*) eval $BASH_SOURCE "$@"; return $?;; esac
+case $- in *i*) $BASH_SOURCE "$@"; return $?;; esac
 # since security measures taken, $0 will be the script's name always
-
+  
 
 case $UID in
-0)
-#	OLDPATH=$PATH
-#	PATH=/usr/bin:/usr/sbin:/bin:/sbin:/lib/lsb
-#	hash -r
-#	if type $1; then
-#		eval "$@"
-#		exit $?
-#	fi
-#	PATH=$OLDPATH
-	NOQUOTE=YES
+0)	NOQUOTE=YES
 	;;
 esac
 
@@ -121,14 +113,6 @@ case $BASENAME in
 		esac
 		;;
 ############################## Place Program Route Filters Here ###############	
-## NOTICE: append routes with ;;& if you wish to continue execution
-##         use ;; to stop execution, or use ;& to execute the next block 
-##         UNCONDITIONALLY--if the ln) block ended with ;& then the ln)
-##         block would execute the vim) block as well, and since vim
-##         continues processing, it would inherit that behavior because of it.
-##         The route would be: ln->vim->[any other blocks and conditions]->*
-##         Please use this kind of routing with care!!
-
 			# ln route filter, checks for overwrite (accidental misnaming arguments) 
 			ln)				
 				if [[ $1 == "-s" ]]; then
@@ -144,69 +128,11 @@ case $BASENAME in
 			 		# continue
 
 					fi
-					# routing to continue evaluating for possible route matches
-					;;& 
-			vim)					
-					# vim route filter, simply checks the FILE components of the
-					# command string, checks to see if they are read only, and
-					# elevates if needed, with a brief warning.
-
-# vim [arguments] [file ..]       		check arguments (supported)
-# vim [arguments] -               	  dont elevate (stdin is user accessible)
-# vim [arguments] -t tag							dont elevate (unsupported 
-# vim [arguments] -q [errorfile]  		
-#
-#
-#                   
-#-v                   
-#-e                   
-#-E                   
-#-s                   
-#-d                   
-#-y                   
-#-R                   
-#-Z                   
-#-m                   
-#-M                   
-#-b                   
-#-l                   
-#-C                   
-#-N                   
-#-V[N][fname]         
-#-D                   
-#-n                   
-#-r                   
-#-r (with file name)  
-#-L                   
-#-A                   
-#-H                   
-#-F                   
-#-T <terminal>        
-#-u <vimrc>           
-#--noplugin           
-#-p[N]                
-#-o[N]                
-#-O[N]                
-#+                    
-#+<lnum>              
-#--cmd <command>      
-#-c <command>         
-#-S <session>         
-#-s <scriptin>        
-#-w <scriptout>       
-#-W <scriptout>       
-#-x                   
-#--startuptime <file> 
-#-i <viminfo>         
-#-h  or  --help       
-#--version            
-#
-#
-
+					;;&
 ###############################################################################					
 	*)
 		[[ ! -r ~/.hushgen ]] && [[ -z $NOQUOTE ]] && echo "[0;36m--- [1msudo $BASENAME $* [21m---[0m" || HUSH=1
-		eval sudo "$BASENAME" "$@"
+		sudo "$BASENAME" "$@"
 		ERR=$?
 		case $ERR in
 			0) clr=2		;;  	#     0 = no error = green

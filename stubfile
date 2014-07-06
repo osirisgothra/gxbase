@@ -1,0 +1,68 @@
+echo "${BASH_SOURCE[@]}"
+
+#
+# gxbase can only be started after bash_completion has been called by                                       bash
+# the user's .bashrc, since other calls can cause problems with even sh                           LOGIN           NONLOGIN
+# based scripts since .profile and /etc/profile can interfere.                               /etc/profile.d     /etc/bash.bashrc
+# NOTE: This only works well if you haven't drastically altered your environment                   |                           |
+#       outside of gxbases' domain, and/or under the guise of defacto                              bash_completion  <--        |
+#       system settings that are actually perpendicular to the rules                                      |             ^      |
+#       governing how the shell starts up. If you have done this, you MUST                         bash_completion.d    |GXBASE|
+#				yourself call /gxbase/gxbase from wherever you want it to be run but                              /       |     |      |
+#       but be warned that gxbase is not recommended to run with other shell                     ________/       END    ^      |
+#       customizations since it is meant to govern all shell customizations                     |                       |      |
+#       while running. It would be wise to not use gxbase if self-customization               ~/.profile---------> ~/.bashrc <-
+#       without outside influence is your goal. The procedure of logging in
+#       or starting up bash is shown to the left where GXBASE should fit in.                    intermediate files are left out
+# NOTE: I've verified this should work with the default setup of scripts in                     (like profile.d/FILES for example)
+#       most gnu linux environments. Lucky for me only profile.d contains scripts
+#       that may execute under /bin/sh, so no dancing around sh compatibility
+#       is needed here (that dance is left to /etc/profile.d/bash_completion.sh)
+#  (see the figure to the right for a visualization on how bash starts up)
+function eecho() { echo "$@"; }
+
+# TODO: put in place symantics to recover automatically from such problems
+
+if [[ ${BASH_SOURCE[2]} == ~/.bashrc ]]; then
+  eecho "Starting GXBASE..."
+	GXBASE_ROOT=$(dirname $(readlink -e $BASH_SOURCE))
+	# must be a symbolic link or we wont be able to figure out the directory that gxbase originates from
+	if [[ $GXBASE_ROOT != $(dirname $BASH_SOURCE) ]] && [[ -L $BASH_SOURCE ]]; then		
+		eecho "Symbolic Link Verfied, Setting GXBASE ROOT to $GXBASE_ROOT"
+		if [[ -r $GXBASE_ROOT/gxbase ]]; then
+			eecho "Found gxbase executable in $GXBASE_ROOT/gxbase"
+			eecho "Executing...."
+			if source "$GXBASE_ROOT/gxbase" "$BASH_SOURCE"; then			
+				eecho "Completed Call Ok"
+			else
+				echo "Error: GXBASE Launch Failed With Code $?"
+				return $?
+			fi
+		else
+			echo "Warning: could start gxbase, the gxbase executable is not in $GXBASE_ROOT, is $BASH_SOURCE SYMLINKED to the stubfile correctly?"
+		fi
+	else
+		echo "Symbolic link matchup: $BASH_SOURCE is NOT a symlink, you must symlink $BASH_SOURCE to /gxbase_dir/stubfile!!"
+	fi
+else
+	eecho "Deferring call to gxbase (bash_completion must be called from .bashrc)"
+fi
+
+# if [[ ${BASH_SOURCE[2]} == ~/.bashrc ]]; then
+# 	# when .bashrc is called by profile, which is only called by bash when
+# 	# executing as a login shell, we can set the shell type as LOGIN
+# 	# otherwise assume a non login shell (NORMAL)
+# 	if [[ ${BASH_SOURCE[3]} == ~/.profile ]]; then
+# 		export GX_SHELLTYPE=LOGIN
+# 	else
+# 		export GX_SHELLTYPE=NORMAL
+# 	fi
+# 	# begin gxbase init
+# 	TRUENAME=$(readlink -e $BASH_SOURCE)
+# 	GXBASE_ROOT=$(dirname $TRUENAME)
+# 	if [[ -r $GXBASE_ROOT/gxbase ]]; then		
+# 		source $GXBASE_ROOT/gxbase "${BASH_SOURCE[@]}"
+# 	else
+# 		echo "Cannot start GXBASE bootstrap, the stubfile $BASH_SOURCE is not symlinked from a gxbase root directory."
+# 	fi
+# fi

@@ -1,0 +1,232 @@
+Alien::Package::Lsb (3pm) - an object that represents a lsb package
+assert (3)           - abort the program if assertion is false
+auth_destroy (3)     - library routines for remote procedure calls
+authnone_create (3)  - library routines for remote procedure calls
+authunix_create (3)  - library routines for remote procedure calls
+authunix_create_default (3) - library routines for remote procedure calls
+backtrace_symbols (3) - support for application self-debugging
+backtrace_symbols_fd (3) - support for application self-debugging
+callrpc (3)          - library routines for remote procedure calls
+CellsOfScreen (3)    - screen information functions and macros
+charnames (3perl)    - access to Unicode character names and named character sequences; also define ...
+clnt_broadcast (3)   - library routines for remote procedure calls
+clnt_call (3)        - library routines for remote procedure calls
+clnt_control (3)     - library routines for remote procedure calls
+clnt_create (3)      - library routines for remote procedure calls
+clnt_destroy (3)     - library routines for remote procedure calls
+clnt_freeres (3)     - library routines for remote procedure calls
+clnt_geterr (3)      - library routines for remote procedure calls
+clnt_pcreateerror (3) - library routines for remote procedure calls
+clnt_perrno (3)      - library routines for remote procedure calls
+clnt_perror (3)      - library routines for remote procedure calls
+clnt_spcreateerror (3) - library routines for remote procedure calls
+clnt_sperrno (3)     - library routines for remote procedure calls
+clnt_sperror (3)     - library routines for remote procedure calls
+clntraw_create (3)   - library routines for remote procedure calls
+clnttcp_create (3)   - library routines for remote procedure calls
+clntudp_bufcreate (3) - library routines for remote procedure calls
+clntudp_create (3)   - library routines for remote procedure calls
+COLS (3ncurses)      - curses global variables
+CPANPLUS::Internals (3perl) - CPANPLUS internals
+CPANPLUS::Internals::Extract (3perl) - internals for archive extraction
+CPANPLUS::Internals::Fetch (3perl) - internals for fetching files
+CPANPLUS::Internals::Report (3perl) - internals for sending test reports
+CPANPLUS::Internals::Search (3perl) - internals for searching for modules
+CPANPLUS::Internals::Source (3perl) - internals for updating source files
+CPANPLUS::Internals::Source::Memory (3perl) - In memory implementation
+CPANPLUS::Internals::Source::SQLite (3perl) - SQLite implementation
+CPANPLUS::Internals::Utils (3perl) - convenience functions for CPANPLUS
+CPANPLUS::Shell (3perl) - base class for CPANPLUS shells
+delscreen (3ncurses) - curses screen initialization and manipulation routines
+DisplayCells (3)     - Display macros and functions
+dlsym (3)            - programming interface to dynamic linking loader
+endusershell (3)     - get permitted user shells
+ExtUtils::CBuilder (3perl) - Compile and link C code for Perl modules
+ExtUtils::CBuilder::Platform::Windows (3perl) - Builder class for Windows platforms
+ExtUtils::Command (3perl) - utilities to replace common UNIX commands in Makefiles etc.
+ExtUtils::Command::MM (3perl) - Commands for the MM's to use in Makefiles
+ExtUtils::Constant (3perl) - generate XS code to import C header constants
+ExtUtils::Constant::Base (3perl) - base class for ExtUtils::Constant objects
+ExtUtils::Constant::Utils (3perl) - helper functions for ExtUtils::Constant
+ExtUtils::Constant::XS (3perl) - generate C code for XS modules' constants.
+ExtUtils::Embed (3perl) - Utilities for embedding Perl in C/C++ applications
+ExtUtils::Install (3perl) - install files from here to there
+ExtUtils::Installed (3perl) - Inventory management of installed modules
+ExtUtils::Liblist (3perl) - determine libraries to use and how to use them
+ExtUtils::MakeMaker (3perl) - Create a module Makefile
+ExtUtils::MakeMaker::Config (3perl) - Wrapper around Config.pm
+ExtUtils::MakeMaker::FAQ (3perl) - Frequently Asked Questions About MakeMaker
+ExtUtils::MakeMaker::Tutorial (3perl) - Writing a module with MakeMaker
+ExtUtils::Manifest (3perl) - utilities to write and check a MANIFEST file
+ExtUtils::Miniperl (3perl) - write the C code for perlmain.c
+ExtUtils::Mkbootstrap (3perl) - make a bootstrap file for use by DynaLoader
+ExtUtils::Mksymlists (3perl) - write linker options files for dynamic extension
+ExtUtils::MM (3perl) - OS adjusted ExtUtils::MakeMaker subclass
+ExtUtils::MM_AIX (3perl) - AIX specific subclass of ExtUtils::MM_Unix
+ExtUtils::MM_Any (3perl) - Platform-agnostic MM methods
+ExtUtils::MM_BeOS (3perl) - methods to override UN*X behaviour in ExtUtils::MakeMaker
+ExtUtils::MM_Cygwin (3perl) - methods to override UN*X behaviour in ExtUtils::MakeMaker
+ExtUtils::MM_Darwin (3perl) - special behaviors for OS X
+ExtUtils::MM_DOS (3perl) - DOS specific subclass of ExtUtils::MM_Unix
+ExtUtils::MM_MacOS (3perl) - once produced Makefiles for MacOS Classic
+ExtUtils::MM_NW5 (3perl) - methods to override UN*X behaviour in ExtUtils::MakeMaker
+ExtUtils::MM_OS2 (3perl) - methods to override UN*X behaviour in ExtUtils::MakeMaker
+ExtUtils::MM_QNX (3perl) - QNX specific subclass of ExtUtils::MM_Unix
+ExtUtils::MM_Unix (3perl) - methods used by ExtUtils::MakeMaker
+ExtUtils::MM_UWIN (3perl) - U/WIN specific subclass of ExtUtils::MM_Unix
+ExtUtils::MM_VMS (3perl) - methods to override UN*X behaviour in ExtUtils::MakeMaker
+ExtUtils::MM_VOS (3perl) - VOS specific subclass of ExtUtils::MM_Unix
+ExtUtils::MM_Win32 (3perl) - methods to override UN*X behaviour in ExtUtils::MakeMaker
+ExtUtils::MM_Win95 (3perl) - method to customize MakeMaker for Win9X
+ExtUtils::MY (3perl) - ExtUtils::MakeMaker subclass for customization
+ExtUtils::Packlist (3perl) - manage .packlist files
+ExtUtils::ParseXS (3perl) - converts Perl XS code into C code
+ExtUtils::ParseXS::Constants (3perl) - Initialization values for some globals
+ExtUtils::ParseXS::Utilities (3perl) - Subroutines used with ExtUtils::ParseXS
+ExtUtils::testlib (3perl) - add blib/* directories to @INC
+ExtUtils::Typemaps (3perl) - Read/Write/Modify Perl/XS typemap files
+ExtUtils::Typemaps::Cmd (3perl) - Quick commands for handling typemaps
+ExtUtils::Typemaps::InputMap (3perl) - Entry in the INPUT section of a typemap
+ExtUtils::Typemaps::OutputMap (3perl) - Entry in the OUTPUT section of a typemap
+ExtUtils::Typemaps::Type (3perl) - Entry in the TYPEMAP section of a typemap
+ExtUtils::XSSymSet (3perl) - keep sets of symbol names palatable to the VMS linker
+FcConfigEnableHome (3) - controls use of the home directory.
+FcDirCacheClean (3)  - This tries to clean up the cache directory of cache_dir.This returns FcTrue i...
+FcPatternEqualSubset (3) - Compare portions of patterns
+get_myaddress (3)    - library routines for remote procedure calls
+getusershell (3)     - get permitted user shells
+Glib::devel (3pm)    - Binding developer's overview of Glib's internals
+Glib::Utils (3pm)    - Miscellaneous utility functions
+IO::Socket::SSL::Utils (3pm) - - loading, storing, creating certificates and keys
+IPC::Run::IO (3pm)   - - I/O channels for IPC::Run.
+IPC::Run::Timer (3pm) - - Timer channels for IPC::Run.
+IPC::SysV (3perl)    - System V IPC constants and system calls
+Lexical::Persistence (3pm) - Persistent lexical variable values for arbitrary calls.
+List::MoreUtils (3pm) - Provide the stuff missing in List::Util
+Locale::Codes::Changes (3perl) - details changes to Locale::Codes
+Locale::Msgfmt::Utils (3pm) - Functions used internally by Locale::Msgfmt
+lsearch (3)          - linear search of an array
+lseek64 (3)          - reposition 64-bit read/write file offset
+LWP::Protocol (3pm)  - Base class for LWP protocols
+Mail::SpamAssassin::Plugin::DNSEval (3pm) - look up URLs against DNS blocklists
+Mail::SpamAssassin::Plugin::PhishTag (3pm) - SpamAssassin plugin for redirecting links in incoming e...
+Mail::SpamAssassin::Plugin::URIDNSBL (3pm) - look up URLs against DNS blocklists
+Module::Build::Compat (3perl) - Compatibility with ExtUtils::MakeMaker
+Module::CoreList::Utils (3perl) - what utilities shipped with versions of perl
+Net::DBus::Error (3pm) - Error details for remote method invocation
+Net::DBus::Exporter (3pm) - Export object methods and signals to the bus
+Net::DBus::Tutorial (3pm) - tutorials on the Perl DBus APIs
+Net::DBus::Tutorial::ExportingObjects (3pm) - tutorials on providing a DBus service
+Net::HTTPS (3pm)     - Low-level HTTP over SSL/TLS connection (client)
+Padre::Plugin::Devel (3pm) - tools used by the Padre developers
+Padre::Wx::Dialog::OpenURL (3pm) - a dialog for opening URLs
+Padre::Wx::Role::Idle (3pm) - Role for delaying method calls until idle time
+Padre::Wx::Role::View (3pm) - A role for GUI tools that live in panels
+pmap_getmaps (3)     - library routines for remote procedure calls
+pmap_getport (3)     - library routines for remote procedure calls
+pmap_rmtcall (3)     - library routines for remote procedure calls
+pmap_set (3)         - library routines for remote procedure calls
+pmap_unset (3)       - library routines for remote procedure calls
+Pod::ParseUtils (3perl) - helpers for POD parsing and conversion
+Pod::Simple::Methody (3perl) - - turn Pod::Simple events into method calls
+PPI::Token::Symbol (3pm) - A token class for variables and other symbols
+PPIx::EditorTools (3pm) - Utility methods and base class for manipulating Perl via PPI
+PPIx::EditorTools::FindUnmatchedBrace (3pm) - PPI-based unmatched-brace-finder
+PPIx::EditorTools::FindVariableDeclaration (3pm) - inds where a variable was declared using PPI
+PPIx::EditorTools::IntroduceTemporaryVariable (3pm) - Introduces a temporary variable using PPI
+PPIx::EditorTools::Lexer (3pm) - Simple Lexer used for syntax highlighting
+PPIx::EditorTools::Outline (3pm) - Collect use pragmata, modules, subroutiones, methods, attributes
+PPIx::EditorTools::RenamePackage (3pm) - Change the package name
+PPIx::EditorTools::RenamePackageFromPath (3pm) - Change the package name based on the files path
+PPIx::EditorTools::RenameVariable (3pm) - Lexically replace a variable name in Perl code
+PPIx::EditorTools::ReturnObject (3pm) - Simple object to return values from PPIx::EditorTools
+pthread_setcancelstate (3) - set cancelability state and type
+pthread_sigmask (3)  - examine and change mask of blocked signals
+registerrpc (3)      - library routines for remote procedure calls
+rpc (3)              - library routines for remote procedure calls
+setusershell (3)     - get permitted user shells
+sigdelset (3)        - POSIX signal set operations.
+sigfillset (3)       - POSIX signal set operations.
+siginterrupt (3)     - allow signals to interrupt system calls
+sigpause (3)         - atomically release blocked signals and wait for interrupt
+sigrelse (3)         - System V signal API
+svc_destroy (3)      - library routines for remote procedure calls
+svc_freeargs (3)     - library routines for remote procedure calls
+svc_getargs (3)      - library routines for remote procedure calls
+svc_getcaller (3)    - library routines for remote procedure calls
+svc_getreq (3)       - library routines for remote procedure calls
+svc_getreqset (3)    - library routines for remote procedure calls
+svc_register (3)     - library routines for remote procedure calls
+svc_run (3)          - library routines for remote procedure calls
+svc_sendreply (3)    - library routines for remote procedure calls
+svc_unregister (3)   - library routines for remote procedure calls
+svcerr_auth (3)      - library routines for remote procedure calls
+svcerr_decode (3)    - library routines for remote procedure calls
+svcerr_noproc (3)    - library routines for remote procedure calls
+svcerr_noprog (3)    - library routines for remote procedure calls
+svcerr_progvers (3)  - library routines for remote procedure calls
+svcerr_systemerr (3) - library routines for remote procedure calls
+svcerr_weakauth (3)  - library routines for remote procedure calls
+svcfd_create (3)     - library routines for remote procedure calls
+svcraw_create (3)    - library routines for remote procedure calls
+svctcp_create (3)    - library routines for remote procedure calls
+svcudp_bufcreate (3) - library routines for remote procedure calls
+svcudp_create (3)    - library routines for remote procedure calls
+Symbol (3perl)       - manipulate Perl symbols and their names
+Sys::Syslog (3perl)  - Perl interface to the UNIX syslog(3) calls
+TAP::Formatter::Console::ParallelSession (3perl) - Harness output delegate for parallel console output
+TAP::Parser::Utils (3perl) - Internal TAP::Parser utilities
+textdomain (3)       - set domain for future gettext() calls
+update_panels (3curses) - panel stack extension for curses
+update_panels_sp (3ncurses) - curses screen-pointer extension
+usleep (3)           - suspend execution for microsecond intervals
+version::Internals (3perl) - Perl extension for Version Objects
+wl_client_get_credentials (3) - (unknown subject)
+Wx::build::MakeMaker (3pm) - ExtUtils::MakeMaker specialisation for wxPerl modules
+Wx::build::Utils (3pm) - utility routines
+XAllocColorCells (3) - allocate and free colors
+XChangeDeviceControl (3) - query and change input device controls
+xdr_accepted_reply (3) - library routines for remote procedure calls
+xdr_authunix_parms (3) - library routines for remote procedure calls
+xdr_callhdr (3)      - library routines for remote procedure calls
+xdr_callmsg (3)      - library routines for remote procedure calls
+xdr_opaque_auth (3)  - library routines for remote procedure calls
+xdr_pmap (3)         - library routines for remote procedure calls
+xdr_pmaplist (3)     - library routines for remote procedure calls
+xdr_rejected_reply (3) - library routines for remote procedure calls
+xdr_replymsg (3)     - library routines for remote procedure calls
+XGetDeviceControl (3) - query and change input device controls
+XGetWMProtocols (3)  - set or read a window's WM_PROTOCOLS property
+XkbActionCtrls (3)   - Returns the ctrls fields of act converted to an unsigned int
+XkbAllocControls (3) - Allocates an XkbControlsRec structure in the XkbDescRec
+XkbChangeControls (3) - Provides a flexible method for updating the controls in a server to match th...
+XkbChangeEnabledControls (3) - Manipulates the EnabledControls control
+XkbForceBell (3)     - Overrides user preference settings for audible bells to ring the bell on the ...
+XkbForceDeviceBell (3) - Rings the bell on any keyboard, overriding user preference settings for aud...
+XkbFreeControls (3)  - Frees memory used by the ctrls member of an XkbDescRec structure
+XkbGetAutoResetControls (3) - Gets the current values of the auto-reset controls
+XkbGetControls (3)   - Finds the current state of Xkb server controls
+XkbGetControlsChanges (3) - Updates a local copy of a keyboard description with the changes previous...
+XkbGetIndicatorChanges (3) - Updates a local copy of the keyboard description with the actual values...
+XkbGetKeySyms (3)    - Obtain the symbols for a subset of the keys in a keyboard description
+XkbGetNameChanges (3) - Update the local copy of the keyboard description with the actual values of ...
+XkbGetXlibControls (3) - Determines the current state of the Library Controls
+XkbKeyGroupInfo (3)  - Returns the number of groups of symbols bound to the key corresponding to key...
+XkbKeyNumGroups (3)  - Returns the number of groups of symbols bound to the key corresponding to key...
+XkbKeyTypesForCoreSymbols (3) - Determine the Xkb key types appropriate for the symbols bound to a k...
+XkbNoteControlsChanges (3) - Notes the changes in a changes structure when a client receives an XkbC...
+XkbResizeKeySyms (3) - Change the number of symbols bound to a key
+XkbResizeKeyType (3) - Change the number of levels in a key type
+XkbSAActionSetCtrls (3) - Sets the ctrls0 through ctrls3 fields of act from ctrls
+XkbSelectEventDetails (3) - Selects or deselects for a specific Xkb event and optionally places cond...
+XkbSetAutoResetControls (3) - Changes the current values of the AutoReset control attributes
+XkbSetControls (3)   - Copies changes to the X server based on a modified ctrls structure in a local...
+XkbSetDebuggingFlags (3) - Change the values of any of the debug controls
+XkbSetXlibControls (3) - Changes the state of the Library Controls
+XML::XPathEngine::Boolean (3pm) - Boolean true/false values
+xprt_register (3)    - library routines for remote procedure calls
+xprt_unregister (3)  - library routines for remote procedure calls
+XSetFillStyle (3)    - GC convenience routines
+XSetWMProtocols (3)  - set or read a window's WM_PROTOCOLS property
+XtCancelSelectionRequest (3) - bundle multiple selection conversion requests into a single request u...
+XtIsTopLevelShell (3) - obtain and verify a widget's class

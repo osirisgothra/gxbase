@@ -12,13 +12,30 @@
 #
 # guioff - enabled/disables GUI features of commands that support this variable
 #
+
+
 function guioff()
 {
-	if [[ $NOGUI ]]; then		
-		unset NOGUI
-	else
-		export NOGUI=on
+  [[ -z $1 ]] && set toggle
+	case $1 in
+		toggle)
+			[[ $NOGUI ]] && unset NOGUI || NOGUI=1
+			;;
+		on)
+			[[ $NOGUI ]] || NOGUI=1
+			;;
+		off)
+			[[ $NOGUI ]] && unset NOGUI			
+			;;
+	esac	
+
+
+	if [[ -z $NOGUI ]]; then				
+		echo "Commands are now oblivious to GUI-disabling effects of guioff"	
+	else	
+		echo "Commands that support GxBase GUI-disabling are now: disabled"
 	fi;
+
 	echo "GUI commands are now ${NOGUI-off}."
   [[ $NOGUI ]] && return 0
 	return 1	
@@ -469,6 +486,28 @@ function startx()
 	return $ERR
 }
 
+function hashdir()
+{
+	shopt -s nullglob
+
+	if [[ -z $1 ]] || [[ ! -d $1 ]] || [[ -z $1/* ]]; then
+		echo "error: need to specify an existing directory that contains FILES"
+	else		
+		pushd . &> /dev/null
+		cd $1 &> /dev/null
+		if [[ $? -eq 0 ]]; then
+			for i in *; do
+				echo "hashing $PWD/$i to command '$i'..."
+				hash -p $PWD/$i $i
+			done
+		else
+			echo "error while or after switching to: $1"
+		fi		
+		popd &> /dev/null		
+	fi
+}
+
+
 # loadhashes [workdir] [target]
 function loadhashes()
 {
@@ -479,7 +518,7 @@ function loadhashes()
 		return 0
 	fi
 	local IFS=$'\n'
-	for i in $(echo $1/$2.hash); do
+	for i in $(cat $1/$2.hash); do
 		hash -p "$1/$2" "$i"
 	done
 
@@ -500,7 +539,7 @@ function hashautocmd()
   {  
   for i in *; do 
     if [[ "$(basename "$(readlink "$i")")" == "$2" ]]; then 
-	echo $i; 
+			echo $i; 
     fi; 
   done
   } > "$2.hash"

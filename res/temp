@@ -10,6 +10,23 @@
 # - do not delete this file or truncate it when redistributing the package, all developers should have access to this information, miniscule as it may seem
 #
 # created 2-May 2014 - updated 3-May 2014 first released with gxbase v0.2.0-1 (alpha)
+# updated 5-Jun 2014: added commands: dirof, cdof  updated command: findwithchildren (fixed missing $* bug, was missing the $)
+#                     fixed documentation block for ownercount()
+# latest version of this file and gxbase is available from: git://gitorious.org/gxbase/0-2-0.git
+# this file was incepted into the repository starting at branch: 0.2.0.0
+#                                     last documentation branch: 0.2.0.1
+
+# Licensed under the GNU GPL (NOT LGPL as previously licensed)
+
+
+# cuts down permission blocks into single letter codes
+# ie: e = only executable(1)           W=only writable(2)       R=only readable(4)  X=read/execute(5)
+#     A = read/write/executable(7)     B=both read/writable(6)  N=none(0)           E=write/execute(3)
+function shortls()
+{
+	ls -l "$@" | colrm 30 42 | colrm 11 12 | sed "s/-wx/E/g;s/rwx/A/g;s/r-x/X/g;s/--x/e/g;s/rw-/B/g;s/r--/R/g;s/-w-/W/g;s/^l/^[[33m/g;s/^d/^[[32m/g;s/^-/^[[0m/g"
+}
+
 
 # get count of ownership for a set of files
 # ie:  6 owned by root:root 24 owned by www:users, 1 owned by root:daemon, etc
@@ -254,10 +271,14 @@ function makebusyboxlinkshere()
 	return 0
 }					
 
+# findwithchildren DIRECTORYNAME
+# DIRECTORYNAME can be partial
+# finds a directory and sees if it has more subdirs, if so returns them (the directory children, NOT the directory)
+# in stdout (usually, fd0)
 function findwithchildren()
 {
 	declare -i FOUNDCOUNT=0
-	for i in `dirname $(locate *) | sort | uniq`; do 
+	for i in `dirname $(locate $*) | sort | uniq`; do 
 		for ((j=1;j<=#;j++)); do
 			FOUNDCOUNT=0
 			if [[ -d "$i/${!j}" ]]; then
@@ -270,7 +291,7 @@ function findwithchildren()
 	done
 }
 
-# colorize [topic]
+# colorize TOPIC
 function colorize()
 {
 	TOPIC="$*"
@@ -280,3 +301,35 @@ function colorize()
 	fi
 	/bin/sed -r "s/$TOPIC/[32;1m\0[0m/g;s/[^\s0-9]*:/[1m\0[0m/g;s/[\:\.\<\>\(\)\=\/\,]/[30;1m\0[0m/g"
 }	
+
+# dirof command   - any binary or executable script in $PATH (even if aliased/functioned over!) 
+# very handy -- next func shows why
+function dirof() 
+{ 
+	dirname $(type -fap "$@")
+}
+# cdof [-push] command - change to directory where "command" is
+#                        if "command" is not found, then it searches
+#                        for a location of anything matching that name, 
+#                        case insensitive. Use -push to push the dir first!
+function cdof()
+{
+	[[ $1 == -push ]] && { pushd . &> /dev/null; shift; local NEEDPOP=YES; }
+	if [[ $(dirof $*) ]]; then
+		cd $(dirof "$*")
+		if [[ $? -eq 0 ]]; then return 0;fi
+	else
+	# try to find approximate match for
+		cd $(dirname $(find -l1 --ignore-case "$*"))
+		if [[ $? -eq 0 ]]; then return 0;fi
+	fi
+	ERRC=$?
+	# failed, pop back if pushed
+	[[ $NEEDPOP == YES ]] && popd &> /dev/null	
+	# return error code, but only if it was set (if not set to 1 to indicate that there was a definite error)
+	case $ERRC in
+		0) return 1;;
+		*) return $ERRC;;
+	esac
+}
+

@@ -1,9 +1,15 @@
-" Filename:	bash.vim
-" Purpose:	Vim syntax file
-" Language:	Bash - Unix Shell
-" Maintainer:	Donovan Rebbechi elflord@pegasus.rutgers.edu
-" URL:		http://pegasus.rutgers.edu/~elflord/vim/syntax/bash.vim
-" Last update:	Tue Aug  4 09:02:08 EDT 1998
+" Filename:	   bash.vim
+" Purpose:         Vim syntax file
+" Language:	   Bash - Unix Shell
+" Maintainer:	   Donovan Rebbechi elflord@pegasus.rutgers.edu
+" Fork Maintainer: Gabriel Sharp osirisgothra@hotmail.com
+" URL:		   http://pegasus.rutgers.edu/~elflord/vim/syntax/bash.vim
+" Fork URL:        git;//gitorious.org/gxbase/0-2-0/extras/bash.vim
+" Fork Purpose:    Stand-alone version of the bash.vim syntax file (the file
+"                  awk.vim not required but is still used if available)
+
+" Last unofficial update: Fri Jun 6 18:12:00 EDT 2014
+" Last official update:	Tue Aug  4 09:02:08 EDT 1998
 "
 " Updated 1998 July 27
 " 	Fixed bugs with embedded echos and command subs in bash
@@ -24,16 +30,23 @@ if !exists("bash_maxlines")
 	let bash_minlines = 2 * bash_minlines
 endif
 
-
-
-syn include @bashAwk <sfile>:p:h/awk.vim
+" Changed Block: added check for awk.vim
+if filereadable("awk.vim")
+	syn include @bashAwk <sfile>:p:h/awk.vim
+endif
 
 syn region bashAwkBlockSingle matchgroup=bashStatement start=+g\=awk[ \t]*-[^ \t]*[ \t]*'{+ end=+}'+ contains=@bashAwk
 syn region bashAwkBlockSingle matchgroup=bashStatement start=+g\=awk[ \t]*-[^ \t]*[ \t]*"{+ end=+}"+ contains=@bashAwk,bashDeref
 
+syn match bashCOs ";;" 
+syn match bashCOs ";&" 
+syn match bashCOs ";;" 
+syn region bashCOregion start="case" end="esac" contains=bashCOs
+hi bashCOs ctermbg=green
 
 " Comment out this to get less colour
-" let hi_color=1
+" Block Change: hi_color is on by default now
+let hi_color=1
 
 " bash syntax is case sensitive
 syn case match
@@ -62,9 +75,11 @@ syn match   bashCaseError ";;"
 syn match   bashEsacError "\<esac\>"
 syn match   bashCurlyError "}"
 syn match   bashParenError ")"
+
 if exists("is_kornshell")
-syn match     bashDTestError "]]"
+	syn match     bashDTestError "]]"
 endif
+
 syn match     bashTestError "]"
   
 " Tests
@@ -86,6 +101,7 @@ syn region  bashSubSh transparent matchgroup=bashOperator start="(" end=")" cont
 
 " Misc
 "=====
+
 syn match   bashOperator		"[!&;|=]"
 syn match   bashWrapLineOperator	"\\$"
 syn region  bashCommandSub   matchGroup=bashSpecial start="`" skip="\\`" end="`" contains=ALLBUT,bashFunction,bashCommandSub,bashTestOpr,bashCase,bashEcho,bashDerefOperator,@bashSedStuff
@@ -93,6 +109,7 @@ syn region  bashCommandSub matchgroup=bashOperator start="$(" end=")" contains=A
 syn match   bashSource	"^\.\s"
 syn match   bashSource	"\s\.\s"
 syn region  bashColon	start="^\s*:" end="$\|" end="#"me=e-1 contains=ALLBUT,bashFunction,bashTestOpr,bashCase,bashDerefOperator,@bashSedStuff
+
 
 " File redirection highlighted as operators
 "==========================================

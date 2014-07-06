@@ -1,0 +1,62 @@
+#!/bin/bash -r
+#
+
+case $- in
+	
+	# restricted, (all others do not matter at this point)
+	# the r flag could only be set by running directly unless of course
+	# you were weird enough to run bash -r from the current directory
+	# and then source it, or something equally weird.
+	*r*)		
+		echo "You must not execute directly, please link ./stubfile to"
+		echo "/etc/bash_completion.d/gxbase_stub and restart bash."
+		echo "error 12"
+		#indirect to avoid calling exit
+		(exit 12)
+		;;
+	# interactive but not restricted, the right way to start the script
+	# to ensure that the file that called us is correct, we must statisfy
+	# two rules: 1) the argument must be passed, the basename of the caller
+	#               should be gxbase_stub
+	#            2) gxbase_stub issues a identifier as the second option, which
+	#								is the 
+	*i*)
+		[[ -z $GXB_LAUNCH_IN_PROGRESS ]] && {
+			eecho "GXBASE Executer v1.0 Startup"
+			export GXBASE_ROOT
+			export GXBASE_CALLER="$1"
+			export GXBASE_CALLER_REAL=${BASH_SOURCE[1]}
+			export GXBASE_CALLER_PARENT=${BASH_SOURCE[2]}
+			eecho "Callers: Announce=$GXBASE_CALLER"
+			eecho "         Expected=$GXBASE_CALLER_REAL"
+			eecho "           Parent=$GXBASE_CALLER_PARENT"
+			if [[ ${BASH_SOURCE[1]} == $GXBASE_CALLER ]]; then
+				eecho "Verified Caller: $CALLER"  		
+				eecho "Executing Core Scripts..."
+				export GXB_LAUNCH_IN_PROGRESS=1  					
+  	  	unset GXB_LAUNCH_IN_PROGRESS
+				if source $GXBASE_ROOT/res/core; then 
+					eecho "GXBASE Core Loaded"
+				else 
+					eecho "GXBASE Core Load Finished With Error Status #$?"
+				fi
+			else				
+				if sudo modprobe pcspkr; then
+					beep
+					sudo modprobe -r pcspkr
+				fi
+				echo "ERROR: Caller did not announce it's identity, cannot authenticate caller's origin!"
+				echo "       Please check your /etc/bash_completion.d/zz9_gxbase_stub and try again!"
+				return 11
+			fi
+ 	}
+		;;
+	# not interactive, or restricted
+	# usually when ran from GUI or launch .desktop item
+	*)
+		echo "code 13: bad option shell: $-"
+		(exit 13)
+		;;
+esac	
+	
+

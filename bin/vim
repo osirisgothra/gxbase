@@ -15,6 +15,9 @@
 case $- in *i*) eval $BASH_SOURCE "$@"; return $?;; esac
 # since security measures taken, $0 will be the script's name always
 
+# variables
+# SUDOTHRESH (integer): minimum number of files that need admin rights to read/write before sudo kicks in (default=1)
+declare -i SUDOTHRESH=1
 
 case $UID in
 0)
@@ -84,7 +87,7 @@ case $BASENAME in
 					echo "example: gen-sudo /usr/bin/sudoedit"
 					echo
 					echo "You MUST supply the full path to the program because it will be used to remove"
-					echo "it's entry from the hashtable in order to allow you to run this command anew."
+					echo "it's entry from the hash table in order to allow you to run this command anew."
 					echo "If you already have done this, just make sure $(dirname $BASH_SOURCE) is in"
 					echo "your system's path variable. Edit your ~/.bashrc to do this. See below for more."
 					echo
@@ -121,6 +124,14 @@ case $BASENAME in
 		esac
 		;;
 ############################## Place Program Route Filters Here ###############	
+## NOTICE: append routes with ;;& if you wish to continue execution
+##         use ;; to stop execution, or use ;& to execute the next block 
+##         UNCONDITIONALLY--if the ln) block ended with ;& then the ln)
+##         block would execute the vim) block as well, and since vim
+##         continues processing, it would inherit that behavior because of it.
+##         The route would be: ln->vim->[any other blocks and conditions]->*
+##         Please use this kind of routing with care!!
+
 			# ln route filter, checks for overwrite (accidental misnaming arguments) 
 			ln)				
 				if [[ $1 == "-s" ]]; then
@@ -136,8 +147,103 @@ case $BASENAME in
 			 		# continue
 
 					fi
-					;;&
-###############################################################################					
+					# routing to continue evaluating for possible route matches
+					;;& 
+			vim|gvim|vim.*)					
+				# vim route filter, simply checks the FILE components of the
+				# command string, checks to see if they are read only, and
+				# elevates if needed, with a brief warning.
+				# NOTE: switch values are ignored however, the values immediately following switches that may actually be attributed to switches
+				#       are not treated specially and could be misinterpreted as a false elevation case, in which case you should run vim directly
+				#       or use the -direct as your first parameter afterwards. Example: vim -direct --vim-option vim-option-string file1 ...
+				#       Beware that if you do this, there will be no elevation, that is why there is also a "vim -directsudo" argument, which works
+				#       the same way except sudo is used by force:
+				declare -i SUDOCOUNT=0
+				case $1 in
+					"-directsudo")
+							((SUDOCOUNT++))							
+							;&
+					"-direct")
+							SKIPCHECKS=1
+							shift
+							;;
+					*)															
+							for i in "$@"; do
+								# do not process switch values
+								if [[ "${i: 0:1}" == "-" ]]; then
+									continue
+								fi
+								if [[ -e "$i" ]]; then
+									# exists, check for write-ability/readability
+									if [[ ! -r "$i" ]] || [[ ! -w "$i" ]]; then
+										((SUDOCOUNT++))
+									fi
+								else
+									# check for the file in PATH and VIM_SEARCHPATH (see default above)
+									# dont walk through the PATH, make a temporary copy and possibly reinject
+									# original copy to be restored after looking
+	#						#	OLD_PATH=$PATH									
+ #						 # 	[[ "$VIM_SEARCHPATH" == "" ]] && unset VIM_SEARCHPATH  # the next will fail if its empty but still set, correct that here 									
+#	 IN PROGRESS	#						# note the +: which will only add the searchpath and the : preceding it if it is not empty
+#								# PATH=$PATH${VIM_SEARCHPATH+:}${VIM_SEARCHPATH}
+ #						# 	MATCH=$(type -p "$i")
+									
+
+									# doesn't	exist, check target's directory
+									ITEMDIR=$(dirname "$i")							
+									if [[ -d "$ITEMDIR" ]] && [[ ! -w "$ITEMDIR" ]]; then
+										((SUDOCOUNT++))
+									elif [[ -d "$ITEMDIR" ]] && [[ ! -r "$ITEMDIR" ]]; then
+										((SUDOCOUNT++))						
+									fi
+								fi
+							done
+							;;
+				esac
+				VIMDESTS=($(type -pa $BASENAME))
+				# default if no other found
+				VIMSPEC=/usr/bin/vim
+				unset VIMFOUND
+				for kk in "${VIMDESTS[@]}"; do
+					echo "comparing $kk against $BASH_SOURCE..."
+					if [[ $kk != $BASH_SOURCE ]]; then
+						echo "found one: $kk"
+						VIMSPEC=$kk
+						VIMFOUND=1
+						break
+					fi
+				done
+				[[ $VIMFOUND != 1 ]] &&	echo "Warning, could not find a copy of vim in your path, using the default: $VIMSPEC"			
+				############### boundary check ######################
+				
+				# at  this point, there is a chance that the user may have 
+				# double linked the vim in different locations, if this is 
+				# the  case we cant have it  running forever in a loop, we 
+				# will detect this and warn the  user so that he,  she, or 
+				# it can resolve the issue:
+
+				if [[ $VIM_RUNNING ]]; then
+					echo "Error: infinite loop protection, terminating without running."
+				else
+          export VIM_RUNNING=1
+					if [[ $SUDOCOUNT -ge $SUDOTHRESH ]]; then
+						# one or more files tagged, and the tag threshold has been met
+						[[ $SKIPCHECKS ]] && echo -ne "User evoked switcharg-ignoring \"directsudo\", " || echo -ne "One or more file system	object(s) are inaccessible, "
+						echo "using root privileges."
+						sleep 2						
+						sudo -H "$VIMSPEC" "$@"
+					else
+            [[ $SKIPCHECKS ]] && echo -ne "User evoked switcharg-ignoring \"direct\": "
+						echo "Editing using ${USERNAME}'s permissions."
+						sleep 1						
+						"$VIMSPEC" "$@"
+					fi
+					unset VIM_RUNNING
+				fi
+				exit $?
+
+				
+    	;;
 	*)
 		[[ ! -r ~/.hushgen ]] && [[ -z $NOQUOTE ]] && echo "[0;36m--- [1msudo $BASENAME $* [21m---[0m" || HUSH=1
 		eval sudo "$BASENAME" "$@"

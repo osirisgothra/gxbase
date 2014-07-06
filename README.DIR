@@ -1,0 +1,44 @@
+README.DIR
+
+ Description of GxBase Direcetory Structure. There is a symbolic link in every directory
+ that is mentioned below. If there is no README.DIR in a directory, please notify the
+ author, find out if it is supposed to be there, and if not, delete or move it for
+ security purposes. When reporting rogue directories to the author, please make sure you
+ include a snapshot of your GxBase tree (dont include customizations made by yourself).
+
+ If this is a fork project not by the original author. You must first contact the author
+ of the fork project first, they will be responsible for forwarding it to me if they don't
+ know or cant fix the problem.
+
+ Please note that even in-development directories will be put in here, even if they are empty
+ (The description will be blank if it does not have one yet). README.DIR must document all
+ known directories, however, it is not required that in-development directories contain a
+ symbolic link due to the possibility of a empty directory used for ``tagging``.
+
+ The directory ``/gxbase`` is the equivalent to your install directory (GXBASE_ROOT enviro-
+ nment variable). Examples can be /gxbase, /usr/local/gxbase, /usr/share/gxbase, /opt/gxbase
+ /home/ubuntu/.gxbase and so on. The default location used by the author is /gxbase however
+ when documented, ``/gxbase`` means the same as ``$GXBASE_ROOT``; not an absolute path.
+
+Directories (in alphabetical order)
+
+/gxbase							 		 							main root directory where you installed gxbase        
+/gxbase/bin					 									true binary executables in ELF32/64 format
+/gxbase/dev					 		 	 					 	pipes, fifos, character and other devices used by gxbase
+/gxbase/doc														documentation root directory (gxbase and others too)
+/gxbase/doc/html	                    documentation root for the doxygen generated reference
+/gxbase/extras												extra files that may be helpful with editing/using gxbase
+/gxbase/extras/license-templates			assorted license files for script file authors
+/gxbase/freezer										    scripts and binaries catagorized & frozen to archives
+/gxbase/lib                           libraries (not ELF) written in languages other than bash
+/gxbase/offline                       broken files quarenntined from the rest of the tree
+/gxbase/res                           main resource directory where all bash-based scripts
+/gxbase/sing				 	 								stand-alone integrated scripts for gxbase users
+/gxbase/stubs        	   							stubfiles used by the gxbase installer and bootstrap
+
+
+Documentation
+
+ Please visit http://paradisim.twilightparadox.com/gxbase/doc.html
+
+

@@ -1,0 +1,78 @@
+#!/bin/bash
+
+case $- in *i*) ;;
+*) echo "please do not run this, please source it: . gxbin [mean|nice]"; exit 1;;
+esac
+
+function rst_hash()
+{
+	echo -ne "Finding target..."
+	declare -g TARGET="$(readlink -e $(dirname $BASH_SOURCE))"	
+	echo $TARGET
+
+
+if diff $BASH_SOURCE $TARGET/$(basename $BASH_SOURCE); then
+	echo "Target verified..."
+else
+	echo "TARGET \"$TARGET\" corrupt, cannot use it, failing - check your filesystem for bad links!"
+	return 1
+fi
+
+
+	echo "Resetting hash..."
+	hash -r
+}
+
+case $1 in
+
+ "")
+ 	echo "Usage: gxbin [--help|mean|nice]"
+	;;
+ mean)
+ 	if rst_hash; then		
+	 	echo -ne "Forcing mean mode [s"
+		for ITEM in $TARGET/*; do
+		if [[ -x ${ITEM} ]]; then
+			if [[ -r ${ITEM} ]]; then
+				echo -ne "[u[s$ITEM...[0K"				
+				hash -p $ITEM $(basename "$ITEM") &> /dev/null
+				if alias $(basename "$ITEM") &> /dev/null;  then
+					unalias $(basename "$ITEM") 
+				fi
+			fi
+		fi
+		done
+		echo "[ucompleted![0K"
+	else
+		return 1
+	fi
+	;;
+ nice)
+ 	if rst_hash; then
+		echo "Files will execute in nautural order determined by PATH."
+	else
+		return 1
+	fi
+	;;
+  --help)
+	cat <<EOF
+Put GXBASE binaries in or out of priority mode"
+
+ gxbin [mean|nice]
+
+   mean        force gxbase binaries to be hashed in and run
+               even if a program by the same name is ahead of
+               it in the system's path.
+
+   nice        return the hash to normal (same as hash -r)
+
+Make sure you know which files are being affected before running this
+command. Use at own risk!
+
+EOF
+	;;
+esac
+
+
+
+

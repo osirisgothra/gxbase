@@ -35,7 +35,10 @@ if [[ -z $GXBASE_RES_BASHALIASES ]]; then
 	}
 	[[ $GXCNF_NOGXDEVALIASES ]] || {
 		alias eb='vim -n -c ":so $GXBASE_ROOT/res/editbashes"'	
+		alias ebo='vim -n -c ":so $GXBASE_ROOT/res/editbashes_old"'
 		alias rgx='source /etc/bash_completion; source ${GXBASE_ROOT}/res/bashrc'
+		alias cleargxvars='for i in `declare -p | grep "(?<=declare .. )GX(BASE|CNF)[^=]*" -Po`; do unset $i; done'
+		alias re-source='cleargxvars; source'
 	}
 
 	# conditional aliases (and overrides to unconditionals)

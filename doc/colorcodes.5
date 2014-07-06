@@ -1,6 +1,8 @@
+NAME
 
-Terminal Special Characters and Sequence Codes
-----------------------------------------------------------------------------------------------------------
+	Terminal Special Characters and Sequence Codes
+
+SYNOPSIS
 
 ANSI ESCAPE SEQUENCES
 
@@ -39,7 +41,11 @@ NORMAL ANSI COLOR CODES
   [0   None [0m  [37;2m Lowlight [x;2m [0m [37;3m Emphasis [x;3m [0m [37;4m Underlined [x;4m [0m
 [37;5m Blink [x;5m [0m [37;7m Reverse [x;7m  [0m [37;8m  Hidden [x;8m  [0m [37;9m Strikeout [x;9m  [0m
 
-ANSI 256-color codes = ESC[<3|4>8;5;<cc>m   (3=Fore 4=Back cc=Code (below))
+ANSI EXTENDED COLOR CODES
+
+  Terminals like x-term support 256-color codes in this manner:
+	      
+				ESC[<3|4>8;5;<cc>m   (3=Fore 4=Back cc=Code (below))
 [0m
 [48;5;16m  16[40m[48;5;17m  17[40m[48;5;18m  18[40m[48;5;19m  19[40m[48;5;20m  20[40m[48;5;21m  21[40m    [48;5;100m 100[40m[48;5;101m 101[40m[48;5;102m 102[40m[48;5;103m 103[40m[48;5;104m 104[40m[48;5;105m 105[40m  [48;5;184m 184[40m[48;5;185m 185[40m[48;5;186m 186[40m[48;5;187m 187[40m[48;5;188m 188[40m[48;5;189m 189[40m[0m
 [48;5;22m  22[40m[48;5;23m  23[40m[48;5;24m  24[40m[48;5;25m  25[40m[48;5;26m  26[40m[48;5;27m  27[40m    [48;5;106m 106[40m[48;5;107m 107[40m[48;5;108m 108[40m[48;5;109m 109[40m[48;5;110m 110[40m[48;5;111m 111[40m  [48;5;190m 190[40m[48;5;191m 191[40m[48;5;192m 192[40m[48;5;193m 193[40m[48;5;194m 194[40m[48;5;195m 195[40m[0m

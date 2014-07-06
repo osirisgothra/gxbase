@@ -1,0 +1,45 @@
+#!/bin/bash
+
+function _running() {	pgrep -u $USERNAME "$*";	return $?; }
+
+BROWSER=""
+SITENAME='www.google.com'
+SEARCHPREFIX='/search?q='
+SEARCHSUFFIX=''
+SEARCHSITE="http://${SITENAME}${SEARCHPREFIX}"
+SEARCHSITE_NOSEARCH="http://${SITENAME}"
+WORDS=$(printf "%s+" "$@")
+SEARCHLINE="${SEARCHSITE}${WORDS}${SEARCHSUFFIX}"
+if TTY=$(tty) && [[ $TTY =~ .*pts.* ]]; then
+	echo "Executing in Background, Disowned"
+	EXESUFF="& disown"
+else
+	# tty is NULL or is /dev/ttyXXX
+	echo "Executing in Foreground, Waiting"
+	EXESUFF=""
+fi
+
+if [[ $EXESUFF ]] && [[ $DISPLAY ]]; then
+	if [[ $SSH_TTY == $TTY ]]; then
+		echo "Running in Remote Mode, Still Use GUI? [Y:/n]"
+if _running firefox; then
+	BROWSER=(`which firefox` "-new-tab")
+elif _running chromium-browser; then
+	BROWSER=`which chromium-browser`
+elif _running google-chrome; then
+	BROWSER=`which google-chrome`
+elif _running rekonq; then
+	BROWSER=`which rekonq`
+elif _running midori; then
+	BROWSER=`which midori`
+elif _running konqueror; then
+	BROWSER=`which konqueror`
+fi
+	
+[[ -z $BROWSER ]] && BROWSER=("/usr/bin/links2" "-g")
+
+
+"${TBROWSER[@]}" $SEARCHLINE $EXESUFF
+
+
+

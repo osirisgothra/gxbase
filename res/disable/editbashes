@@ -1,0 +1,73 @@
+" 
+" editbashes
+"
+" script to edit the bash files in vim
+" in split for high-area monitors
+"
+" the layout is [bottom to top]:
+" -------------                                     
+" | 7 | 2 | 4 |      0 /gxbase/res/bash-helpers   
+" |___|-------|      1 /gxbase/res/bash-vars      
+" | 6 |       |      2 /gxbase/res/bash-settings                              
+" |---|   1   |      3 /gxbase/res/bash-aliases    
+" |   |       |      4 /gxbase/res/bash-bindings                             
+" | 0 |-------|      5 /gxbase/res/bashrc               
+" |   |   3   |      6 /etc/bash.bashrc
+" |-----------|      7 /gxbase/res/bash-prompt
+" |     5     |      changelog                            
+" -------------         5/24 - initial created copy
+"                       5/31 - replaced bash-prompt with bash-aliases                         
+"                              replaced bash_logout with bash-bindings
+"                              added split for bash-prompt (7)
+"                              removed wrap+mouse override commands (stupid)
+"                              added notes (see below)
+" notes
+" -----
+" this may look jammed up on your monitor if you use large text, 
+"  small resolution, or both.
+" if that's the case, you can type :only and zoom to your window of choice
+"  after you've used the mouse to click it
+" use CTRL+W twice to switch to next window (not in insert mode!)
+" use ALT+X to save and exit ALL
+" use ALT+S to save ALL              ( you will be reminded before entering )
+" this works out best with: fullscreen terminal, Ubuntu Mono 12pt, 36" 1080p LCD monitors or better
+" if you dont like it you can  comment all but the first line below, which will revert to the old behavior
+" or rename editbashes_old to editbashes, which will make eb behave like it used to.
+"
+e /gxbase/res/bashrc
+split /gxbase/res/bash-helpers
+vsplit /gxbase/res/bash-aliases
+split /gxbase/res/bash-vars
+split /gxbase/res/bash-settings
+vsplit /gxbase/res/bash-bindings
+exe 0 . "wincmd w"
+split /etc/bash.bashrc
+split /gxbase/res/bash-prompt
+" return to original position
+exe 99 . "wincmd w"
+
+hi ErrorMsg ctermbg=black
+hi Ignore ctermfg=gray
+hi String ctermfg=gray ctermbg=black
+hi Delimiter ctermfg=black cterm=bold
+hi Statement ctermfg=1 cterm=none
+map x :wqall
+imap x :wqall
+map s :wall
+imap s :walli
+" j down   k up   h left   l right 
+"`[1;3A up
+:map [1;3A :exec "winc k"
+:imap [1;3A :exec "winc k"i
+"`[1;3B down       
+:map [1;3B :exec "winc j"
+:imap [1;3B :exec "winc j"i
+"`[1;3D left
+:map [1;3D :exec "winc h"
+:imap [1;3D :exec "winc h"i
+"`[1;3C right
+:map [1;3C :exec "winc l"
+:imap [1;3C :exec "winc l"i
+:echo "[ALT+S] Save All Documents    [Alt+X] Save All & Quit VIM"
+
+
