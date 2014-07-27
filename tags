@@ -1,0 +1,67 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+_PS1	res/bash-prompt	/^function _PS1()$/;"	f
+_PS2	res/bash-prompt	/^function _PS2()$/;"	f
+_PS3	res/bash-prompt	/^function _PS3()$/;"	f
+addbashcmd	res/bash-helpers	/^function addbashcmd()$/;"	f
+cdof	res/temp	/^function cdof()$/;"	f
+choice	res/temp	/^function choice()$/;"	f
+color	res/bash-helpers	/^function color()$/;"	f
+colorize	res/temp	/^function colorize()$/;"	f
+command_not_found_handle	res/etc-bash	/^	function command_not_found_handle()$/;"	f
+countof	res/bash-helpers	/^function countof()$/;"	f
+cputemp	res/gxcmd	/^function cputemp()$/;"	f
+delbashcmd	res/bash-helpers	/^function delbashcmd()$/;"	f
+dirof	res/temp	/^function dirof() $/;"	f
+do_xinit	res/bash-helpers	/^function do_xinit()$/;"	f
+eecho	stubfile	/^function eecho() { echo "$@"; }$/;"	f
+findwithchildren	res/temp	/^function findwithchildren()$/;"	f
+form	res/make-component	/^function form() { $/;"	f
+func	res/temp	/^function func()$/;"	f
+funclist	res/temp	/^function funclist()$/;"	f
+funclist_helper	res/temp	/^function funclist_helper()$/;"	f
+getrange	res/gxcmd	/^function getrange()$/;"	f
+getsetting	res/temp	/^function getsetting() { cat file.ini | grep -Po -i "(?<=^$1=).*"; }$/;"	f
+guioff	res/bash-helpers	/^function guioff()$/;"	f
+gx	res/complete	/^function gx.completions()$/;"	f
+gx	res/complete	/^function gx.gxbase-COMPNAME.unloader$/;"	f
+gx	res/config	/^function gx.config$/;"	f
+gx	res/config	/^function gx.gxbase-config.unloader$/;"	f
+gx	res/core	/^function gx.assert()$/;"	f
+gx	res/core	/^function gx.funcsert()$/;"	f
+gx	res/core	/^function gx.funcsertf()$/;"	f
+gx	res/core	/^function gx.gxbase-core.unloader$/;"	f
+gx	res/core	/^function gx.loadassert$/;"	f
+gx	res/envinfo	/^function gx.allvarnames()$/;"	f
+gx	res/envinfo	/^function gx.gxbase-envinfo.unloader$/;"	f
+gx	res/template-component	/^function gx.#SOMEFUNC()$/;"	f
+gx	res/template-component	/^function gx.gxbase-#COMPNAME.unloader$/;"	f
+gx	res/ui	/^function gx.gxbase-ui.unloader$/;"	f
+gx	res/ui	/^function gx.shopt()$/;"	f
+hashautocmd	res/bash-helpers	/^function hashautocmd()$/;"	f
+hashdir	res/bash-helpers	/^function hashdir()$/;"	f
+help	res/bash-helpers	/^function help()$/;"	f
+ishell	res/bash-helpers	/^function ishell()$/;"	f
+loadhashes	res/bash-helpers	/^function loadhashes()$/;"	f
+lsfunc	res/bash-helpers	/^function lsfunc()$/;"	f
+lsfunc2	res/bash-helpers	/^function lsfunc2()$/;"	f
+makebusyboxlinkshere	res/temp	/^function makebusyboxlinkshere()$/;"	f
+makemine	res/bash-helpers	/^function makemine() { sudo chown ${USERNAME}:${USERNAME} "$@"; echo "changed ownership to ${USERNAME}:${USERNAME}"; }$/;"	f
+mantopic_formatter	res/temp	/^function mantopic_formatter()$/;"	f
+mantopic_generator	res/temp	/^function mantopic_generator()$/;"	f
+ownercount	res/temp	/^function ownercount()$/;"	f
+serv	res/bash-helpers	/^function serv()$/;"	f
+serv_complete	res/bash-helpers	/^function serv_complete$/;"	f
+shortls	res/temp	/^function shortls()$/;"	f
+startx	res/bash-helpers	/^function startx()$/;"	f
+uniqsessid	res/gxcmd	/^function uniqsessid()$/;"	f
+uniqsessidv	res/gxcmd	/^function uniqsessidv()$/;"	f
+vconf	res/bash-helpers	/^function vconf()$/;"	f
+vim_func	res/bash-helpers	/^function vim_func()$/;"	f
+xh	res/bash-helpers	/^function xh()$/;"	f
+xtty	res/bash-helpers	/^function xtty()$/;"	f
+xvim	res/bash-helpers	/^function xvim() { sudo chown ${USERNAME}:${USERNAME} "$@"; sudo chmod a+rw "$@"; vim `command ls -C "$@"`; sudo chmod a+x "$@"; return $?; }$/;"	f

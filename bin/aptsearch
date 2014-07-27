@@ -1,0 +1,41 @@
+#!/bin/bash
+
+
+
+
+
+
+
+
+
+
+	shopt -s checkwinsize
+	eval $(resize)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#eval 'dialog --inputmenu searched 50 $COLUMNS 30 $(
+while (true); do
+	eval declare -a RESULT=($(apt-cache search $1 | sed "s/^/\"/g;s/$/\"/g;s/ - /\" \"/g" | tr "\n" " "))
+	if dialog --menu "Search Results" 50 $COLUMNS 30 "${RESULT[@]}" 2>result; then
+		apt-cache show $(cat result) > result.txt
+		if dialog --editbox result.txt 0 0; then
+			if dialog --inputbox "Enter New Search Terms" 0 0 2>result.txt; then
+				set -- $(cat result.txt)
+				continue
+			fi
+		fi
+	fi
+	break		
+done

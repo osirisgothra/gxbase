@@ -19,9 +19,24 @@ case $- in
 	# two rules: 1) the argument must be passed, the basename of the caller
 	#               should be gxbase_stub
 	#            2) gxbase_stub issues a identifier as the second option, which
-	#								is the 
+	#								is the 	
 	*i*)
+		if [[ $DISPLAY ]] && [[ $TERM != linux ]] && [[ $(tty) =~ .*pt.* ]]; then
+			if [[ ! -r ~/.gxbase-no-motd ]]; then
+				[[ -r /etc/issue.net ]] && cat /etc/issue.net
+				[[ -r /etc/motd ]] && cat /etc/motd
+			fi
+		fi
 		[[ -z $GXB_LAUNCH_IN_PROGRESS ]] && {
+			if [[ $PATH =~ .*$GXBASE_ROOT.* ]]; then
+				eecho "Warning: skipping addition of gxbase into path"
+			else
+				if [[ -e ~/.config/gxbase/gxbase_in_path_first ]]; then
+					export PATH="$GXBASE_ROOT/bin:$GXBASE_ROOT/res:$PATH"
+				else
+					export PATH="$PATH:$GXBASE_ROOT/bin:$GXBASE_ROOT/res"
+				fi
+			fi
 			eecho "GXBASE Executer v1.0 Startup"
 			export GXBASE_ROOT
 			export GXBASE_CALLER="$1"
@@ -34,12 +49,14 @@ case $- in
 				eecho "Verified Caller: $CALLER"  		
 				eecho "Executing Core Scripts..."
 				export GXB_LAUNCH_IN_PROGRESS=1  					
+				eecho "Building function database..."
+
+#			if source $GXBASE_ROOT/res/core; then 
+#				eecho "GXBASE Core Loaded"
+#			else 
+#				eecho "GXBASE Core Load Finished With Error Status #$?"
+#	  	fi
   	  	unset GXB_LAUNCH_IN_PROGRESS
-				if source $GXBASE_ROOT/res/core; then 
-					eecho "GXBASE Core Loaded"
-				else 
-					eecho "GXBASE Core Load Finished With Error Status #$?"
-				fi
 			else				
 				if sudo modprobe pcspkr; then
 					beep

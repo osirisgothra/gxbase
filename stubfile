@@ -1,4 +1,46 @@
-echo "${BASH_SOURCE[@]}"
+#!/bin/bash -r
+
+###
+### gxbase BIOS functions
+### minimal internal foundation functions to support
+### the 4 main parts of the gxbase environment:
+### 1) per-user configuration reading       | gxconf()
+### 2) basic gxbase <--> user communication | gxecholv()
+### 3) environment inter dependency checks  | gxcomp()
+### 4) error handling                       | gxerr()
+###
+
+
+#F gxconf [file] [section] [setting-name] 
+function lineof() { cat $1 | grep "$2" --line-number | grep "^[0-9]*" -o; } 
+function gxconf() 
+{
+	SECTION=$2
+	TARGET=~/.config/gxbase/${1}rc
+	# config files are named this way, for example, gxecholv configuration is 'gxecholvrc'w
+	# entries within the files are contained on a per-section basis:  [section]
+	#                                                                 setting=value
+	#                                                                 # comment line
+	if lineof $TARGET "^\[$SECTION\]$"; then
+
+		if [[ -r $TARGET ]]; then
+			: #TODO FINISH THIS
+		else
+			:
+		fi
+	else
+		:
+	fi
+
+}                       
+
+
+function gxecholv() 
+{
+	[[ -r ~/.config/gxbase/echo.ini ]] && grep "vcvim: echo "${BASH_SOURCE[@]}
+}
+
+
 
 #
 # gxbase can only be started after bash_completion has been called by                                       bash
@@ -19,7 +61,27 @@ echo "${BASH_SOURCE[@]}"
 #       that may execute under /bin/sh, so no dancing around sh compatibility
 #       is needed here (that dance is left to /etc/profile.d/bash_completion.sh)
 #  (see the figure to the right for a visualization on how bash starts up)
-function eecho() { echo "$@"; }
+function eecho() 
+{ 
+	local RET=$? # save current code no matter what	
+	case Lv$GXBASE_EECHOF_LEVEL in
+		# makes subsequent queries faster than reading the file from disk each time ( you could do this yourself in gxbconf too )
+		Lv)
+		 if [[ -r ~/.gxbase-extended-echo-forced ]]; then
+				declare -g GXBASE_EECHOF_LEVEL=1
+			else
+				declare -g GXBASE_EECHOF_LEVEL=0
+			fi
+			;;&
+		Lv1)
+			echo "$@";;
+		Lv0)
+			;;
+	esac
+	return $RET
+
+
+}
 
 # TODO: put in place symantics to recover automatically from such problems
 

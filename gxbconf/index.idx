@@ -1,0 +1,8 @@
+<?xml version="1.0" lang="en_US" encoding="UTF-8"?>
+<?gcsindex role="index"?>
+<index>
+	<item link="bash_shopt" desc="Shell Options" target="shopt.gcs" parent="root"/>
+	<item link="bash_set" desc="Shell Settings" target="set.gcs" parent="root"/>
+	<item link="bind" desc="Keyboard Bindings" target="bind.gcs" parent="root"/>
+	<item link="trap" desc="Signal Traps" target="trap.gcs" parent="root"/>
+</index>

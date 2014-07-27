@@ -1,6 +1,30 @@
 #!/bin/bash
+#
+# goo
+#      google quick search
+# (C)2012-14 Gabriel Sharp, T <osirisgothra@hotmail.com>
+# http://paradisim.tk
+#
 
-function _running() {	pgrep -u $USERNAME "$*";	return $?; }
+function _running() 
+{	
+	grep -u $USERNAME "$*";	return $?; 
+}
+
+function _getkey() 
+{
+	unset REPLY
+	until [[ $REPLY =~ [$1] ]]; do read -sn1; done
+	if [[ $# -eq 1 ]]; then
+		echo $REPLY
+	elif [[ $2 == u ]]; then
+		echo ${REPLY^^}
+	elif [[ $2 == l ]]; then
+		echo ${REPLY,,}
+	else
+		echo ${REPLY${2}}
+	fi
+}
 
 BROWSER=""
 SITENAME='www.google.com'
@@ -22,24 +46,30 @@ fi
 if [[ $EXESUFF ]] && [[ $DISPLAY ]]; then
 	if [[ $SSH_TTY == $TTY ]]; then
 		echo "Running in Remote Mode, Still Use GUI? [Y:/n]"
-if _running firefox; then
-	BROWSER=(`which firefox` "-new-tab")
-elif _running chromium-browser; then
-	BROWSER=`which chromium-browser`
-elif _running google-chrome; then
-	BROWSER=`which google-chrome`
-elif _running rekonq; then
-	BROWSER=`which rekonq`
-elif _running midori; then
-	BROWSER=`which midori`
-elif _running konqueror; then
-	BROWSER=`which konqueror`
-fi
+		if [[ $(getkey yn u) == N ]]; then
+			CANCELGUI=1
+		else
+			unset CANCELGUI
+		fi
+	fi
+	if [[ -z $CANCELGUI ]]; then		
 	
+		if _running firefox; then
+			BROWSER=(`which firefox` "-new-tab")
+		elif _running chromium-browser; then
+			BROWSER=`which chromium-browser`
+		elif _running google-chrome; then
+			BROWSER=`which google-chrome`
+		elif _running rekonq; then
+			BROWSER=`which rekonq`
+		elif _running midori; then
+			BROWSER=`which midori`
+		elif _running konqueror; then
+			BROWSER=`which konqueror`
+		fi
+	fi
+fi
 [[ -z $BROWSER ]] && BROWSER=("/usr/bin/links2" "-g")
-
-
-"${TBROWSER[@]}" $SEARCHLINE $EXESUFF
-
+"${BROWSER[@]}" $SEARCHLINE $EXESUFF
 
 
