@@ -1,0 +1,11 @@
+apt-add-repository
+apt-cache
+apt-cdrom
+apt-config
+apt-extracttemplates
+apt-ftparchive
+apt-get
+apt-key
+apt-mark
+apt-sortpkgs
+dpkg

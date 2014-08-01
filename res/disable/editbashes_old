@@ -1,0 +1,38 @@
+" 
+" editbashes
+"
+" script to edit the two main bash files in vim
+" in a split
+"
+" THIS IS THE OLD SCRIPT, RENAME IT TO "editbashes" to use it
+" (don't forget to rename the other file, "editbashes" to "editbashes_new"
+" Or, use the 'ebo' aliases, if enabeld
+"
+e /gxbase/res/bashrc
+split /gxbase/res/bash-helpers
+
+hi ErrorMsg ctermbg=black
+hi Ignore ctermfg=gray
+hi String ctermfg=gray ctermbg=black
+hi Delimiter ctermfg=black cterm=bold
+hi Statement ctermfg=1 cterm=none
+map x :wqall
+imap x :wqall
+map s :wall
+imap s :walli
+" j down   k up   h left   l right 
+"`[1;3A up
+:map [1;3A :exec "winc k"
+:imap [1;3A :exec "winc k"i
+"`[1;3B down       
+:map [1;3B :exec "winc j"
+:imap [1;3B :exec "winc j"i
+"`[1;3D left
+:map [1;3D :exec "winc h"
+:imap [1;3D :exec "winc h"i
+"`[1;3C right
+:map [1;3C :exec "winc l"
+:imap [1;3C :exec "winc l"i
+:echo "[ALT+S] Save All Documents    [Alt+X] Save All & Quit VIM"
+
+

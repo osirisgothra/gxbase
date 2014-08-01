@@ -1,0 +1,15 @@
+#!/bin/bash
+# ~/.bash-aliases 
+
+alias check_interactive_shell='case $- in *i*) ;; *) return;; esac; false'
+alias trysource='function _ts() { unset -f $0; if [[ -r $1 ]]; then source "$@"; fi; return $?; }; _ts'
+alias tryexec='function _ts() { unset -f $0; if [[ -x $1 ]]; then CMD="$1"; shift; eval $CMD "$@"; fi; return $?; }; _ts'
+alias inky='read -sn1; echo $REPLY'
+alias inkye='read -n1; echo $REPLY'
+alias instr='read -s; echo $REPLY' 
+alias instre='read; echo $REPLY'
+alias inlines='declare -i i=0; while (true); { i+=1; INLINES[$i]=$instre; if [[ -z ${INLINES[$i]} ]]; then break; fi; }; (i--); echo "( " for ((j=1;j<i;j++)); do echo ${INLINES[$j]}; echo "$j , "; done; echo "END_OF_ARRAY )"'
+alias timed_section='TMOUT='
+alias end_timedsect='unset TMOUT; false'
+alias pause='function _ts() { if [[ $2 == 0 ]]; then set -- $1 1; fi; TMOUT=$[$1]; echo "Press any key $[$2] ${2+time(s)} to continue..."; read -sn${2-1} _DISCARD; unset TMOUT; unset -f $0; [[ $_DISCARD ]] && return 1 || return 0; };'
+

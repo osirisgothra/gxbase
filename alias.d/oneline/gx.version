@@ -1,1 +1,0 @@
-echo "GxBase Version: $($GXBASE_ROOT/version.sh)"

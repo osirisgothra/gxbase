@@ -1,1 +1,0 @@
-cat $GXBASE_ROOT/docs/howtopush.txt |less -P "How to Use Git to Push To Remote Repositories - Press Q to Quit "

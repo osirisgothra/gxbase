@@ -1,1 +1,24 @@
-chmod 775 $*
+unset ADDOPT
+if [[ -d "$*" ]]; then
+	echo "$* is a directory, recurse it?"
+	if [[ $(read -sn1 r; printf $r) == y ]]; then
+		echo "okay, recursing.."
+		ADDOPT="--recursive"
+	else
+		echo "nevermind."
+	fi
+fi
+sudo chmod $ADDOPT ug+x $*
+if [[ $? -eq 0 ]]; then
+	declare -i a=0
+	if [[ $ADDOPT ]]; then
+		IFS='
+		'
+		# subtract for the . .. entry 
+    a=$[ $(find $* | grep -Po --count "^.*$") - 2 ];
+	else
+		for i in $@; do a+=1; done
+	fi
+	echo "Finished, $a item(s) made executable, without errors."
+fi
+

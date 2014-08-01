@@ -1,0 +1,18 @@
+#!/usr/bin/python3
+#
+# mocpsh
+#    mocp shell
+#
+# status: checked out/halted
+#         the contents of this file is incomplete, therefore it is not executable
+#         this file is being privately developed at this time, open source will be
+#         made available once it has been completed
+
+
+import os
+import sys
+import gxbase from paradisim-libs
+
+printf("mocpsh is currently not available, please read the header of the source /gxbase/bin/extras/mocpsh");
+printf("if this file is executable, correct it by: chmod a-x /gxbase/bin/extras/mocpsh");
+

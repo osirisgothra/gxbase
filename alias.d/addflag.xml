@@ -1,9 +1,0 @@
-<?xml version="1.0" lang="en_US"?>
-<flagaliases>
-	<flag text="-h">
-		<affects>
-			df du ls
-		</affects>
-	</flag>
-</flagaliases>
-

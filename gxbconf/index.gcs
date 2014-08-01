@@ -1,0 +1,14 @@
+<?xml version="1.0" xml:lang="en_US" encoding="UTF-8"?>
+<?gcsindex role="menu" at="index.idx" indexthis=1?>
+<gcs id="root" title="Shell Configuration">
+	<menu>
+		<group caption="Standard Options">
+			<item link="bash_shopt"/>
+			<item link="bash_set"/>
+		</group>
+		<group caption="Advanced Options">
+			<item link="bind"/>
+			<item link="trap"/>
+		</group>
+	</menu>
+<gcs>

@@ -1,4 +1,0 @@
-Warning: ALL files that are NOT hidden (not starting with dot like .readme-light) WILL be used
-as lightfunctions. Make sure you don't put things that wont get along with 'eval' builtin because
-it could cause harm more than good if misused. Typically you'll want to keep things at one line. If
-you require more complex definitions, use func.sh, or define a new file.

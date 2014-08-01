@@ -1,2 +1,0 @@
-#!/bin/bash
-if [[ $DISPLAY ]] || [ x$TERM -eq xrxvt-unicode-256color ]; then cat `dirname $BASH_SOURCE`/colortable256.data; else echo "Your terminal can't show the 256-color codes properly!"; fi; true

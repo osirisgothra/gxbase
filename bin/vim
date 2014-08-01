@@ -1,910 +1,266 @@
 #!/bin/bash
 #
-# vim, vim.sh, tgvim, tgvim.sh
+# gen-sudo
 #
-#        runs the suitable vim/gvim depending on situation
+# delegate for running commands via sudo
+# notes
+#   use apt-sudo for apt- and dpkg- commands
 #
-# Author:
-#      Gabriel Thomas Sharp <osirisgothra@hotmail.com>
-# 
-# Copyright (c) 2013-14 Paradisim Enterprises, LLC SMI
-# 
-# Version 1.1 FINAL (NO UPDATES TO BE DONE AS IT WILL BE SUPERCEDED BY GXB2)
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU Lesser General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU Lesser General Public License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+# This is a multi-call script, if you want to sudoize an apt-command, please 
+#  make a symbolic link to this file (example: ln -s /$PWD/apt-sudo aot-get) 
 #
 
-#    
-# EXPECTEDUSER, EXPECTEDHOST [environment variables]
-#
-# set these to your name/host if you have customized your directories below
-# you could set these to $USER and $HOSTNAME if you needed to use on multiple hosts from one location
-# or, use a script here to set these values
-# CHANGED: moved to beginning to make it easy for setting by users that dont want to dive into the script
-EXPECTEDUSER=gabriel
-EXPECTEDHOST=paradisim
+# Protect interactive shell's environment by forcing an execution rather
+# than allowing this file to be sourced. [system.security]
+case $- in *i*) eval $BASH_SOURCE "$@"; return $?;; esac
+# since security measures taken, $0 will be the script's name always
+
+# variables
+# SUDOTHRESH (integer): minimum number of files that need admin rights to read/write before sudo kicks in (default=1)
+declare -i SUDOTHRESH=1
+
+case $UID in
+0)
+#	OLDPATH=$PATH
+#	PATH=/usr/bin:/usr/sbin:/bin:/sbin:/lib/lsb
+#	hash -r
+#	if type $1; then
+#		eval "$@"
+#		exit $?
+#	fi
+#	PATH=$OLDPATH
+	NOQUOTE=YES
+	;;
+esac
 
 
-
-
-# Foreward
-#
-# Purpose
-# 
-# the "situation" as said in the short description, is defined as:
-#
-#   vim: if a tty-like terminal is available (or fall-back * for no gui)
-#  gvim: if a gui environment is available and no tty-like terminal is available*
-#
-#  * if there is no TTY and there is no DISPLAY, falls back to /dev/stdin
-#    which is a 'guess', since no other methods can be used to guarantee 
-#    its running. Use killall -KILL [this script's filename] to undo a stuck vim script!
-#
-# Installation Instructions
-# 
-# #1 Copy The Script (this file) To It's Permanent Location
-#
-# For scripted (non seamless) operation, use a name like vim.sh (or something OTHER than vim) 
-# and place somewhere in your PATH. It is recommended you place it in your (user's) personal
-# script folder. Make sure you put that folder in your PATH. That can be done by modifying yor
-# .bashrc file (see BASH manual). 
-#
-# #2 Set the script settings up
-#
-# You don't HAVE to do anything else, but to get the most out of this script, you may wish to use
-# the guess feature which looks for the file asked for in a list of locations Including your system
-# path, GXBASE (if you use GXBASE), and /etc. Personal folders are only used if set up however, and
-# until you set them up you will get a pre-init notice about it. Go down for instructions about setting
-# the CUSTOM_DIRS variable and change EXPECTEDUSER to your username, and EXPECTEDHOST to your hostname.
-# It is not recommended that you run this program as root, and it is not intended to be run at the system
-# level. If you want all users to have this file included when created, place it in the /etc/skel folder
-# for them to set up themselves as they are created.
-#
-# #3 (optional) Seamless operation mode
-#
-# For seamless operation (preferred by me, at least), after setup is complete, and you are SURE
-# everything is working OK, rename the script file to vim. This only works if you prepend the
-# script's location in your PATH BEFORE the folder where the vim executable is first. Note that
-# you must log out and back in for this to take effect due to the executable cache effect in bash.
-# 
-#
-# #4 (Optional) Other settings you might want
-#
-# All options are set via hidden flag files, which are zero length, in your .config folder in your home directory.
-# Only the .vimbequiet, since it is not really a developer flag, is creatable/destructible via the command line,
-# the others must be explicitly created. The easiest way to create them is to just use the 'touch' command which
-# will create a zero length file (see 'man touch' for details). 
-#
-# 4A - Shut Up! - Use the --bequiet flag (FIRST PARAM ONLY) to permanently disable all messages or
-#                 --beloud to re enable them, preinit and error messages wont be silenced
-#                 This setting's flag file is a zero-length file in $HOME/.config/.vimbequiet
-# 4B - .vimnosect - create this file if you dont want sections/prefixes in debug messages (in ~/.config)
-#                   THIS FLAG WILL OVERRIDE --bequiet BECAUSE IT DESTROYS THE ECHO HANDLER!
-# 4C - .vmnosing  - completely disable guessing handlers (if you JUST want the script to pick between vim/gvim)
-#                   the guessing handler will NEVER be used as long as this file exists in ~/.config
-#
-# #5 Documentation for the User
-#
-# Everything is kind of on the fly, all of the script is documented as much as possible
-# however, the script only acts different than the original vim command (see vim manual)
-# in the following ways:
-#           - if you specify only one file and NO flags (one command line option),
-#             this script will search the custom directories, unless you have directed
-#             it not to do so, for possible matches
-#           - when opening files, they are tested for write-ability, if they are not 
-#             then you will be warned, and you can optionally invoke sudo inline
-#             to lift the restriction (if you have permissions to do so)
-#           - When writing to new files, if the current folder is not writable, the
-#             file is renamed to a location (usually ~/bin) that IS writable.
-#           - When launching vim, this script checks for the presence of a GUI system
-#             and an absence of a TTY, and launches the gui version instead (usually
-#             you'll need to use this command without a terminal to get a gui vim).
-#             This behavior can be modified however, by altering the tgvim function.
-#           - Multiple files or switches are passed directly to vim and not acted upon
-#             except for program (vim/gvim) choosing.
-#
-# For documentation about vim, gvim, or their tools please see their respective man
-# pages. I suggest you use :help once getting into vim if you are new to it. Remember
-# for tutorial purposes it may be better not to run in seamless mode (see step 4 
-# above) until you know exactly how things work. 
-#
-# If you have questions, send me an email, my address is listed in the script header.
-#
-# This documentation is subject to change, removal, without notice, at any time
-# at the sole will of the author of the intellectual work. Old copies may be kept
-# on archive however, if you need them.
-#
-
-#
-# VIM_DEBUG_SHOW_CUSTOM_DIRS [imported variable, if present]
-#
-# if set, will show the custom directories which is useful if you are using script commands
-# within the assignments (ie, VAR=$(script command))
-# when present: show directories, wait for keypress   absent: do nothing   value meaning: no meaning
-#
-
-# LASTENT, LASTSRC, LASTBSR [environment variables]
-#
-# Used to determine if the user started the script correctly or if the script was
-# sourced (using a dot . or the 'source' built-in). This is important because the
-# exit command has a VERY different effect on sourced scripts (the shell is exited)
-# and since the script environment uses a lot of variables, and changes some built-ins
-# this prevents damage to the environment if the user were to press CTRL+C in the
-# midst of the script's execution, would be a big problem otherwise. Such checks are
-# not needed and unnecessary for this script.
-#
-# script pre-check, this MUST be first, and the use of $_ MUST BE THE FIRST COMMAND
-# given because it relies on the last command received by the command processor. This
-# is why the test for the tty is done after the fact, to prevent the new $_ from be-
-# coming /usr/bin/tty. In tty-less X sessions however, LASTENT has no meaning so it is
-# just checked if the command processor was invoked this way.
-
-# source protection
-# 
-# causes the program to run even if sourced, but to give a warning about it.
-#
-
-if [[ $1 == --reset-config ]]; then
-	echo "really erase settings?"
-	if (choice); then
-		echo "erasing..."
-		rm -fr $HOME/".config/vim"
-		echo "done."
-	else
-		echo "aborted!"
-	fi
-	return 0 > /dev/null;
-	exit 0;
-fi		
-
-if [[ $(basename $BASH_SOURCE) != $(basename $0) ]]; then
-	echo "Sourcing this script is not legal because the internal variables and functions would pollute your environment."
-	if [[ -r "$HOME/.config/vim/SOURCING_FAIL" ]]; then
-		echo "You've chosen to always FAIL this command. This script will terminate in 5 seconds."
-		sleep 5
-		return 255
-	elif [[ -r "$HOME/.config/vim/SOURCING_OKAY" ]]; then
-		echo "You have chosen to automatically allow the script to be re-executed normally."	
-	else
-		echo "However, this command can be re-executed as a normal script, but has not been"
-		echo "configured to do so automatically. Because of this, the script is pausing to"
-		echo "allow you to configure this behavior. If you do not answer within the time"
-		echo "of 5 seconds, the default will be chosen for you."
-		echo ""
-		echo "? or C - Continue Script Execution [1m(default)[0m "
-		echo " 		 X - Abort & Return Error "
-		echo " 		 A - Continue, and Don't Show This Message Again"
-		echo "Ctrl+C - Abort Immidiately, No Execution of ANY Kind Beyond This Point"
-		echo "     F - Fail (Same as [A] Except This Action Will FAIL From Now On Automatically"
-		echo ""
-		echo -ne "choose F,Break,A,C, or X here [C]: "
-		TMOUT=5
-		unset REPLY
-		read -sn1
-		unset TMOUT
-		case ${REPLY^^} in
-			X)	return 255;;
-			A)  r="$HOME/.config/vim"; mkdir -p $r; touch "$r/SOURCING_OKAY";;
-			F)  r="$HOME/.config/vim"; mkdir -p $r; touch "$r/SOURCING_FAIL"; return 255;; 
-		esac	
-		echo "Now continuing..."
- 	fi
-	sleep 0.5
-	$BASH_SOURCE "$@"
-	return $?
-fi
-
-LASTENT=$(basename $_)
-if (tty -s); then
-	# if not tty, then LASTENT is not in question
-	LASTENT=$(basename $0)
-fi
-LASTSRC=$(basename $0) LASTBSR=$(basename $BASH_SOURCE)
-
-
-# zeroflag
-#
-# just like unsetflag, chains to the DELETE (instead of REVOKE) function of setflag
-# args/returns: see unsetflag
-function zeroflag()
-{
-	setflag_ext "$1" DELETE
-	return $?
-}
-
-function unsetflag()
-{
-	setflag_ext "$1" REVOKE
-	return $?
-}
-
-# setflag_ext
-#
-# removes flag if it exists, otherwise does nothing
-# this is used internally for zeroflag/unsetflag
-# args: 1=flagname (required) 2=ext value to set (right now either REVOKE/DELETE)
-# returns false - if flag couldn't be removed    true - when removed
-#               - no flagname was passed              - when flag is already not there
-function setflag_ext()
-{
-	if [[ $1 ]]; then
-		setflag $1 $2
-		return $?
-	else
-		return 1
-	fi
-}
-
-# setflag
-# 
-# creates or modifies a flag and it's (optional) value
-# if no value is specified and the flag exists with a value, the value is retained
-# if a value is specified, the old value is lost. Call with arg1 = DELETE and the flag will be emptied (not removed though)
-# if you call with REVOKE then this will cause the flag to be delted completely (not truncated)
-# return values (depending on what kind of call) are the following:
-# call type    return when
-# or subtype   flag changed             unchanged                unpresent
-# ---------------------------------------------------------------------------
-# normal             0                      0                        1
-# DELETE             0                      0                        1       NOTE THAT 1=FALSE 0=TRUE
-# REVOKE             1                      1                        0
-function setflag()
-{
-	local	PXCONFIGDIR=$HOME/.config/pxvim
-	if [ $# -eq 0 ]; then
-		local FLAGNAME=.default
-	else
-		local FLAGNAME=$1
-		shift
-	fi
-	mkdir -p "$PXCONFIGDIR"
-	if [[ "$1" == "DELETE" ]]; then
-		truncate "$PXCONFIGDIR/$FLAGNAME" --size=0
-	elif [[ "$1" == "REVOKE" ]]; then
-		if (rm -f "$PXCONFIGDIR/$FLAGNAME") && [[ ! -r "$PXCONFIGDIR/$FLAGNAME" ]]; then			
-			return 0
-		else
-			return 1
-		fi
-	elif [[ -z $1 ]]; then
-		touch "$PXCONFIGDIR/$FLAGNAME"
-	else
-		echo "$*" > "$PXCONFIGDIR/$FLAGNAME"
-	fi
-	if [[ -r "$PXCONFIGDIR/$FLAGNAME" ]]; then
-		return 0
-	else
-		return 1
-	fi
-}
-
-# hasflag, flagvalue, flagint
-#
-# test for presence of (has), gets value of (value), or integer of config flag (int)
-# positional arguments: 1      argument values: 1 (required): name of flag to query
-
-function hasflag()
-{
-	if [[ -r "$HOME/.config/pxvim/$1" ]]; then
-		return 0
-	else
-		return 1
-	fi
-}
-function flagvalue()
-{
-	if (hasflag $1); then
-		FLAGCONTENT="$(zcat $HOME/.config/pxvim/$1)"
-	  return 0;
-	else
-		return 1;
-	fi
-}
-function flagint()
-{
-	if (hasflag $1); then
-		flagvalue $1
-		declare -i FLAGINT=0
-		FLAGINT=$[ $FLAGINT + $(echo $FLAGCONTENT | grep "[0-9]+" -Po) ]
-	fi
-}
-
-if [[ "$1" == "--bequiet" ]]; then
-#	touch $HOME/.config/.vimbequiet
-  setflag QUIETMODE
-	echo "quiet mode engaged"
-	shift
-elif [[ "$1" == "--beloud" ]]; then
-#	if (rm $HOME/.config/.vimbequiet); then
-  if (unsetflag QUIETMODE); then
-		echo "quiet mode turned off"
-	else
-		echo "couldn't delete the setting file $HOME/.config/.vimbequiet, either it is already off, or you havent the permissions to delete it, check your permissions!"
-	fi
-	shift
-fi
-
-if [[ -r ~/.config/.vimshowsrcnames ]]; then 
-	echo "LASTENTS: ENT=$LASTENT SRC=$LASTSRC BSR=$LASTBSR [press a key]"
- read
-fi
-
-if [[ "$LASTENT" != "$LASTSRC" ]] || [ "$LASTSRC" != "$LASTBSR" ]; then
-	echo "Invalid mode of operation, this script must be invoked as a script and"
-	echo "not sourced because it makes changes to it's environment that would"
-	echo "damage the interactive user's environment. Please do not start the script"
-	echo "in this way (using dot or source commands). If you are in the same folder"
-	echo "and want to run it:   right way: ./vim.sh    wrong way: . vim.sh"
-  return 1
-	# wont (shouldn't) pass this point
-	echo "This LINE should not get printed, if it does the file is corrupted either in memory or on disk."
-	exit 1
-fi
-
-
-# full-dismissal, for when you need to just execute vim (when using seamless mode)
-# and want vim to mean vim or gvim to mean gvim. Also very handy when developing
-# and script is not working or temporarily out of order.
-# keep this command FIRST
-
-if [[ "$1" == "--fdm" ]]; then
-	BASENAME=$(basename $0)
-	echo "FDM: Initiating FULL-DISMISSAL MODE (FDM), command line passing directly to $BASENAME..."
-	# actually ends up being like 2 seconds if you incl. the 0.25 time it takes to execute it from disk
-	vimsleep 1.75
-	shift
-	command /usr/bin/$BASENAME "$@"
-	ERR=$?
-	echo "FDM: Passing Error Code Back To Shell ($ERR)"
-	#echo alters the error state so we saved it in ERR, which
-	#goes out of context right after return!
-	exit $ERR
-fi
-
-# EXPECTEDUSER, EXPECTEDHOST [environment variables]
-#
-# set these to your name/host if you have customized your directories below
-# you could set these to $USER and $HOSTNAME if you needed to use on multiple hosts from one location
-# or, use a script here to set these values
-EXPECTEDUSER=gabriel
-EXPECTEDHOST=paradisim
-setup_expected_userhost
-
-# CUSTOM_DIRS [environment variable]
-#
-# setup custom directory scan variable, CUSTOM_DIRS
-#
-# important: this is set up to scan a custom set of directories, if you want to use this
-#            script for your own purposes, please modify the custom folders below
-#            note they must be separated by spaces or newlines, for files with spaces please
-#            use quotes! All bash replacements, parsers and commands (find, grep, etc) are good
-#            for this sort of thing (I have broken this up a bit due to its length this is not required 
-#            but suggested for long path lists, the only REQUIRED variable is CUSTOM_DIRS)
-#            other special processing notes for CUSTOM_DIRS:
-#            - CUSTOM_DIRS_SYS uses sed to break up colons into quoted long strings of PATH
-#            - CUSTOM_DIRS_GXBASE is for clarity, GXBASE IS AN ADD-ON, if it isn't present it wont be used
-#            - CUSTOM_DIRS_PERSONAL should be changed, I added a guard in case this isn't my system, you should do so too
-#              change the guard to match your system and change the folders to match your needs
-#           
-
-# VIM_BE_QUIET [variable from flag]
-#
-# makes echo output go to nothingness (except log)
-
-if (hasflag QUIETMODE); then
-	VIM_BE_QUIET=YES
-else
-	unset VIM_BE_QUIET
-	TMOUT=5
-
-	echo "[pre-init] once you have verified you have set up your script, and everything is working the way you want, go ahead and use vim --bequiet to squelch out these messages (except the pre-init ones of course and the fatal errors)"
-	echo "           you can use vim --beloud to undo this effect [proceeding in 4 seconds]"
-	read -sn1
-	unset TMOUT
-fi
-
-# security note: you can set this file's permission to a-r a+x a-w if you are paranoid about security! (mode 444=max security 544=good 554=ok 555=decent 755=dont-leave-unattended-shells 775-only if you trust your users 777=only if you trust everyone (!)
-# i recommend the security to be 540 if your paranoid, or 755 if your network is secure behind a GOOD firewall, preferably a hardwired one..
-
-#BUGFIX: USER and HOSTNAME variables are not secure ways of getting user/host information and therefore should not be used unless their values are guarenteed
-#        which can be done by making them readonly upon assignment making impossible to change value after even during execution
-#        dont expect executed (not sourced) scripts to have any protection however, since the readonly flag has no bearing when exported
-# providing that /bin/ps is sane, this is 
-# the most secure way i can think to get current user is via the calling process's owner (who ran this script)
-declare -xr USER=$(/bin/ps --pid $$ --format="%u" --noheader)
-# providing that /usr/bin/cat is sane, and /etc/hostname is secure, this is the most secure method of obtaining hostname
-declare -xr HOSTNAME=$(/usr/bin/cat /etc/hostname)
-
-
-CUSTOM_DIRS_SYS="/etc $(echo $PATH | sed "s/:/ /g")"
-
-# enter leniancy mode when root
-if [[ "$UID" == "0" ]]; then
-	# ADDED: first time message shows up for 3 seconds, and never again because it's annoying or never if .hushlogin is present
-	# note that if hushlogin is on first time around, and then gets deleted later, this message will show up at that time
-	if [[ ! -r $HOME/.config/gxbase/vim-root-message ]] && [[ ! -r ~/.hushlogin ]]; then
-		echo "[32;1mnotice: because this is root, the script will be leniant on the values of expected host/user for test purposes, run as a regular user to verify it is running correctly!![0m"
-		echo "(this message will only be shown one time per install of gxbase)"
-		sleep 3	
-		mkdir --parents $HOME/.config/gxbase 
-		touch $HOME/.config/gxbase/vim-root-message
-	fi
-		
-	# BUGFIX: on nonstandard dist/inst where UID 0 is not "root" apparently this happens sometimes (changed from "root" to "$USER")
-	EXPECTEDUSER=$USER
-	EXPECTEDHOST=$HOSTNAME
-fi
-
-
-
-if [[ "$HOSTNAME" == "$EXPECTEDHOST" ]] && [[ "$USER" == "$EXPECTEDUSER" ]]; then
-	# depending on your vim version, who knows where that is... so change it (might be /vim/vim73/colors for you, etc)
-	CUSTOM_DIRS_PERSONAL="$HOME/bin /usr/share/vim/vim74/colors /usr/share/vim/vim/74/colors $HOME"
-else
-	echo "[pre-init] Expected personalization of directories is set for user/host not matching this system, you havent set up your vim script yet, not using personalized directories..."
-	echo "User: $USER   Hostname: $HOSTNAME
-	echo "EXPECTEDUSER: $EXPECTEDUSER  EXPECTEDHOST: $EXPECTEDHOST
-fi
-
-if [[ ! -z $GXBASE_ROOT ]]; then
-	CUSTOM_DIRS_GXBASE="$GXBASE_ROOT"
-	SDT="$(find ${GXBASE_ROOT:-$GXBASE_ROOT}/ -type d)"	
-	IFS='
-	'
-	for $i in $SDT; do
-		if [[ "$i" != "$GXBASE_ROOT" ]]; then
-			CUSTOM_DIRS_GXBASE_SD+="$i"
-		fi
-	done
-	# bug in bash? zero-len but set IFS causes problems in bash-completion and elsewhere too
-	unset IFS	
-else
-	echo "[pre-init] No GXBASE detected, so skipping scan of GXBASE directories to increase speed of program..."
-fi
-
-# 
-# CUSTOM_DIRS
-#
-# This is actually the one that gets used in the end (see notes above on CUSTOM_DIRS_*)
-#
-CUSTOM_DIRS="$CUSTOM_DIRS_SYS $CUSTOM_DIRS_PERSONAL $CUSTOM_DIRS_GXBASE $CUSTOM_DIRS_GXBASE_SD"
-CUSTOM_DIRS=`echo $CUSTOM_DIRS | sed "s/^[^ ]*$\n/ \0 /g"`
-
-#
-########################################### FUNCTIONS ###############################################################
-#
-# ttgvim                          MAIN FUNCTION!!!
-#
-# call: ttgvim [vim or gvim[-xxx] compatible functions]
-# This is the 'meat' function (the caveat destination of
-# all the script control statements) This function decides
-# which, to the best of available variables, process states
-# and presence/absence of vim/gvim[-xxx], and then executes
-# the appropriate binary. NOTE: after this function, control
-# leaves this script (finally) to the client application (vim)
-# Anything having to do with the binaries should be queried 
-# in their respective manpages (man://vim or man://gvim)
-#
-function ttgvim()                       
-{
-	if (tty -s) || [ -z "$DISPLAY" ]; then
-		XVIM=vim
-	else
-		XVIM=gvim
-	fi
-
-	if [[ $SUDOON ]]; then		
-		$SUDOON /usr/bin/$XVIM "$@"
-	else
-		/usr/bin/$XVIM "$@"
-	fi
-	retval=$?	
-
-	[[ $vIM_DEBUGMSG ]] && echo "recording exit value to /tmp/tgvim.exit"
-  [[ $vIM_DEBUGMSG ]] && echo "$(date):$BASH_SOURCE:$retval" >> /tmp/tgvim.exit 2>&1
-	return $retval
-}   
-
-#
-#  becho [ means "bridge-to-builtin" echo ]
-# 
-#  echo regardless of state, section, or quietness
-#  needed for questions before choice prompts
-#
-function becho()
-{
-	builtin echo "$@" > /dev/stdout
-}
-
-#
-#  eecho [ means "error" echo ]
-#
-#  echo regardless of state, section, quietness, as an error to stderr
-#  no colorization is made on stderr writes for log compat reasons
-#
-function eecho()
-{
-	builtin echo "$@" > /dev/stderr
-}
-
-#
-# function subset: *sect* functions
-# when the .novimsect flag is present, the functions are defined differently
-# as to not waste environment space
-#
-if [[ ! -r ~/.config/.novimsect ]]; then
-		
-	# fakesection
-	# 			used by noparamcheck to print the sections process as if they
-	# 			were executed, for consistency over the entire script.
-	# returns: 0
-	function fakesection()
-	{
-		sect_start $@
-		echo "nothing to be done in this $* section (already executed), skipping"
-		sect_end $@
-	}
- 
- 
-	
-	# sect_start
-	# 			declares a start of the section by printing a banner and
-	#       (re)creates a banner header for all echo command builtins
-	#       warning: echo remapping can be dangerous if misused, modify with care,
-	#                oh and never (ever) call echo without the [builtin] keyword within the
-	#                [eval] statements
-	#       example:
-	#       	sect_start HEADER
-	#         echo -ne "HELLO"
-	#         echo -ne " WORLD"
-	#       outputs:
-	#       ----- BEGIN HEADER SECTION -----
-	#       HEADER:HELLO HEADER: WORLD
-	function sect_start()
-	{
-	
-		[ -z "$VIM_BE_QUIET" ] && builtin echo "----- BEGIN $* SECTION -----"
-		if [[ -z "$VIM_BE_QUIET" ]]; then 
-			eval "function echo()	{ builtin echo -ne \"[1;30m[Phase=$*]:[0m\"; builtin echo \"\$@\";	}"
-		else
-			eval 'function echo() { return $?; }'
-		fi
-	}
-	
-	function sect_end()
-	{
-	  unset echo
-	  [ "$VIM_BE_QUIET" ] && return  
-		builtin echo "----- END OF $* SECTION -----"
-	}
-	
-else
-		
-	# when ~/.config/.novimsect flagfile is present,
-	# use no section identifiers or string headers, 
-	# and make sure echo function is disabled.
-	
-	function fakesection() 
-	{
-		true;
-	}
-	function sect_start() 
-	{
-		true;
-	}
-	function sect_end() 
-	{
-		true;
-	}
-	unset echo
-	SECTIONLESS=true
-	
-fi
-
-
-
-# tgvim 
-#
-# call: tgvim [vim/gvim[-xxx]-compatible command line]
-# "non-sudoized" wrapper for ttgvim
-# note the quotes in "$@": very important!!!
-function tgvim()
-{
-	unset SUDOON
-	ttgvim "$@"
-}
-
-# sudotgvim
-#
-# call: sudotgvim [vim/gvim[-xxx]-compatible command line]
-# "sudoized" wrapper for ttgvim
-# note the quotes "$@": very important!!!
-function sudotgvim()
-{
-	SUDOON="sudo -H"
-	ttgvim "$@"
-}
-
-function autotgvim()
-{
-	local LIFTRESTRICTIONS=NO
-  for j in "$@"; do
-		if [ -r $j ]; then
-			if [ ! -w $j ]; then
-				becho "Unwritable, lift restrictions with sudo?"
-				if (choice); then
-					LIFTRESTRICTIONS=YES
-					break;
-				fi
-			fi
-		fi	
-  done
-	if [[ $LIFTRESTRICTIONS == YES ]]; then
-		sudotgvim "$@"
-		local RETVALS = $?
-	else
-		tgvim "$@"
-		local RETVALS = $?
-	fi
-	return $RETVALS
-}
-
-
-#
-# not_contains
-#
-# call: not_contains [string] [char]
-# returns true if $1 does not_contain $2[0] (one character only)
-#
-function not_contains()
-{
- 	local char=${2: 0:1}
-	for ((i=0;i<${#1};i++)); do
-		if [[ ${1: i:1} == $char ]]; then
-			return 1
-		fi
-	done
-	# never had a match, return false
-	return 0
-}
-
-#
-# not_contains_any
-#
-# call: not_contains_any [string] [string-of-chars]
-# same as above, but $2 can be any length, each character is evaluated
-#
-function not_contains_any()
-{
-	for ((a=0;a<${#2};a++)); do
-		if (not_contains $1 ${2: a:1}); then
-			continue
-    else
-			return 0
-		fi
-	done
-	# never matched anything, return false
-	return 1
-}
-function do_cleanup() 
-{ 
-	unset IFS; 
-	if (! hasflag noclearonexit); then
-		clear
-	fi
-	return $?; 
-}
-
-########################################################## END FUNCTIONS ##################################################
-
-
-######################################################### THE "MEAT" ######################################################
-# EDITED flag variable
-# edited   unset: vim not called, true: called from guessing loop
-unset EDITED
-unset TMOUT
-
-### PREINIT
-### PREINIT
-### PREINIT
-sect_start PREINIT
-
-if [[ "$VIM_DEBUG_SHOW_CUSTOM_DIRS" ]]; then
-	builtin echo "$CUSTOM_DIRS"
-	echo "Custom directory list above, please press ENTER to continue..."
-	read
-fi
-
-
-
-### NOPARAMCHECK
-### NOPARAMCHECK
-### NOPARAMCHECK
-sect_start NOPARAMCHECK
-# check for no parameters, if so we enter vim in directory mode, current dir
-# if writable, if not ask if to make sudo mode active
-if [[ $# -eq 0 ]]; then
-	echo "No parameters, entering vim in directory mode..."
-	if [[ -w "$PWD" ]]; then
-		tgvim "$PWD"
-	else
-		becho "current directory write-protected, use sudo to lift the restriction? [y/n]:"
-		if (choice); then
-			sudotgvim "$PWD"				
-		else
-			tgvim "$PWD"
-		fi
-	fi
-	RETV=$?
-	[[ $RETV -ne 0 ]] && eecho "warning, return value was nonzero: $RETV"
-	sect_end NONPARAMCHECK
-	fakesection GUESSING
-	fakesection STANDARD
-	fakesection NORMAL-MODE
-	return $RETV;
-fi
-
-## GUESSING
-## GUESSING *** MAIN ENTRY FUNCTION OF SCRIPT ***
-## GUESSING
-sect_start GUESSING
-[ -r ~/.config/.novmsing ] &&	set -- --nosing $@
-# if only one parameter, and that one parameter does NOT contain any / chars
-if [[ $# -eq 1 ]] && (not_contains "$1" "/"); then
-	echo "Singular argument, checking for file in usual locations..."
-	# read the note at the beginning for details on custom directories
-	for i in $CUSTOM_DIRS; do
-		echo -ne "scanning [0;32m$i[1;30m/[1;32m$1[1;30m...[0m"
-		PARTIALMATCH=$i/$1*
-		if [[ -r "$PARTIALMATCH" ]]; then 
-			ISPARTMATCH=YES; 
-		else 
-			ISPARTMATCH=NO; 
-		fi
-  	if [[ -d $i/$1 ]]; then
-			echo '[33;1mis a directory (skipping)[0m'
-		elif [[ -r $i/$1 ]] && (! file --mime-encoding `readlink -e  $i/$1` | grep "us-ascii" -cq); then
-			becho "[31;1mis not us-ascii (binaries, illegedible to me) skipping"
-		elif [[ -w $i/$1 ]]; then
-			echo '[32;1mFOUND[0m'
-			tgvim $i/$1
-			EDITED=true		
-			break
-  	  # [[ ]] does not deglob or split, injecting an eval/echo works around this kludge
-		elif [[ $ISPARTMATCH == "YES" ]]; then 
-			#&& (echo "PARTIAL EXISTS AND READS" ) && (file "$PARTIALMATCH" --mime-encoding | grep "us-ascii" -cq); then
-			echo "FOUND PARTIAL MATCH.."
-			
-		  becho -ne "Did you mean $PARTIALMATCH ?"
-			if (choice); then				 
-				 ## QUOTES ARE IMPORTANT                                             ########### VIM ENTRY POINT
-			   autotgvim "$PARTIALMATCH"
-				 EDITED=true
-				 break
-			else
-				echo "continuing search..."
-				continue
-			fi
-		elif [[ -r $i/$1 ]]; then
-			echo "FOUND READONLY..."
-			echo '[33;1mpresent-readonly[0m'
-			becho -e "$i/$1 is readonly want to edit anyways [y=edit n=skip and keep searching]? [y/n]"
-			if (choice); then
-				becho -e 'use sudo to lift readonly restrictions? [y/n]'
-				if (choice); then
-					sudotgvim $i/$1
+set ${GX_DEBUGMODE-+x}
+BASENAME=$(basename $0)
+set +x
+unset HUSH
+case $BASENAME in 
+	gen-sudo)
+		case $1 in
+			hush)
+				if [[ $2 == off ]]; then
+					echo "hushmode off"
+					rm ~/.hushgen -f
 				else
-					tgvim $i/$1
+					echo "hushmode on (use hush off to turn off)"
+					touch ~/.hushgen
 				fi
-				EDITED=true
-				break
-			else				
-				unset TMOUT
-				echo 'Continuing...'
-			fi
-			unset TMOUT			
-		else		
-			unset EDITED
-			echo '[31;1mNope.[0m'
-		fi
-	done
-	if [[ -z $EDITED ]]; then
-		echo "No single match found, proceeding with checks..."
-		if [[ ! -r $1 ]] && [[ ! -w $PWD ]]; then
-			echo 'Current directory: not writable'
-			echo 'Filename Not Locally Found: '$i' '
-			echo 'Trying to create one in /home/gabriel/bin...'
-			touch '/home/gab/riel/bin/'$1
-			if [[ $? -eq 0 ]]; then
-				echo 'R/W Verification Completed, starting gvim/vim...'
-				# it worked, edit it
-				tgvim '/home/gabriel/bin/'$1
-        EDITED=true
-			else
-				echo 'R/W Verification Failed, continuing checks, note file(s) may not be writable...'
-        unset EDITED
-			fi
+				exit 0
+				;;
+			*)	
+				if [[ $1 ]]; then
+					GNAME="$(basename $1)"
+					NNAME="$PWD/$GNAME"
+					if [[ -x "$1" ]] && [[ ! -x $NNAME ]]; then
+						echo -ne "Create a link for $GNAME [at $NNAME] to $BASH_SOURCE? [y/n]:"
+						if [[ $(read -sn1; echo $REPLY) == y ]]; then
+							echo " creating a gen-sudo for $1 ..."
+							if (ln -s "$BASH_SOURCE" "$NNAME" -f); then
+								echo "successful! swapping hashtable entries to reflect changes..."
+								hash -d "$GNAME"
+								hash -p "$NNAME" "$GNAME"
+								echo "done"
+							else
+								echo "failed ($?)"
+								exit 1
+							fi
+						else
+							echo "aborted."
+						fi
+						exit 0
+					else
+						echo "Bad argument: $1 is not a path to an executable file!"
+						exit 1
+					fi			
+				# else == [[ -z $1 ]]
+				else
+					# the only way to beep when pcspkr is shut off (done by default in most modern installers)
+					
+					sudo modprobe pcspkr; beep; sudo modprobe -r pcspkr					
+					echo
+					echo "Error: you need to specify a name of the new command to make gen-sudoized."
+					echo
+					echo "example: gen-sudo /usr/bin/sudoedit"
+					echo
+					echo "You MUST supply the full path to the program because it will be used to remove"
+					echo "it's entry from the hash table in order to allow you to run this command anew."
+					echo "If you already have done this, just make sure $(dirname $BASH_SOURCE) is in"
+					echo "your system's path variable. Edit your ~/.bashrc to do this. See below for more."
+					echo
+					echo "Your current .bashrc PATH assignment is:"
+					echo "  $PATH"
+					echo
+					echo "Your current PATH variable status is:"
+					oIFS=$IFS
+					IFS=":"
+					declare -i FOUND=0
+					for i in $PATH; do
+						if [[ "$i" == "$(dirname $BASH_SOURCE)" ]]; then
+							((FOUND++))
+						fi
+					done
+					
+					if [[ $FOUND -gt 1 ]]; then
+            echo "[33mOK: The PATH variable contains the correct path... however, it is present there $FOUND times, you"
+						echo "    need it to be in there ONE time. More than this can cause performance issues. You should"
+						echo "    revise your ~/.bashrc file!   Especially if it appears more than two or three times!!!!![0m"
+					elif [[ $FOUND -eq 0 ]]; then
+	        	echo "[31mWARNING: Your PATH variable does NOT contain the needed path. Please add this line "
+						echo "         to the VERY LAST LINE of your ~/.bashrc file:"
+						echo -e "        [1m        PATH+=\":$(dirname $BASH_SOURCE)\"[21m"
+						echo -e "         \(The QUOTES are very important\!\)[0m"
+						echo
+					else
+						echo "[32mOK: Your PATH variable contains the correct path, no modification of .bashrc needed![0m"
+					fi
 
-		fi
-	else
-		echo 'Checking & edits done, will stop now.'
-		echo 'To avoid singular checks, use --nosing flag before filename.'
-	fi
-fi
-sect_end GUESSING
+					exit 1
+				fi
+				;;
+		esac
+		;;
+############################## Place Program Route Filters Here ###############	
+## NOTICE: append routes with ;;& if you wish to continue execution
+##         use ;; to stop execution, or use ;& to execute the next block 
+##         UNCONDITIONALLY--if the ln) block ended with ;& then the ln)
+##         block would execute the vim) block as well, and since vim
+##         continues processing, it would inherit that behavior because of it.
+##         The route would be: ln->vim->[any other blocks and conditions]->*
+##         Please use this kind of routing with care!!
+
+			# ln route filter, checks for overwrite (accidental misnaming arguments) 
+			ln)				
+				if [[ $1 == "-s" ]]; then
+					[[ -r "$3"  ]] && {
+							echo -ne "overwrite [1m$3[0m? (y/n) [n = 3 seconds]: "
+							TMOUT=3
+							REPLY=n
+							if [[ $(read -sn1; echo $REPLY) != y ]]; then							
+								echo $'\nAborted!'
+								exit 1
+							fi
+						}											
+			 		# continue
+
+					fi
+					# routing to continue evaluating for possible route matches
+					;;& 
+			vim|gvim|vim.*)					
+				# vim route filter, simply checks the FILE components of the
+				# command string, checks to see if they are read only, and
+				# elevates if needed, with a brief warning.
+				# NOTE: switch values are ignored however, the values immediately following switches that may actually be attributed to switches
+				#       are not treated specially and could be misinterpreted as a false elevation case, in which case you should run vim directly
+				#       or use the -direct as your first parameter afterwards. Example: vim -direct --vim-option vim-option-string file1 ...
+				#       Beware that if you do this, there will be no elevation, that is why there is also a "vim -directsudo" argument, which works
+				#       the same way except sudo is used by force:
+				declare -i SUDOCOUNT=0
+				case $1 in
+					"-directsudo")
+							((SUDOCOUNT++))							
+							;&
+					"-direct")
+							SKIPCHECKS=1
+							shift
+							;;
+					*)															
+							for i in "$@"; do
+								# do not process switch values
+								if [[ "${i: 0:1}" == "-" ]]; then
+									continue
+								fi
+								if [[ -e "$i" ]]; then
+									# exists, check for write-ability/readability
+									if [[ ! -r "$i" ]] || [[ ! -w "$i" ]]; then
+										((SUDOCOUNT++))
+									fi
+								else
+									# check for the file in PATH and VIM_SEARCHPATH (see default above)
+									# dont walk through the PATH, make a temporary copy and possibly reinject
+									# original copy to be restored after looking
+	#						#	OLD_PATH=$PATH									
+ #						 # 	[[ "$VIM_SEARCHPATH" == "" ]] && unset VIM_SEARCHPATH  # the next will fail if its empty but still set, correct that here 									
+#	 IN PROGRESS	#						# note the +: which will only add the searchpath and the : preceding it if it is not empty
+#								# PATH=$PATH${VIM_SEARCHPATH+:}${VIM_SEARCHPATH}
+ #						# 	MATCH=$(type -p "$i")
+									
+
+									# doesn't	exist, check target's directory
+									ITEMDIR=$(dirname "$i")							
+									if [[ -d "$ITEMDIR" ]] && [[ ! -w "$ITEMDIR" ]]; then
+										((SUDOCOUNT++))
+									elif [[ -d "$ITEMDIR" ]] && [[ ! -r "$ITEMDIR" ]]; then
+										((SUDOCOUNT++))						
+									fi
+								fi
+							done
+							;;
+				esac
+				VIMDESTS=($(type -pa $BASENAME))
+				# default if no other found
+				VIMSPEC=/usr/bin/vim
+				unset VIMFOUND
+				for kk in "${VIMDESTS[@]}"; do
+					echo "comparing $kk against $BASH_SOURCE..."
+					if [[ $kk != $BASH_SOURCE ]]; then
+						echo "found one: $kk"
+						VIMSPEC=$kk
+						VIMFOUND=1
+						break
+					fi
+				done
+				[[ $VIMFOUND != 1 ]] &&	echo "Warning, could not find a copy of vim in your path, using the default: $VIMSPEC"			
+				############### boundary check ######################
+				
+				# at  this point, there is a chance that the user may have 
+				# double linked the vim in different locations, if this is 
+				# the  case we cant have it  running forever in a loop, we 
+				# will detect this and warn the  user so that he,  she, or 
+				# it can resolve the issue:
+
+				if [[ $VIM_RUNNING ]]; then
+					echo "Error: infinite loop protection, terminating without running."
+				else
+          export VIM_RUNNING=1
+					if [[ $SUDOCOUNT -ge $SUDOTHRESH ]]; then
+						# one or more files tagged, and the tag threshold has been met
+						[[ $SKIPCHECKS ]] && echo -ne "User evoked switcharg-ignoring \"directsudo\", " || echo -ne "One or more file system	object(s) are inaccessible, "
+						echo "using root privileges."
+						sleep 2						
+						sudo -H "$VIMSPEC" "$@"
+					else
+            [[ $SKIPCHECKS ]] && echo -ne "User evoked switcharg-ignoring \"direct\": "
+						echo "Editing using ${USERNAME}'s permissions."
+						sleep 1						
+						"$VIMSPEC" "$@"
+					fi
+					unset VIM_RUNNING
+				fi
+				exit $?
+
+				
+    	;;
+	*)
+		[[ ! -r ~/.hushgen ]] && [[ -z $NOQUOTE ]] && echo "[0;36m--- [1msudo $BASENAME $* [21m---[0m" || HUSH=1
+		eval sudo "$BASENAME" "$@"
+		ERR=$?
+		case $ERR in
+			0) clr=2		;;  	#     0 = no error = green
+		  1) clr=3		;;  	#     1 = no successful, regular error = yellow
+127|128) clr=1;41	;; 		# 127/8 = command not found = SEVERE = red on dark red
+			*) clr=1		;;  	#   >=2 = fatal/unexpected error = red
+
+		esac		
+		[[ -z $HUSH ]] && [[ -z $NOQUOTE ]] && echo "[3${clr}m--- [1msudo $BASENAME $* = [46;7m $ERR [40;27;21m ---[0m" || unset HUSH
+		exit $ERR
+		;;
+esac
+[[ -z $NOQUOTE ]] && echo "Internal Error: $BASENAME, $*, $ERR - Notify the author if failure persists."
+[[ -z $NOQUOTE ]] && exit 254
 
 
-## STANDARD
-## STANDARD   *** FAILBACK AND SINGLE MODE ***
-## STANDARD
-sect_start STANDARD
-	if [[ "$1" == "--nosing" ]] || [[ "$1" == "-G" ]] || [[ -r ~/.config/.novimsing ]]; then
-		echo 'Single Item Command-Line ['$1']: SICL Check Disabled, Using Regular Command-Line Handler...'	
-		vimsleep 1
-		shift
-	else
-		if [[ ! -z $EDITED ]]; then
-			echo 'Single Item Command-Line: Succeded (done editing)'
-		else
-			echo 'Single Item Command-Line: Failed (unresolved)'
-			echo 'Continuing to Regular Command-Line Handler...'
-		fi	
-	fi
-sect_end STANDARD
-
-## NORMAL-MODE
-## NORMAL-MODE  *** ENTRY MODE FOR EXPLICIT COMMAND LINE OPTIONS, ETC ****
-## NORMAL-MODE
-sect_start NORMAL-MODE
-# if at first we dont succeed, try again
-# when file not found, or working with multiple non-alphabetical options
-# we will jump into normal mode, if not guessed or standardized
-if [[ -z $EDITED ]]; then
-	echo
-	echo '[32m'
-	# check-for-unwritables loop
-	# checks each file to see if existing files are unwritable
-	unset SOME_UNWRITABLE
-	for i in "$@"; do
-		if [[ -r "$i" ]]; then
-			LASTISFILE=1
-			echo -ne '[32m'
-		else
-			LASTISFILE=0
-		fi
-
-		if [[ ! -w "$i" ]] && [[ -r "$i" ]]; then
-			echo -ne "[31m"
-			SOME_UNWRITABLE=TRUE		
-		fi
-	  if [[ "$LASTISFILE" -eq 1 ]]; then
-			stat "$i" --format="Owned by %U in the %G group, 		%N is a %F, %s bytes long."
-		fi
-	done
-	if [[ "$SOME_UNWRITABLE" == "TRUE" ]]; then
-		echo -e "\n[0m"		
-		becho "Files are unwritable, use sudo? [y/n]"
-		if (choice); then
-			sudotgvim "$@"
-		else
-			tgvim "$@"
-		fi
-	else
-		tgvim "$@"
-	fi
-else
-	echo "Editing Happened Already, Nothing to do in this section."
-fi
-do_cleanup
 

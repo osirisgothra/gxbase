@@ -1,0 +1,48 @@
+#!/bin/false gxbase
+#
+# complete
+#
+# bash completion extras - configuration and their internal functions
+#
+if [[ -z $GXBASE_LOADING ]] && [[ $GXBASE_LOADING != TRUE ]]; then
+	echo "To be loaded by GXBASE only, not as a general use script."
+	return 1
+else
+	# scripts loaded by gxbase only output their name, all other output is redirected 
+	# to the log specified by GXBASE_LOG
+	echo -ne "$BASH_SOURCE"
+	# required components (GXBASE_LOG and gxbase-core)
+	gx.assert LOG
+	gx.assert ROOT
+	gx.loadassert core
+	gx.loadassert envinfo	
+fi
+
+# gx.completions [command line] : master function for completions extended by gxbase
+function gx.completions()
+{
+}
+
+# if completion is off, enable it [enable shopts, check for bash_completion function, if not there load it if possible]
+shopt -s progcomp complete_fullquote
+if (! funcsert _longopt) && [[ -r /etc/bash_completion ]]; then
+	source /etc/bash_completion
+elif (! funcsert _longopt) && [[ ! -r /etc/bash_completion ]]; then
+	echo "warning $(date): /etc/bash_completion is not readable, check your permissions -- auto-completion may not work for you" >> $GXBASE_LOG
+fi
+
+#=========== completions set up by gxbase ----------------
+ 
+
+
+# all gxbase components need to have an unloader
+# their name is the same as the component's name with .unloader affixed to it
+function gx.gxbase-COMPNAME.unloader
+{
+	unset -f gx.completions
+}
+
+# register component in the library
+# all components will called "gxbase-[compname]"
+# the filename will be [compname]
+GXBASE_COMPONENTS[gxbase-COMPNAME]=1

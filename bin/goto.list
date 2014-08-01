@@ -1,15 +1,15 @@
 click-here-to-edit-this-list
 
-/home/gabriel/bin
-/home/gabriel/projects
-/home/gabriel/projects/gxman
-/home/gabriel/g
-/home/gabriel/.kde/share
-/home/gabriel/.wine/drive_c
-/usr/share/gxbase
+/home/${USERNAME}/bin
+/home/${USERNAME}/projects
+/home/${USERNAME}/projects/gxman
+/home/${USERNAME}/g
+/home/${USERNAME}/.kde/share
+/home/${USERNAME}/.wine/drive_c
+${GXBASE_ROOT}
 
 /root
-/home/gabriel/rootsfolder
+/home/${USERNAME}/rootsfolder
 
 /etc/alternatives
 /etc/init

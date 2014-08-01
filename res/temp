@@ -1,0 +1,335 @@
+#!/bin/bash
+# temp
+#
+# tempoaray storage for soon to be incorporated features of gxbase
+# - the files where these items are to be incorporated are not yet available
+#   so they are stored here 
+# - some items may never be incorporated but were useful to keep
+# - some items are stored here for reference purposes only
+# - this file is subject to HEAVY change, do not rely on it's existence or contents for components or features
+# - do not delete this file or truncate it when redistributing the package, all developers should have access to this information, miniscule as it may seem
+#
+# created 2-May 2014 - updated 3-May 2014 first released with gxbase v0.2.0-1 (alpha)
+# updated 5-Jun 2014: added commands: dirof, cdof  updated command: findwithchildren (fixed missing $* bug, was missing the $)
+#                     fixed documentation block for ownercount()
+# latest version of this file and gxbase is available from: git://gitorious.org/gxbase/0-2-0.git
+# this file was incepted into the repository starting at branch: 0.2.0.0
+#                                     last documentation branch: 0.2.0.1
+
+# Licensed under the GNU GPL (NOT LGPL as previously licensed)
+
+
+# cuts down permission blocks into single letter codes
+# ie: e = only executable(1)           W=only writable(2)       R=only readable(4)  X=read/execute(5)
+#     A = read/write/executable(7)     B=both read/writable(6)  N=none(0)           E=write/execute(3)
+function shortls()
+{
+	ls -l "$@" | colrm 30 42 | colrm 11 12 | sed "s/-wx/E/g;s/rwx/A/g;s/r-x/X/g;s/--x/e/g;s/rw-/B/g;s/r--/R/g;s/-w-/W/g;s/^l/^[[33m/g;s/^d/^[[32m/g;s/^-/^[[0m/g"
+}
+
+
+# get count of ownership for a set of files
+# ie:  6 owned by root:root 24 owned by www:users, 1 owned by root:daemon, etc
+
+function ownercount()
+{
+	local LOC=""
+	[[ -z $1 ]] && LOC=$PWD || LOC=$1
+	command ls $LOC -l | tail -n+2 | awk '{ printf $3":"$4"\n";}' | tr " " "\n" | sort | uniq -c | sort -k2nr | awk '{printf("%s owned by %s, ",$1,$2)}END{eof }'
+}
+
+# gets a setting from a file
+# example:
+# ------------file.ini------------------
+#         ...
+# MYSETTING=funny
+#         ...                              ... = other mixed content
+# YOURSETTING=serious
+# EMPTYSETTING=
+#         ...
+# -------------------------------------- 
+# [1]   Stopped                 vim file.ini
+# [2]+  Stopped                 vim temp
+# root@host tty1 /gxbase/res$ source temp
+# root@host tty1 /gxbase/res$ getsetting MYSETTING
+# funny
+# root@host tty1 /gxbase/res$ getsetting yourSetting
+# serious
+# root@host tty1 /gxbase/res$ echo $?
+# 0
+# root@host tty1 /gxbase/res$ getsetting EMPTYSETTING
+#
+# root@host tty1 /gxbase/res$ echo $?
+# 0
+# root@host tty1 /gxbase/res$ getsetting NONEXISTENT_SETTING
+# root@host tty1 /gxbase/res$ echo $?
+# 1
+# root@host tty1 /gxbase/res$ %
+# 
+# the above is an excript of what happens when i use this with the file "file.ini" (you will have to write it yourself)
+# if the setting is empty the return value is 0, if it doesnt exist, returns 1
+# if it does exist, returns the rest of the setting on that line
+# limitations: does not work with settings that have special characters or whitespace embedded before them
+# todo: change           file.ini to $1               $1 to $2
+function getsetting() { cat file.ini | grep -Po -i "(?<=^$1=).*"; }
+
+
+# usage: func [function-name]
+# does not check if $1 is a valid name, so grep returns the error if it cant find it
+function func()
+{
+	[[ -z $1 ]] && { echo "Error: You need to specify a function name after the command."; return 1; }
+	[[ $2 ]] && echo "Warning: the last $[ $# - 1 ] parameter${3+s} will be ignored."
+
+	local IFS=$'\n'
+	for i in `declare -f | grep "^$1 ()" -A999 2> /dev/null`; do 
+		echo "$i"
+		if [[ $i == "}" ]]; then 
+			break
+		fi
+	done
+	return $?
+}
+function funclist_helper()
+{
+	declare -F | grep -o "\b\S*$" | column 
+}
+function funclist()
+{
+	echo "Functions Valid for This Shell"
+	echo
+	funclist_helper
+	echo
+	declare -i LISTCOUNT="$(funclist_helper | grep -c '^.*$')" 
+	[[ $LISTCOUNT != 1 ]] && LCSUF=s || unset LCSUF
+	echo "$LISTCOUNT function${LCSUF}."
+}
+
+# mantopic [command] [topic=SYNOPSIS]
+function mantopic_generator()
+{
+	cmdname="${1=man}"
+ 	secname="${2=SYNOPSIS}"
+	
+ 	declare -i j=0
+ 	local IFS=$'\n'
+	
+ 	for i in `man $cmdname | cat | grep "$secname" -A99`; do 	
+ 		if [[ j -gt 1 ]]; then			
+ 			if (echo $i | grep -P "^([A-Z]*$)"); then
+				break;
+			fi
+			# prevets next section's name from being printed
+			echo "$i"
+		fi
+		j+=1
+	done
+}
+
+# mantopic_formatter
+#
+function mantopic_formatter()
+{
+	# color
+	local cmd_color=6
+	local cmd_colorbg=1
+	local cmd_colorattr=1	
+	# commented out
+	# mantopic "$@" | grep '^[A-Z]*$' --invert-match | tr -s ' ' | sed 's/^ *//g' | 	grep --color -P '($cmdname\S*| )\b' | sed 's/\[31\;1m/\[3${cmd_color};4${cmd_colorbg};${cmd_colorattr}m/g' 
+	# and replaced it with 
+	echo "$@" | grep '^[A-Z]*$' --invert-match | tr -s ' ' | sed 's/^ *//g' | 	grep --color -P '($cmdname\S*| )\b' | sed 's/\[31\;1m/\[3${cmd_color};4${cmd_colorbg};${cmd_colorattr}m/g'
+}
+
+#
+#	 switch:param relationships:
+#	 choice -c [keys] -t [timeout] -m [prompt] -in -d [key] 
+#	 long:short relationships
+#	 choice --choice-keys|-c  --timeout|-t --prompt|-m  --ignore-case|-i --no-keydisplay|-n --default-key|-d
+#	 optioncnt=optionpos:mapping [...] relationships:
+#	 1=1:message  2=1:keys 2:message 3=1:keys 2:defaultkey 3:message
+#
+function choice()
+{
+	unset KEYSET PROMPTSET DEFAULTSET
+  declare KEYS=YN
+	declare -i TIMEOUTSEC=0
+	declare PROMPT=""
+	declare -i SHOWPROMPT=1
+	declare DEFAULT=Y
+	declare -i CASE=0
+	declare -i CHOICEOFFSET=255
+#//	local function _warnonset() { set -- ${2^^}SET; if [[ ! -z ${!2} ]]; then echo "Warning, $1 already set, its value is being overwritten with a new value!"; else eval ${2^^}SET+=1; fi; }
+	alias warnonset='_warnonset $1'
+
+	getopt -l choice-keys:timeout:prompt:no-ignore-case,no-keydisplay,default-key: -oc:t:m:ind: -n "$0" -- "$@"
+	if [[ $? -ne 0 ]]; then
+		echo "Command Line argument error(s). Cannot continue"
+		(exit 255)
+	else
+		
+		while [[ "$1" != "--" ]]; do
+			case $1 in
+			  --choice-keys) ;& -c)
+					warnonset key $1
+					KEYS="${2}"					
+					shift
+					;;
+	      --timeout) ;& -t)
+					TIMEOUTSEC=$2
+					shift
+					;;
+			  --prompt) ;& -m)
+					warnonset prompt
+					PROMPT=$2					
+					shift
+					;;
+			  --no-ignore-case) ;& -i)
+					CASE=1					
+					;;
+			  --no-keydisplay) ;& -n)
+					SHOWPROMPT=0					
+					;;
+			  --default-key) ;& -d)		
+					warnonset default
+					DEFAULT="${2}"
+					shift
+					;;
+				*) 
+					echo "warning: bad option caught: $1 (ignored)"					
+					;;
+			esac			
+			shift			
+		done
+		if [[ $# -gt 0 ]]; then
+			case $# in				
+				1|2|3)				
+					A=PROMPT ;;&
+		  	2|3)  
+					B=$A; A=KEYS; warnonset keys	;;& 
+ 		    3)  
+					C=$B; B=DEFAULT; warnonset default ;;& 			  
+				1|2|3) 
+					eval ${!A}="$1" ;;&
+				2|3) 
+					eval ${!B}="$2" ;;& 
+				3) 
+					eval ${!C}="$3" ;;
+			esac
+			# fixups/warnings
+			[[ ${#KEYS} -eq 64 ]] && echo "warning: too many keys, only using 63!" 
+			[[ ${#DEFAULT} -ne 1 ]] && { echo "warning: default, bad key count > 1, using first key in string, ${DEFAULT: 0:1}!!" ; DEFAULT="${DEFAULT: 0:1}"; }
+			[[ -z $DEFAULT ]] && { echo "warning: empty default, using first key as default: ${KEYS: 0:1}"; DEFAULT="${KEYS: 0:1}"; }
+			[[ $TIMEOUTSEC -gt $[ 60 * 24 ] ]] && { echo "warning: timeout exceeds one day!"; }
+			[[ $TIMEOURSEC -gt $[ 60 * 24 * 30 ] ]] && { echo "warning: timeout exceeds a month!"; } 
+			NUM="$#"
+			if [[ $# -lt 20 ]]; then 
+				suff=th;	
+			else
+				case ${NUM: -1:1} in
+					1)suff=st;;
+					2)suff=nd;;
+					3)suff=rd;;
+					*)suff=th;;
+				esac
+			fi
+			echo "Warning: extra non-switch parameters, argument${#/[^1]/s} were ignored!"
+					
+			
+		fi
+		
+	fi
+	return $?
+}
+
+alias ifitsokay='if (choice); then'
+alias ifnotokay='if (! choice); then'
+
+function makebusyboxlinkshere()
+{
+	#preliminary crap	
+	if [[ ! -w . ]] && [[ ! -r . ]]; then
+		echo "Not enough permissions to create links in $PWD, change to a directory where you wish to make links first."
+	else
+		echo "This action will create symlinks to busybox for ALL it's supported commands. This will create ALOT of files in this ($PWD) directory."
+		echo "Are you SURE you want to create these symlinks here??"
+		ifnotokay
+			echo "Aborting."
+			return 1
+		fi			
+	fi
+	IFS=" "; 
+	for k in $( { { for j in $(IFS=$'\n ,'; for i in `busybox | grep "," | tr -s '    '`; do echo $i; done | grep '\S*' -o	); do echo $j; done; unset IFS;	} | tr '\n' ' ';	} );	do 
+		ln -s /bin/busybox "$k" 
+	done
+	echo "add this path to your PATH and LD_LIBRARY_PATH ?"
+	ifitsokay
+	  # why twice? the second one adds the ':' in between, but NOT if the item is empty :)
+		PATH=$PATH${PATH-:}$PWD
+		LD_LIBRARY_PATH=$LD_LIBRARY_PATH${LD_LIBRARY_PATH-:}$PWD
+		echo "Added $PWD to PATH and LD_LIBRARY_PATH"
+	fi
+	return 0
+}					
+
+# findwithchildren DIRECTORYNAME
+# DIRECTORYNAME can be partial
+# finds a directory and sees if it has more subdirs, if so returns them (the directory children, NOT the directory)
+# in stdout (usually, fd0)
+function findwithchildren()
+{
+	declare -i FOUNDCOUNT=0
+	for i in `dirname $(locate $*) | sort | uniq`; do 
+		for ((j=1;j<=#;j++)); do
+			FOUNDCOUNT=0
+			if [[ -d "$i/${!j}" ]]; then
+				(FOUNDCOUNT++)
+			fi			
+		done
+		if [[ $FOUNDCOUNT -eq $# ]]; then
+			echo "$i"
+		fi
+	done
+}
+
+# colorize TOPIC
+function colorize()
+{
+	TOPIC="$*"
+	# if there is no topic, then use _ (underscores and worms and emdashes)
+	if [[ -z $TOPIC ]]; then
+		TOPIC="[-_~]"
+	fi
+	/bin/sed -r "s/$TOPIC/[32;1m\0[0m/g;s/[^\s0-9]*:/[1m\0[0m/g;s/[\:\.\<\>\(\)\=\/\,]/[30;1m\0[0m/g"
+}	
+
+# dirof command   - any binary or executable script in $PATH (even if aliased/functioned over!) 
+# very handy -- next func shows why
+function dirof() 
+{ 
+	dirname $(type -fap "$@")
+}
+# cdof [-push] command - change to directory where "command" is
+#                        if "command" is not found, then it searches
+#                        for a location of anything matching that name, 
+#                        case insensitive. Use -push to push the dir first!
+function cdof()
+{
+	[[ $1 == -push ]] && { pushd . &> /dev/null; shift; local NEEDPOP=YES; }
+	if [[ $(dirof $*) ]]; then
+		cd $(dirof "$*")
+		if [[ $? -eq 0 ]]; then return 0;fi
+	else
+	# try to find approximate match for
+		cd $(dirname $(find -l1 --ignore-case "$*"))
+		if [[ $? -eq 0 ]]; then return 0;fi
+	fi
+	ERRC=$?
+	# failed, pop back if pushed
+	[[ $NEEDPOP == YES ]] && popd &> /dev/null	
+	# return error code, but only if it was set (if not set to 1 to indicate that there was a definite error)
+	case $ERRC in
+		0) return 1;;
+		*) return $ERRC;;
+	esac
+}
+

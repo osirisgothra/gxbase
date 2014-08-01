@@ -1,1 +1,0 @@
-if [[ $1 == -y ]]; then shift; echo -ne "ok..."; command rm -fr $*; echo "deleted"; else echo -ne "delete $*"; if (choice); then echo -ne "ok..."; command rm -fr $*; echo "deleted"; else echo "aborted"; fi; fi; return $?;

@@ -1,0 +1,99 @@
+#!/bin/false gxbase
+#
+# core
+#
+# gxbase core functions
+#
+if [[ -z $GXBASE_LOADING ]] && [[ $GXBASE_LOADING != TRUE ]]; then
+	echo "To be loaded by GXBASE only, not as a general use script."
+	return 1
+else
+	# scripts loaded by gxbase only output their name, all other output is redirected 
+	# to the log specified by GXBASE_LOG
+	echo -ne "$BASH_SOURCE"
+	# required components (GXBASE_LOG and gxbase-core)
+	# NONE (since this file implements the component checking aglorithm)
+fi
+
+# THIS FILE HAS ISSUES
+# TODO: 1. replace if [[ $2 with getopts once it is needed (phase two)
+#       1. replace the exit statements with signal after the traps are in place (phase three)
+
+# gx.assert [name] [-rwxd] - checks for presence of GXBASE_[name]
+# -r readable file -w writable file -x executable file -d directory
+# gx.assert [name] [type] [required|needed|essential|..etc]
+function gx.assert()
+{
+	if [[ ${3} ]]; then
+		echo "assert failed: $2 $1 $3 but not present!"
+		exit 3
+	elif [[ -z ${!1} ]]; then
+		echo "assert failed: environment value $1 required but not present!"
+		exit 1
+	else
+		if [[ ${#2} -eq 2 ]] && [[ ! $2 ${!1} ]]; then
+			echo "assert failed: environment value $1 required as file with $2, but failed."
+			exit 2
+		else
+			return 0
+		fi
+	fi
+	echo "assert failed: assert reached an unreachable part of it's function, probably due to environment corruption"
+	return 255		
+	# corruption could also have brought us to this point
+	exit 255 
+}
+
+# gx.loadassert [component]
+function gx.loadassert
+{
+	# must exist for use to do the test	
+	assert COMPONENTS
+	if [[ -z ${COMPONENTS[$1]} ]]
+		# when resource is missing, attempt to load it
+		# this will allow scripts to self-resolve their dependencies
+		if [[ -r $GXBASE_ROOT/res/$1 ]]; then
+			source $GXBASE_ROOT/res/$1
+			return 0;
+		else
+	    echo "component missing: $1"
+			exit 1
+		fi
+	else
+		return 0
+	fi
+}
+function gx.funcsert()
+{
+	# check for function (simplex) without output
+	# may do more complicated things in future this is the reason for the function (place holding)
+	declare -F $1 > /dev/null 2>&1
+	# returns 0 if function exists, 1 if not
+	return $?
+}
+
+# gx.funcsertf [name] - same as above but forcequits on error - delegates to gx.assert
+function gx.funcsertf()
+{
+	if (gx.funcsert $1); then
+		return 0
+	else
+	# use gx.assert to delegate for consistency
+		gx.assert function_$1_declared
+	fi
+	
+}
+
+# all gxbase components need to have an unloader
+# their name is the same as the component's name with .unloader affixed to it
+function gx.gxbase-core.unloader
+{
+  unset -f gx.funcsert
+	unset -f gx.assert
+	unset -f gx.loadassert
+}
+
+# register component in the library
+# all components will called "gxbase-[compname]"
+# the filename will be [compname]
+GXBASE_COMPONENTS[gxbase-core]=1

@@ -1,0 +1,74 @@
+#!/bin/bash
+
+echo "tty upstart program"
+
+
+[[ "${-//[^i]/}" == i ]] && { eval $BASH_SOURCE "$@"; return $?; }
+
+
+if [[ $UID -ne 0 ]]; then
+	if (groups | grep sudo -q); then
+		echo "sudo privileges confirmed"
+	else
+		echo "can't possible work unless you have sudo privileges!"
+		exit 126; 
+	fi
+else
+ echo "(root bypasses privileges for sudo check)"
+fi
+
+if (tty | grep tty -q); then
+	echo "FATAL: can't run from a local terminal, use a serial or pseudo terminal, this is not optional because you are going to disable the terminal you are currently on!"
+  exit 1
+fi
+
+case ${1-do} in
+	undo)
+		clear
+		echo "restarting consoles, if locked..."
+		CMD=start
+		;;
+	do)
+		clear
+		echo "Really lock consoles out? If your GUI/DM crashes there will be no way to get them back without rebooting:"
+		echo "You will be logging off any users that are in this list:"
+		echo
+		who -a | grep tty.
+		echo
+		echo "To confirm, please type this word below: OKAY"
+		read
+		# BIG BEEP
+		sudo modprobe pcspkr; beep; beep; sudo modprobe -r pcspkr
+		if [[ $REPLY != OKAY ]]; then
+			echo "Aborted."
+			exit 125
+		fi
+		echo "Continuing in 5 seconds..."
+		sleep 5
+		CMD=stop
+		;;
+	*)
+		echo "Must specify: $0 [do | undo]"
+		exit 126
+		;;
+esac
+
+[[ $UID -ne 0 ]] && SUDOCMD=sudo || unset SUDOCMD
+FAIL=0
+
+for zz in /etc/init/tty*.conf; do
+	echo -ne "locking ${zz}..."
+	eval $SUDOCMD /sbin/$CMD $(basename ${zz/.conf})
+	if [[ $? -eq 0 ]]; then
+		echo "OK"
+		
+	else
+		echo "FAILED"
+		FAIL=1
+	fi
+done
+
+[[ $FAIL -eq 1 ]] && "WARNING: some or all terminals were not disabled, locking failed!"
+
+[[ $CMD == stop && $FAIL == 0 ]] && echo -ne "\n\n[5mText Console Now LOCKED![0m \n\nUse \"$0 undo\" to turn the tty's back on, you wont be able to use CTRL+(ALT)+F1-F12 keys until you do!\n\n"
+

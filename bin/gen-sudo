@@ -1,0 +1,152 @@
+#!/bin/bash
+#
+# gen-sudo
+#
+# delegate for running commands via sudo
+# notes
+#   use apt-sudo for apt- and dpkg- commands
+#
+# This is a multi-call script, if you want to sudoize an apt-command, please 
+#  make a symbolic link to this file (example: ln -s /$PWD/apt-sudo aot-get) 
+#
+# 6/28/14 - fixed eval statements (eval should not be used unless sanitation is performed!)
+#
+# Protect interactive shell's environment by forcing an execution rather
+# than allowing this file to be sourced. [system.security]
+case $- in *i*) $BASH_SOURCE "$@"; return $?;; esac
+# since security measures taken, $0 will be the script's name always
+  
+
+case $UID in
+0)	NOQUOTE=YES
+	;;
+esac
+
+
+set ${GX_DEBUGMODE-+x}
+BASENAME=$(basename $0)
+set +x
+unset HUSH
+case $BASENAME in 
+	gen-sudo)
+		case $1 in
+			hush)
+				if [[ $2 == off ]]; then
+					echo "hushmode off"
+					rm ~/.hushgen -f
+				else
+					echo "hushmode on (use hush off to turn off)"
+					touch ~/.hushgen
+				fi
+				exit 0
+				;;
+			*)	
+				if [[ $1 ]]; then
+					GNAME="$(basename $1)"
+					NNAME="$PWD/$GNAME"
+					if [[ -x "$1" ]] && [[ ! -x $NNAME ]]; then
+						echo -ne "Create a link for $GNAME [at $NNAME] to $BASH_SOURCE? [y/n]:"
+						if [[ $(read -sn1; echo $REPLY) == y ]]; then
+							echo " creating a gen-sudo for $1 ..."
+							if (ln -s "$BASH_SOURCE" "$NNAME" -f); then
+								echo "successful! swapping hashtable entries to reflect changes..."
+								hash -d "$GNAME"
+								hash -p "$NNAME" "$GNAME"
+								echo "done"
+							else
+								echo "failed ($?)"
+								exit 1
+							fi
+						else
+							echo "aborted."
+						fi
+						exit 0
+					else
+						echo "Bad argument: $1 is not a path to an executable file!"
+						exit 1
+					fi			
+				# else == [[ -z $1 ]]
+				else
+					# the only way to beep when pcspkr is shut off (done by default in most modern installers)
+					
+					sudo modprobe pcspkr; beep; sudo modprobe -r pcspkr					
+					echo
+					echo "Error: you need to specify a name of the new command to make gen-sudoized."
+					echo
+					echo "example: gen-sudo /usr/bin/sudoedit"
+					echo
+					echo "You MUST supply the full path to the program because it will be used to remove"
+					echo "it's entry from the hashtable in order to allow you to run this command anew."
+					echo "If you already have done this, just make sure $(dirname $BASH_SOURCE) is in"
+					echo "your system's path variable. Edit your ~/.bashrc to do this. See below for more."
+					echo
+					echo "Your current .bashrc PATH assignment is:"
+					echo "  $PATH"
+					echo
+					echo "Your current PATH variable status is:"
+					oIFS=$IFS
+					IFS=":"
+					declare -i FOUND=0
+					for i in $PATH; do
+						if [[ "$i" == "$(dirname $BASH_SOURCE)" ]]; then
+							((FOUND++))
+						fi
+					done
+					
+					if [[ $FOUND -gt 1 ]]; then
+            echo "[33mOK: The PATH variable contains the correct path... however, it is present there $FOUND times, you"
+						echo "    need it to be in there ONE time. More than this can cause performance issues. You should"
+						echo "    revise your ~/.bashrc file!   Especially if it appears more than two or three times!!!!![0m"
+					elif [[ $FOUND -eq 0 ]]; then
+	        	echo "[31mWARNING: Your PATH variable does NOT contain the needed path. Please add this line "
+						echo "         to the VERY LAST LINE of your ~/.bashrc file:"
+						echo -e "        [1m        PATH+=\":$(dirname $BASH_SOURCE)\"[21m"
+						echo -e "         \(The QUOTES are very important\!\)[0m"
+						echo
+					else
+						echo "[32mOK: Your PATH variable contains the correct path, no modification of .bashrc needed![0m"
+					fi
+
+					exit 1
+				fi
+				;;
+		esac
+		;;
+############################## Place Program Route Filters Here ###############	
+			# ln route filter, checks for overwrite (accidental misnaming arguments) 
+			ln)				
+				if [[ $1 == "-s" ]]; then
+					[[ -r "$3"  ]] && {
+							echo -ne "overwrite [1m$3[0m? (y/n) [n = 3 seconds]: "
+							TMOUT=3
+							REPLY=n
+							if [[ $(read -sn1; echo $REPLY) != y ]]; then							
+								echo $'\nAborted!'
+								exit 1
+							fi
+						}											
+			 		# continue
+
+					fi
+					;;&
+###############################################################################					
+	*)
+		[[ ! -r ~/.hushgen ]] && [[ -z $NOQUOTE ]] && echo "[0;36m--- [1msudo $BASENAME $* [21m---[0m" || HUSH=1
+		sudo "$BASENAME" "$@"
+		ERR=$?
+		case $ERR in
+			0) clr=2		;;  	#     0 = no error = green
+		  1) clr=3		;;  	#     1 = no successful, regular error = yellow
+127|128) clr=1;41	;; 		# 127/8 = command not found = SEVERE = red on dark red
+			*) clr=1		;;  	#   >=2 = fatal/unexpected error = red
+
+		esac		
+		[[ -z $HUSH ]] && [[ -z $NOQUOTE ]] && echo "[3${clr}m--- [1msudo $BASENAME $* = [46;7m $ERR [40;27;21m ---[0m" || unset HUSH
+		exit $ERR
+		;;
+esac
+[[ -z $NOQUOTE ]] && echo "Internal Error: $BASENAME, $*, $ERR - Notify the author if failure persists."
+[[ -z $NOQUOTE ]] && exit 254
+
+
+

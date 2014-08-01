@@ -1,0 +1,26 @@
+#!/bin/bash
+
+cat <<-EOF
+	startgxbase is no longer used
+
+	to use, back up your copies and link these:
+
+	LINK TARGET             SYMLINK NAME
+
+	/gxbase/res/bashrc      ~/.bashrc
+	/gxbase/res/bash_logout ~/.bash_logout
+	
+	/gxbase/res/etc-bash    /etc/bash.bashrc  <- Optional*
+
+	*only if you want install-on-demand for command-line programs
+	 that install via apt-get (uses command_not_found)
+	 If you dont have admin privs,  you can trigger it in by uncommenting 
+	 the first code line of .bashrc after you link it in.
+
+   lastest version of our projects are at: http://www.gitorious.org/+paradisim
+
+	 contact: osirisgothra@hotmail.com
+
+	 if you actually are using this then you could be the only one! let me know why
+		 you chose to use it by contacting me!?
+EOF	

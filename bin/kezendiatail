@@ -41,29 +41,36 @@
 # Report any bugs to <bugs@paradisim.tk> or visit our FAQ on our website.
 #
  
+# as you can see, this is not started yet, but its here as a reminder to get it done some day
 
+[[ -z $GXBASE_ROOT ]] && { GXBASE_ROOT="$(readlink -e `dirname ${BASH_SOURCE}`/../../.)"; syslog "Note: Guessing GXBASE_ROOT = ${GXBASE_ROOT}."; }
+[[ ! -r ${GXBASE_ROOT}/startgxbase ]] && { echo "Error: you need GXBASE_ROOT pointing to the GXBASE script library for this to work!"; }
+# delegate to simplify handling of interactive mode scripting to keep variables local and keep 'exit' from actually exiting the caller's shell
+[[ -z ${-//[^i]} ]] && { eval $BASH_SOURCE "$@"; return $?; }
 
+# handle the script
 
+case "$0" in
+	dialog)
+		echo "dialog commands here"
+		;;
+	whiptail)
+		echo "whiptail commands here"
+		;;
+	choice)
+		echo "choice commands here"
+		;;	
+	kdialog)	
+		echo "kdialog commands here"
+		;;
+	zenity)
+		echo "zenity commands here"
+		;;
+		
+	*)	
+		echo "unsupported command"
+		;;
+esac
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+echo "This script is not finished"
 

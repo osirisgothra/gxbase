@@ -1,0 +1,107 @@
+Offline Filesystem
+
+README-OFFLINE.txt			The Network Filesystem You are Trying To Use is OFFLINE
+howto-offlinefs.txt			Your Network Filesystem Ofline Help File (linked source)
+
+If you are reading the README-OFFLINE.txt, that means whatever filesystem of the
+directory you are in, ${PWD}, is offline. If you are using GXBASE, this along
+with a few other text files, are shown automatically upon directory change.
+
+NOTE: I assume you realize if you are not root, you must start all root commands
+      by typing 'sudo [command line]'. You need sudo / admin rights for this.
+			If you dont have the specfied right, try using 'sudo su' to become root or
+			logout and log back in as root [not recommended]. It is recommended to 
+			ALWAYS use sudo or gen-sudo (gxbase users) which will automatically map
+			nondestructive sudo-requiring commands to sudo for you. You can get
+			gxbase by typing 
+			
+			'cd /; sudo git clone git://gitorious.org/gxbase/current.git;. /gxbase/bin/gxbase'
+
+			This will set up gxbase for all users on a user-to-user basis they will
+			have the chance to say yes or no to the use of gxbase integration. GXBASE
+			is a passive extension library for bash with some tools to help power users
+			and power script writers.
+
+
+Remedies:
+
+	RESTORE OFFENDING FILESYSTEM (ONE DIRECTORY ONLY):
+			Mount the offending filesystem, right where you are, type:
+			
+			mount "$PWD" 
+
+			as long as the entry is in fstab and correct, if the machine is up
+			it will remount the current filesystem
+
+
+	RESTORE ALL NETWORK MOUNTS
+
+			If all directories are offline, quickly up them by typing:
+
+			mountall
+
+
+
+	MOUNT A BROKEN NETWORK FILESYSTEM:
+
+
+			if the network name matches the directory's name, you can use
+
+			sudo mount $(basename "$PWD"):/ -t nfs "$PWD"
+
+			The hostname and directory name must match and contain no spaces or
+			other illegal hostname/dirname symbols. This assumes that you want
+			to mount the root filesystem. You can exchange '/' for any export you
+			want like '/adminfiles' or '/www-root'
+
+			Because the entry is not in fstab, this is a one-shot deal. If you want
+			it every time, you will have to add the entry to fstab. Or you can use
+      gxbase's fstabmount command to add an entry AND mount the volume.
+			The fstabmount uses the EXACT same parameters as 'mount' so you do not need
+			to know anything about fstabmount to use it. you can also use mtabmount
+			which copies non-system, read-write, nfs, ext, ntfs, smb filesystems to
+			your fstab. But beware that this command adds ALL of the mounts not
+			currently in fstab, that are in mtab which is everything mounted, with
+			the exception of read-only media. This however includes SSDs, and
+			DVD-RAMs and simmilar.
+
+ EDIT FSTAB YOURSELF
+
+ 			Please read fstab(5) for details 
+			
+ REGULAR USERS (NO ADMIN RIGHTS)
+
+		Remedies (easiest first)
+
+			Restart the system (press ctrl-alt-delete)
+
+			Cold boot (power off and wait 5 seconds before power-on)
+
+			Log out, and log back in (the graphical desktop Manager, not the shell)
+
+			Contact the Administrator (of your system)
+
+			Try Booting Recovery Mode or Alternate Kernel
+
+			Read Manuals (type 'info nfs'  at any prompt to get started)
+
+			Online (http://www.google.com/search?q=nfs+filesystem+mount+failed)
+
+
+REFERENCES
+
+	(1) Linux, GNU, and Related Kernels (www.linux.org, www.gnu.org)
+	(2) nfs(5) and mount.nfs(8) - the nfs4 kernel server addon + default client
+	(3) /etc/fstab(5) - the filesystem mount table
+	(4) /etc/mtab(GXBASE) - the mounted filesystem table (see gxbase)
+	(5) gxbase(5), gxbase(GXBASE) - the general extensions for bourne again shell 
+	    environments - a passive library for shell programmers and power users
+  (6) samba(8) - a microsoft windows share mounter
+
+
+CONTACT AUTHOR
+
+osirisgothra@hotmail.com
+
+
+

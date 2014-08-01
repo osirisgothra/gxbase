@@ -1,0 +1,17 @@
+#!/bin/bash
+# note: comment out the echo-to-tty lines when not debugging!
+mapfile MINE
+echo "You piped: ${#MINE[@]} lines"
+# make a tempfile
+echo "creating tempfile..."
+sayfile=$(tempfile)
+echo "writing data..."
+echo "${MINE[*]}" >> $sayfile
+echo "executing say connection to file..."
+# this way there is NO output
+( say -f "$sayfile" &> /dev/null & ) &> /dev/null
+# the tempfile will be delted by cron later
+# TODO: may add tempfile cleanup after say in background, not sure if i want to do that yet 
+#       because i might want to add a replay/repeat/rewind command, etc that would need it
+#       to persist for a bit... :/
+echo "all done!"

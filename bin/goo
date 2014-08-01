@@ -1,112 +1,75 @@
 #!/bin/bash
-
 #
-# variables that you can set if you want different browsers, sites, etc
-# (prefix is placed between sitename and search terms, and suffix is placed after the search terms)
-# the browser variables should include any browser-specific flags as well.#
+# goo
+#      google quick search
+# (C)2012-14 Gabriel Sharp, T <osirisgothra@hotmail.com>
+# http://paradisim.tk
 #
 
+function _running() 
+{	
+	grep -u $USERNAME "$*";	return $?; 
+}
+
+function _getkey() 
+{
+	unset REPLY
+	until [[ $REPLY =~ [$1] ]]; do read -sn1; done
+	if [[ $# -eq 1 ]]; then
+		echo $REPLY
+	elif [[ $2 == u ]]; then
+		echo ${REPLY^^}
+	elif [[ $2 == l ]]; then
+		echo ${REPLY,,}
+	else
+		echo ${REPLY${2}}
+	fi
+}
+
+BROWSER=""
 SITENAME='www.google.com'
 SEARCHPREFIX='/search?q='
 SEARCHSUFFIX=''
-TBROWSER="/usr/bin/lynx -accept-all-cookies"
-TGBROWSER="/usr/bin/links2 -g"
-#TGBROWSER="/usr/bin/sudo -Hu gabriel /usr/bin/xinit /usr/bin/firefox"
-
-GBROWSER="/usr/bin/chromium-browser"
-
-# variables that must be initialized to these values, do not 
-# change anything below this line:
-
 SEARCHSITE="http://${SITENAME}${SEARCHPREFIX}"
 SEARCHSITE_NOSEARCH="http://${SITENAME}"
-goomode=
-
-# GOOMODE: T/TG/G flag: present, set and shift variable and
-#          skip to confirmation
-if [ "$1" == "T" ] || [ "$1" == "TG" ] || [ "$1" == "G" ]; then
-	goomode=$1
-	shift
-
-# GOOMODE: T/TG/G flag not specified, attempt to pick the BEST browser for
-#          the situation and requiring the least amount of travel (travel
-#          meaning how much effort a user must put forth to change between
-#          the current UI and the browser UI.
+WORDS=$(printf "%s+" "$@")
+SEARCHLINE="${SEARCHSITE}${WORDS}${SEARCHSUFFIX}"
+if TTY=$(tty) && [[ $TTY =~ .*pts.* ]]; then
+	echo "Executing in Background, Disowned"
+	EXESUFF="& disown"
 else
-	
-	# TTY: valid (typed from terminal)
-	if (tty -s); then
-		# GUI: present (keep in terminal)
-		if [[ $DISPLAY ]]; then
-			goomode=T
-    # GUI: absent (use graphical framebuffer terminal since no GUI to interfere with it)
+	# tty is NULL or is /dev/ttyXXX
+	echo "Executing in Foreground, Waiting"
+	EXESUFF=""
+fi
+
+if [[ $EXESUFF ]] && [[ $DISPLAY ]]; then
+	if [[ $SSH_TTY == $TTY ]]; then
+		echo "Running in Remote Mode, Still Use GUI? [Y:/n]"
+		if [[ $(getkey yn u) == N ]]; then
+			CANCELGUI=1
 		else
-			goomode=TG
+			unset CANCELGUI
 		fi
+	fi
+	if [[ -z $CANCELGUI ]]; then		
 	
-	# TTY: invalid (from automated script or indirect)
-	else
-		# GUI: present (use GUI browser since we aren't attached to any terminal)
-		if [[ $DISPLAY ]]; then
-			goomode=G
-		# GUI: absent (use framebuffer since we just can't connect a tty-based browser)
-		else
-			goomode=TG
+		if _running firefox; then
+			BROWSER=(`which firefox` "-new-tab")
+		elif _running chromium-browser; then
+			BROWSER=`which chromium-browser`
+		elif _running google-chrome; then
+			BROWSER=`which google-chrome`
+		elif _running rekonq; then
+			BROWSER=`which rekonq`
+		elif _running midori; then
+			BROWSER=`which midori`
+		elif _running konqueror; then
+			BROWSER=`which konqueror`
 		fi
 	fi
 fi
-
-# SEARCH TERMS: absent, use SEARCHSITE_NOSEARCH, which may be different because some
-#               search engines are different pages for search start points
-if [ -z "$1" ]; then
-	SEARCHLINE=$SEARCHSITE_NOSEARCH
-# SEARCH TERMS: present, use the SEARCHSITE variable and SEARCHSUFFIX, if present
-#               terms are refiltered to include a + for separators. Quoted strings
-#               are going to still be spaced if they have them.
-else
-	SEARCHLINE=$SEARCHSITE`echo "$*" | sed "y/ /+/"`$SEARCHSUFFIX
-fi
-
-# DLINE: 'done' command line, use $goomode to translate amongst the three variables
-#               and possible many more later, which is why it uses this method and
-#               not a case statement or even indexers.
-DLINE=$(eval echo \${${goomode}BROWSER}" "${SEARCHLINE})
-
-# Confirmation Screen
-#
-
-echo -e "\n\n" 
-echo -e "\e[1;37;40mCONFIRMATION SCREEN\n"
-echo -e "\e[1;37;40mStatic Variables"
-echobreak
-echo -e "\e[0;37;40mSITENAME: $SITENAME \tSEARCHPREFIX=$SEARCHPREFIX \tSEARCHSUFFIX=$SEARCHSUFFIX"
-echo -e "\e[0;37;40mTBROWSER: $TBROWSER \tTGBROWSER=$TGBROWSER \tGBROWSER=$GBROWSER"
-echo -e "\e[0;37;40m"
-echo -e "\e[1;37;40mDynamic Variables"
-echobreak
-echo -e "\e[0;37;40mSEARCHSITE: $SEARCHSITE \tSEARCHSITE_NOSEARCH: $SEARCHSITE_NOSEARCH"
-echo -e "\e[0;37;40m"
-echo -e "\e[1;37;40mSession Volitile Variables"
-echobreak
-echo -e "\e[0;37;40mMODE: $goomode \t\t\tDISPLAY=$DISPLAY"
-echo -e "\e[0;37;40mLINE: $SEARCHLINE"
-echo -e "\e[0;37;40m"
-echo -e "\e[1;37;40mExecution Command Line (DLINE)"
-echobreak
-echo -e "\e[0;37;40mDLINE: $DLINE"
-echo -e "\e[0;37;40m"
-echo -ne "\e[1;37;40mX\e[1;30m)\e[0m ABORT  \e[0;1mG\e[30;1m)\e[0m GO\e[1;30m/\e[0mEXECUTE \e[0;32m(\e[1mdefault\e[0;32m)\e[0m"
-echobreak
-read -sn1
-echo -e "\n"
-# reply is converted to uppercase, so pressing x or X is ok for aborting
-if [ ! "${REPLY^^}" == "X" ]; then
-	eval $DLINE
-	echo "Browser's Return Value: $?"
-fi
-
-
-
-
+[[ -z $BROWSER ]] && BROWSER=("/usr/bin/links2" "-g")
+"${BROWSER[@]}" $SEARCHLINE $EXESUFF
 
 

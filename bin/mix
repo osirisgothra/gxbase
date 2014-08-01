@@ -1,5 +1,8 @@
 #!/bin/bash
 #
+#  IF YOU GET ERRORS LIKE "Unable to find simple control ... blah blah Master,0" this means
+#   you NEED to set the DEFAULT_CARD and perhaps other variables (see below)
+#
 # /bin/mix
 #   
 #   change master volume setting based on the name of the link (this program's program_name)
@@ -41,9 +44,9 @@
 # to 1 (recommended), the card '1' will be tested, if it is there, it will be used, and if not, it will
 # fallback to 0. 
 #
-# IMPORTANT: if you dont know what your card is, please use card "1"
-#
-DEFAULT_CARD=1
+# IMPORTANT: if you dont know what your card is, please use card "0"
+#                 
+DEFAULT_CARD=0
 
 
 
@@ -144,6 +147,12 @@ fi
 
 echo "amixer -c $CARD sget Master | grep -Po stff" 
 CURVOL=`amixer -c $CARD sget Master | grep -Po '(?<=Playback )[0-9]+(?= \[)'`
+if [[ -z $CURVOL ]]; then
+	echo "FAILURE: cant get current volume from mixer, please set the VARIABLES in mix script to something valid, read the script for details"
+	return 1 > /dev/null 2>&1
+	exit 1
+fi
+
 if [ ! -z "$*" ]; then
 	# test for inline negatives or positives first
 	TEST="$1"
@@ -164,10 +173,10 @@ if [ ! -z "$*" ]; then
 	
   
   AMT=$[ $2 ]
-	if [ "$1" == "up" ] || [ "$1" == "+" ]; then
+	if [[ "$1" == "up" ]] || [[ "$1" == "+" ]]; then
 		#echo "COMMAND: UP   VALUE: $2"
 		NEWVOL=$[ $AMT + $CURVOL ]
-	elif [ "$1" == "down" ] || [ "$1" == "dn" ] || [ "$1" == "-" ]; then
+	elif [[ "$1" == "down" ]] || [[ "$1" == "dn" ]] || [[ "$1" == "-" ]]; then
 		#echo "COMMAND: DOWN  VALUE: $2"
 		NEWVOL=$[ $CURVOL - $AMT ]
 	else
