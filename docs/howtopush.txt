@@ -1,0 +1,40 @@
+How to Public Git
+
+New project repositories should start at "Step 1". Everyone
+else should start at "Step 2". Also, if the repository is new
+and to be committed online, step 4 should be done the first time
+only (skip if already done). Item #s marked with a 'u' prefix are the
+steps you need when updating.
+
+     Create an Empty Git Repository or Reinit an Existing One
+ 1)  [ git init . ]
+     -q --shared=false/true/everybody/world/all/etc
+
+     Add File Contents to the Git Index
+u2)  [ git add . ]
+     --all|--no-all <pathspec>
+
+     Record Changes (Current Index Contents) to a new Commit @ Repository
+u3)  [ git commit -m "$mycommit_message" ]
+     --date=|--only|--dry-run|--allow-empty[-message] --message|-m
+
+     Create the online repository (git calls these "remotes")
+ 4)  [ git remote add origin git@gitorious.org:$myproject/$myrepository_git ]
+     ^--command---^  ^--refname  ^--remote name
+
+     Push State of the repository to the remote server (the "Commit" to the "Remote")
+u5)  [ git push -u origin master ] <-- git names the main head "master" by default
+     ^-cmd-_^       ^--the "remote" we created above
+
+ #1  Use --dry-run on commands to test them
+ #2  Use --quiet for no output
+ #3  Use -v for lots of information
+ #4  Keep an eye on total repo size(!)
+ #5  Documentation for a project: u6)  [ doxygen . ] and press "ENTER".
+ #6  Repeat steps 2,3 and 5 whenever you need to update again.
+ #7  as of (some version of git) the commands are split up into several modules
+     like git-add, by practive it might be prudent to use "git-add" instead of
+     using "git add" in case someone decides to depreciate this feature.
+
+See Also: git(1) git-add(1) git-remote(1) git-push(1) doxygen(1) git-commit(1)
+This file is used by the push-automated(4) script.

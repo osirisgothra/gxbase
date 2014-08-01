@@ -1,0 +1,20 @@
+Not for regular use, use this to view the resulting use of  all issue variables
+under agetty, or to reveal undocumented ones. Not pretty but formatted this way
+so that you can see _ALL_ of the values within a single 80x20 display, usually:
+
+\\a=\a	\\A=\A	\\0=\0	\\n=\n	\\N=\N	\\@=\@
+\\b=\b	\\B=\B	\\1=\1	\\o=\o	\\O=\O	\\\\=\\
+\\c=\c	\\C=\C	\\2=\2	\\p=\p	\\P=\P	\\$=\$
+\\d=\d	\\D=\D	\\3=\3	\\q=\q	\\Q=\Q	\\%=\%
+\\e=\e	\\E=\E	\\4=\4	\\r=\r	\\R=\R	\\^=\^
+\\f=\f	\\F=\F	\\5=\5	\\s=\s	\\S=\S	\\&=\&
+\\g=\g	\\G=\G	\\6=\6	\\t=\t	\\T=\T	\\*=\*
+\\h=\h	\\H=\H	\\7=\7	\\u=\u	\\U=\U	\\(=\(
+\\i=\i	\\I=\I	\\8=\8	\\v=\v	\\V=\V	
+\\j=\j	\\J=\J	\\9=\9	\\w=\w	\\W=\W	\\_=\_
+\\k=\k	\\K=\K	\\~=\~	\\x=\x	\\X=\X	\\+=\+
+\\l=\l	\\L=\L	\\!=\!	\\y=\y	\\Y=\Y	\\-=\-
+\\m=\m	\\M=\M	\\@=\@	\\z=\z	\\Z=\Z	\\)=\)
+
+This table distributed with GXBASE for linux, (C)2014 Paradisim Enterprises, LLC
+Written by Gabriel Sharp: osirisgothra@hotmail.com/paradisim.twilightparadox.com

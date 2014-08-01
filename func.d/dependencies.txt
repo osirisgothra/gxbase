@@ -1,0 +1,58 @@
+
+# note the dependencies are for the parser to 'push' loading order to resolve all dependencies
+# items that 'depend' on another will have their dependents loaded first.
+# example:
+#  lets say "A.sh" depends on "C.sh" and "C.sh" depends on "B.sh" and "E.sh" and "E.sh" depends on "D.sh"
+#  chart out first:
+#i		item		depends-on			depended-on-by (dependencies)
+#0-    A          C
+#1     B                              B
+#2     C          B, E                A
+#3     D                              E
+#4     E          D                        ___________________________________________________
+#                                         |   _____________________________________________  ||
+# now our flowchart                       \  //                                            \ \\
+# ._START_\ betical order. Index 0 _\      \//  _\               _____A  .------------------\_\\----. 
+#'.-START-/ Queue all items, alpha -/ load item -/  dependencys? |YES  \ | find/load dependency item|
+#                                    /|\  __|__          ^       |____ / |   queue                  |
+#                                  ___|   \NO!/         / \_____      V  '--------------------------'
+#                                 /        \ /         /_______ \ 
+#                                 |         V                  \_\ 
+#                                 |    dependency item +--YES-\ pop queue 
+#                                 |    queued on stack?+------/ back to current
+#                                 |         | |                 loaded item
+#                                 |         |no!
+#                                 |         \ \___\ parse script --\\\\  More Items???->NO-> ALL DONE!
+#                                 |          \____/ go to next item////       |
+#                                 \__________________________________<_Y_E_S__/
+#
+#  With this in mind we would do this:
+#
+#  load all items
+#  obj lst[i] c  variables, obj=single script object   lst=the list i=current index    c=list count(0-based)
+#
+#  start: lst -> "A,B,C,D,E" obj=A   i=0  c=4 (5 objects)
+#         stack = empty  parsed stack=empty
+#  get item into obj from lst @ i, (i is at zero, obj = lst[0] = "A")
+#  does "A" have dependencies?
+#  yes, C, so re call the get item for index of C, which is 2...
+#  and push "A" to stack
+#  get item into obj from lst @ 2 (i=2, obj[2]="C")
+#  does "C" have dependencies?? yes, B, E,
+#  same thing, load B first and push C
+#  B dependencies?? no, then parse it, once parsed put to "finished stack"
+#  pop from stack, now back at "C"
+# still parsing for "E", we do the same for E as for B
+#  pop from stack, now at "C", B and E on "finished stack"
+#  parse C put to stack, "C","B","E" on finished stack
+#  now back to "A" with "C" parsed, and is only dependency
+#  so now we parse "A", done, put "A" to "finished stack"
+#  going on to next index, "B" ("A","B","C","E" are on finished stack)
+#  is "B" on finished stack? yes, skip
+#  now at C, same thing, skip...
+#  D is now loaded, does it have dependencies?
+#  no, parse, put to stack (A,B,C,D,E on finished stack)
+#  go to next, "E"
+#  E is on finished stack, skip
+#  at end of list, so quit
+

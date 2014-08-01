@@ -1,0 +1,4 @@
+<?xml version="1.0"?>
+<vdml>
+	<set flags="xi" name="GXBASE_COMMAND_TIMEOUT" value="1500ms"/> 
+</vdml>

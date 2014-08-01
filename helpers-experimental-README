@@ -1,0 +1,44 @@
+GXBASE - General Extensions for the Bash Shell Environment
+----------------------------------------------------------
+
+The helpers-experimental-README
+-------------------------------
+
+Document Changes
+----------------
+12 2013 Nov	Original Release	Stated that 0.1.0 is the current version
+23 2014 Apr	Update			Changes to reflect that 0.1.0 is now a previous version
+
+Notes
+-----
+
+Be advised that the helpers-experimental branch spans not only this version of gxbase, but all versions
+and may have their own versions as well. Please see the documentation for the helpers in each version
+of gxbase AND the helpers themselves, where applicable.
+
+
+Symlink Is Unreadable (invalid)?
+--------------------------------
+
+  The "helpers-experimental" directory is part of:
+
+	gitorious.org/gxbase/helpers-experimental
+
+  However, this repository is found in:
+
+	gitorious.org/gxbase/gxbase.git
+	[after update this will be subversioned]
+	gitorious.org/gxbase/0.1.0/gxbase.git
+
+I've named the symlink to work if you clone both branches the way 
+they are in the repository, if you do not then you will have to 
+re-create the symlink. However, you can delete it because it does 
+not actually have any affect on gxbase. If a binary is needed, 
+it will be documented but at this time none of the helpers are active 
+in this version (0.1.0) of the gxbase repository.
+
+Please read: docs/README and docs/html/index.html for details
+
+Read the GNU LGPL2 for licensing at http://www.gnu.org
+	
+

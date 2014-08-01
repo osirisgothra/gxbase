@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# g/bin/vlcst	
+#   
+#        Start VLC Media Player, with time settings asked
+# 
+# Author:
+#    Gabriel Thomas Sharp <osirisgothra@hotmail.com>  
+# 
+# Copyright (C)2013 Paradisim Enterprises, LLC    <paradisim.twilightparadox.com>
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file was created 
+# For more support, visit our homepage: http://paradisim.tk
+# Report any bugs to <bugs@paradisim.tk> or visit our FAQ on our website.
+#
+
+# getinput "question-text" "ylabel" "nlabel" "
+   
+echo -ne "Start time (Minutes):"
+read MINS
+echo -ne " (Seconds):"
+read SECS
+echo -e "Stop time (Minutes):"
+read SMINS
+echo -ne " (Seconds):"
+read SSECS
+if [[ -z $* ]]; then
+	echo -e "Extra Params [2 seconds]:"
+	TMOUT=2
+	read EXTRAS
+	unset TMOUT
+else
+	EXTRAS="$*"
+fi
+
+# start vlc
+ST=$[ MINS * 60 + SECS ];               
+
+
+
+
+
+
+
+
+
+
+

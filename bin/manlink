@@ -1,0 +1,71 @@
+#!/bin/bash
+# shows a manpage from a man:// handler, useful for firefox, lynx, etc
+# also supports GUI display methods
+eval `resize`
+
+function outc()
+{
+	if (tty); then
+		declare -i PASSES=0
+		STAT=" manlink - man\://"$THEURL" ${SECTION:+(Section $SECTION)} " 
+		LEN1=$(calc -p $COLUMNS - ${#STAT} )
+		LEN2=$(calc -p round\($LEN1 / 2\))
+		if [ $DEBUGMODE ]; then
+			echo LEN1=$LEN1
+			echo LEN2=$LEN2
+		fi
+		while (true); do
+			for ((i=0; i < $LEN2; i++)); do
+				PROMPT+=`printf " "`
+			done
+			if [ $PASSES -eq 0 ]; then		
+				PROMPT+="$STAT"
+				PASSES+=1
+			else
+				break;
+			fi
+		done		
+	  if [ $DEBUGMODE ]; then	
+			echo passes=$PASSES
+			echo prompt=$PROMPT
+			echo columns=$COLUMNS
+			echo theurl=$THEURL
+			read
+		fi
+		echo "$*" | less -P "$PROMPT"
+	else
+		rm -f /var/tmp/zenity.tmp 2> /dev/null 1>&2
+		echo "$*" > /var/tmp/zenity.tmp
+		zenity --text-info --title $0 --filename=/var/tmp/zenity.tmp
+		rm -f /var/tmp/zenity.tmp 2> /dev/null 1>&2
+	fi
+}
+
+function depreciated()
+{
+if [ "$1"=="DEBUG" ]; then
+	# for testing purposes
+	echo "Entering Test Mode $1 = DEBUG"
+	THEURL=bashrc
+	SECTION=5                                      
+	DEBUGMODE=ON
+	outc "`cat /etc/bash.bashrc|sed 's//__CR__/g'`"
+else
+	DEBUGMODE=
+  THEURL="${*#man://}"
+	SECTION="${THEURL/[^:]*:/}"
+	if [ $MANLINK_DEBUGLINK ] || [ "$2" == "DEBUGLINK" ]; then
+		outc "theurl=$THEURL section=$SECTION"		
+		(tty) && read
+	fi
+ 	if [ -z "$THEURL" ]; then
+		RESPONSE="URL Invalid: $* - it must start with man:// and be a valid word"
+	else                       
+		RESPONSE=$(man ${SECTION:+-s$SECTION} $THEURL)
+	fi
+	outc $RESPONSE
+fi
+}
+
+# just call manx
+manx "${*#man://}"

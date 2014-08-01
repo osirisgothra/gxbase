@@ -1,0 +1,39 @@
+#!/bin/bash
+# uploadsite
+# uploads this stuff to the website
+#
+
+# custom location, set your location where public_html can be found
+# you will need an .inputrc for login to work that contains your login/password
+WEBSITE=ftp.paradisim.tk
+BEGINTIME=$SECONDS
+shopt -s nullglob
+pushd .
+if [[ ! -r $LOCALSITE ]]; then
+	LOCALSITE=/var/www
+fi
+if (cd "$LOCALSITE"); then
+	echo "-----------------"
+	echo "| $(date) |"
+	echo "------------------ftp---processing---beginning----------------------"
+	ftp <<-FTPSCRIPT
+	open $WEBSITE
+	cd public_html
+	hash on
+	prompt off
+	mput *
+	close
+	exit
+	FTPSCRIPT
+	echo "----------------------ftp---script---done---------------------------"
+	popd
+	DATASIZER="$(calc `stat ./* ./.[^.]* --format="%s" | sed 's/$/+/g' | tr '\n' ' ' | grep -P '.*(?=\+)' -o`) "
+	DATASIZE=$(echo $DATASIZER | tr '\t' '\0' | tr ' ' '\0')
+	#DEBUG: echo $DATASIZER
+	#       echo $DATASIZE
+	echo "Script completed: $[ $SECONDS - $BEGINTIME ] seconds, $DATASIZE bytes"
+	unset X DATASIZE DATASIZER
+else
+	echo "Site unavailable! Can't Upload"
+	echo "Waiting 5 seconds (press ctl+c to break)"
+fi

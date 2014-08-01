@@ -1,0 +1,46 @@
+#!/usr/bin/vim.gnome
+#
+# usernotes.txt
+#  
+#   Author<->User Annotations That Are Too Big For Source Files
+#
+# Authors:
+#      Gabriel T. Sharp <osirisgothra@hotmail.com>
+#      You
+#
+# Copyright (c) 2013-2014 Paradisim Enterprises, LLC
+#
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+
+#---------------------------------------------------------------------
+# NOTATION: 1
+# SUBJECT: Why 'chug' is not a single-command alias
+#
+#         FILE: ../alias.d/coreutils.sh
+# COMMAND ATTN: alias chug
+#
+# ASKED BY: Anonymous
+#  ANWERED: Gabriel T. Sharp on FEB 21, 2014
+#--------------------------------------------------------------------------
+# QUESTION: Please, why-oh-why did you not use 'chown user:group' here?
+# ANSWER: because  chown  and  chgrp share near-identical[1] arguments. 
+# Therefore, the alias command chug, can also do this, if I changed 
+# it # to user:group, i would then need to check the command line for 
+# properness extract the user name, and the command line apart, which 
+# defeats the speed and simplicity of an alias, in fact documenting this 
+# is wasting space too in the file, that's why it is under USER NOTES, 
+# and is one of the first.

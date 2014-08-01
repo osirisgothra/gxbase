@@ -1,0 +1,44 @@
+
+
+#!/bin/bash
+# uploadsite_interval
+#
+# uploads to your website every N seconds checking for changes
+# uploads are not done unless file X is changed
+#
+
+#variables
+# interval, in seconds (can be fractional, like "60.5" or "1.75"
+declare INTERVAL=20
+
+# place you store your local files at
+declare LOCALSITE=/var/www
+
+# place to store the DIFF file
+declare DIFFSTORELOCATION=$HOME/.cache/uploadsite-$USER-$INTERVAL-checkfile.diff
+
+# condition that must be true to continue interval
+declare EXECUTECONDITION=true
+#declare EXITCONDITION="cat $HOME/.config/upsiteint_server_run_flag" # would run as long as this file existed, good for remote control if needed
+# file to check with diff
+declare DIFF_FILE=index.html
+
+while ( $EXITCONDITION ); do
+	uploadsite
+	cp $LOCALSITE/$DIFF_FILE $DIFFSTORELOCATION
+	echo "sleeping for 45 seconds"
+	while (diff $LOCALSITE/$DIFF_FILE $DIFFSTORELOCATION); do
+		if ( ! $EXITCONDITION ); then
+			#break if something triggered an exit condition
+			break
+		fi
+		sleep 5
+		echo "checking again..."		
+	done	
+		if ( ! $EXITCONDITION ); then
+			#break if something triggered an exit condition
+			break
+		fi
+	echo "change detect, reuping.."
+done
+echo "exit condition, exiting..."

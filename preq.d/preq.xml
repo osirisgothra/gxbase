@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<!-- note: 1 the @ prefix means the item is optional
+					 2 items containing slashes (/) are considered absolute paths to files
+           3 scripts are sourced, not executed
+           4 during verification, binaries are considered found only if executable by 
+						 the current user
+					 5 all GxBase scripts need the processor PI to identify which script
+             it belongs to, it is used to verify proper script contents
+           6 there should be a processor phase="start" and "stop", these
+						 assure they XML processor that the whole file exists, and that
+						 corruption/missing data is not happening. The stop phase does
+						 not need to include the "script" attribute  (note that 
+             processor actually means the <?pr> tag, and the script element
+						 is a singular 's' (phase is unchanged) this shortening is for
+						 convenience. These rules veracious among the entire XML language
+             used with GxBase.
+-->                                   
+<?pr phase="start" s="$GXBASE_ROOT/gxbase"?>
+<preqlist>
+	<scripts>
+		lowlevel.sh
+		declare.sh
+		string.sh
+		ios.sh
+		net.sh
+		path.sh
+		uidelegate.sh
+		llsnd.sh
+		@/lib/lsb/init-functions
+	</scripts>
+	<script-dirs>
+		@/etc/profile.d/*
+		@/lib/lsb/init-functions.d
+	</script-dirs>
+	<binaries>
+		/usr/bin/setterm -i
+		@/usr/games/fortune
+	</binaries>
+	<groups>
+		users
+	</groups>
+	<sugroups>
+		sudoers		
+	</sugroups>
+	<adgroups>
+		admin
+		root
+	</adgroups>
+</preqlist>
+<?processor phase="stop"?>
+		

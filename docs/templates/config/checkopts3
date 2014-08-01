@@ -1,0 +1,76 @@
+
+# set variables
+autocd_desc="Type in paths alone on command line to change to that path."
+cdable_vars_desc="Type in variable NAME when it contains a path to change to it."
+cdspell="Fix minor spelling errors in directory names when changing directories."
+checkhash_desc="Commands in hashtable are verified to exist before executing them."
+checkjobs_desc="Do not exit when jobs are running or stopped unless twice typed exit."
+checkwinsize_desc="Force update of LINES and COLUMNS variables after every command."
+cmdhist_desc="Save multi-line command history in a single history entry to allow re-editing."
+compat31_desc="Bash 3.1 compat: ([['s =~ operator and quoted arguments)."
+compat32_desc="Bash 3.2 compat: LC string conversion with [[ using strcoll()"
+compat40_desc="Bash 4.0 compat: LC string comparison with [[]] and <> ops and command interpreting."
+compat41_desc="Bash 4.1 compat: Use single quote as special chars in double-quoted strs in POSIX mode."
+direxpand_desc="Expand directory names when performing filename completion."
+dirspell_desc="Fix minor spelling errors during word completion if the directory is not found."
+dotglob_desc="Specifing * will also include .* when performing pathname expansion."
+execfail_desc="Do not exit when the exec command fails (for non-interactive shells only)."
+expand_aliases_desc="Aliases are always expanded for non-interactive shells."
+extdebug_desc="Enable the debugging behavior as listed in DEBUGGING and in the shopt builtin."
+extglob_desc="Enable extended pattern matching features."
+extquote_desc="Automatically quote variables when using the ${param} expansion in double quotes."
+failglob_desc="Causes failed pattern matches to return in error."
+force_fignore_desc="Use $FIGNORE suffixes to block auto-completion (ie, WORD wouldnt complete FOREWORD)"
+globstar_desc="The pattern ** matches all files and directories/subdirectories (no files if / is used)"
+gnu_errfmt_desc="Use the GNU standard error message format for error messages."
+histappend_desc="Append to the history file instead of overwriting it when exiting."
+histreedit_desc="Allow users to re-edit a failed history substitution."
+histverify_desc="Do not pass history substitution to the shell, this allows editing first."
+hostcomplete_desc="Perform hostname completion when typing email-like addresses (ie, joe@foo.bar)"
+huponexit_desc="Sends a SIGHUP to all jobs when the interactive shell has exited."
+interactive_comments_desc="Allows words that start with \# to cause the rest of the line to be ignored."
+lastpipe_desc="Runs last foreground command in pipeline in current environment if job control is inactive."
+if [ 0 == 1 ]; then
+lithist_desc="
+	If set, and the cmdhist option is enabled, multi-line commands are saved to the history with embedded newlines rather than using semicolon separators where possible. 
+	login_shell
+	The shell sets this option if it is started as a login shell (see INVOCATION above). The value may not be changed. 
+	mailwarn
+	If set, and a file that bash is checking for mail has been accessed since the last time it was checked, the message ``The mail in mailfile has been read'' is displayed. 
+	no_empty_cmd_completion
+	If set, and readline is being used, bash will not attempt to search the PATH for possible completions when completion is attempted on an empty line. 
+	nocaseglob
+	If set, bash matches filenames in a case-insensitive fashion when performing pathname expansion (see Pathname Expansion above). 
+	nocasematch
+	If set, bash matches patterns in a case-insensitive fashion when performing matching while executing case or [[ conditional commands. 
+	nullglob
+	If set, bash allows patterns which match no files (see Pathname Expansion above) to expand to a null string, rather than themselves. 
+	progcomp
+	If set, the programmable completion facilities (see Programmable Completion above) are enabled. This option is enabled by default. 
+	promptvars
+	If set, prompt strings undergo parameter expansion, command substitution, arithmetic expansion, and quote removal after being expanded as described in PROMPTING above. This option is enabled by default. 
+	restricted_shell
+	The shell sets this option if it is started in restricted mode (see RESTRICTED SHELL below). The value may not be changed. This is not reset when the startup files are executed, allowing the startup files to discover whether or not a shell is restricted. 
+	shift_verbose
+	If set, the shift builtin prints an error message when the shift count exceeds the number of positional parameters. 
+	sourcepath
+	If set, the source (.) builtin uses the value of PATH to find the directory containing the file supplied as an argument. This option is enabled by default. 
+	xpg_echo
+	If set, the echo builtin expands backslash-escape sequences by default.
+
+
+fi
+
+
+# dialog
+
+RESPONSE=$(dialog --checklist "Shell Options" 200 200 200 autocd $autocd_desc off cdable_vars $dable_vars_desc off cdspell $cdspell_desc off checkhash $checkhash_desc off checkjobs $checkjobs_desc off checkwinsize $checkwinsize_desc on cmdhist $cmdhist_desc on compat31 $compat31_desc off compat32 $compat32_desc off compat40 $compat40_desc off compat41 $compat41_desc off direxpand $direxpand_desc off dirspell $dirspell_desc off dotglob $dotglob_desc off execfail $execfail_desc off expand_aliases $expand_aliases_desc on extdebug $extdebug_desc off extglob $extglob_desc on extquote $extquote_desc on failglob $failglob_desc off force_fignore $force_fignore_desc on globstar $globstar_desc off gnu_errfmt $gnu_errfmt_desc off histappend $histappend_desc on histreedit $histreedit_desc off histverify $histverify_desc off hostcomplete $hostcomplete_desc off hupnonexit $hupnonexit_desc on interactive_comments $interactive_comments_desc on lastpipe $lastpipe_desc off lithist $lithist_desc off login_shell $login_shell_desc off mailwarn $mailwarn_desc off no_empty_cmd_completion $no_empty_cmd_completion_desc off nocaseglob $nocaseglob_desc off nocasematch $nocasematch_desc off nullglob $nullglob_desc off progcomp $progcomp_desc on promptvars $promptvars_desc on restricted_shell $restricted_shell_desc off shift_verbose $shift_verbose_desc off sourcepath $sourcepath_desc on xpg_echo $xpg_echo_desc off)
+
+# unset all first,
+for i in $SHOPTLIST; do
+shopt -u $i
+done
+# then set the ones returned to us (which are the ones that were checked)
+for i in $RESPONSE; do
+shopt -s $i
+done

@@ -1,0 +1,9 @@
+#!/bin/bash
+/home/gabriel/bin/addvmode $1 $2
+if [ "$3" == "S-video" ]; then
+	LOC="--right-of DVI-0"
+else
+	unset LOC
+fi
+xrandr --output ${3:-DVI-0} --mode "${1}x${2}" $LOC
+

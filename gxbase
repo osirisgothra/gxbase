@@ -1,0 +1,786 @@
+#!/bin/bash
+#
+# ./gxbase
+#
+# Author:
+#      Gabriel T. Sharp <osirisgothra@hotmail.com>
+#
+# Copyright (c) 2013 Paradisim Enterprises, LLC
+#
+# main invocation for gxbase
+# 	global signature key: is 2AFF3FFA-689E-40EA-93F0-71EB7BA419E4 
+#
+# This script is executed FIRST and launches startup.sh after
+# installing GXBASE_ROOT and the source caller, gxecute, which
+# us a wrapper for source that will attempt to fail gracefully.
+# All other gxbase-wide dependant variables needed for internal
+# gxbase scripts or components should be exported from here.
+# This script is not meant for user customization, use one of
+# the other scripts as defined in the documentation files in
+# the GXBASE/doc directory.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+# BUGFIX: check for xtitle before using it
+if [[ ! -x /usr/bin/xtitle ]]; then
+	function xtitle()
+	{
+		# TODO: implement own xtitle ansi escape sequences (not important though for now)
+		true
+		# same behavior as noop+return 0
+		return $?
+	}
+	if [[ -r $HOME/.gxbase-enable-pre-run-first-time-warnings ]]; then
+		# flag is removed after gxbase finishes first time ok
+		echo "One-time warning: package xtitle no installed, silent run will not modify titlebar in terminal windows"
+	fi
+fi
+
+# set -x # uncomment me to debug the startup session, note if hush.on is enabled, the debug output goes to gx.startXXX logs, 
+# use gx.startupXXX aliases to get that output or type hush.off at the prompt to get rid of it
+function gx.progress() { if [[ $DISPLAY ]]; then if [[ $1 == done ]]; then xtitle $0 > $(tty); else xtitle "Loading GxBase (${1}%)..." > $(tty); fi; fi; }
+#function return() { if [[ $DISPLAY ]]; then xtitle; fi; unset -f return; return $*; }
+gx.progress 0
+
+#
+# convienience aliases for hush-hush on/off
+#
+# check for hush hush mode...
+alias hush.on='touch $HOME/.hushlogin'
+alias hush.off='rm -f $HOME/.hushlogin'
+if [[ -z $GXBASE_HUSHCHECKED ]]; then
+	GXBASE_HUSHCHECKED=1
+	if [[ -e $HOME/.hushlogin ]]; then
+		export GXBASE_RESOURCED=1
+		source $BASH_SOURCE 1> $HOME/.gxbase-last-startup-stdout.log 2> $HOME/.gxbase-last-startup-stderr.log
+		unset GXBASE_RESOURCED
+		function gx.startoutput()
+		{
+		 	 cat $HOME/.gxbase-last-startup-stdout.log | less -r -P " Startup STDOUT Dump for GXBASE (Press q to quit) $(less --version | grep --max-count=1 less) "  		
+		}
+		if [[ -s $HOME/.gxbase-last-startup-stderr.log ]]; then
+      # the length of the error log was nonzero, indicating errors were returned by some operation              
+      echo -e "There were [31;1mERRORS[0m while loading gxbase!\nType [1mgx.starterrors[0m anytime to show it." 
+			echo -e "Type gx.startoutput to show all other output during startup, or hush.off to cancel quiet login mode."
+			echo -e "Type gx.reload (or the lightfunction 'rgx') to reload gxbase, or gxed [item] to edit sources."
+      echo -ne "Press [V] within one second to view these errors..."                                            
+			function gx.starterrors()
+  	  {                                                                                                                          		
+				cat $HOME/.gxbase-last-startup-stderr.log | less -r -P " Startup STDERR Dump for GXBASE (Press q to quit) $(less --version | grep --max-count=1 less) "  		
+	    }                                                                                                                          		
+		  unset REPLY
+			TMOUT=1
+			read -sn1
+			unset TMOUT
+			if [[ ${REPLY^^} == V ]]; then
+				echo "VIEWING"
+				gx.starterrors		
+			else
+				echo "SKIPPING"
+			fi		
+		fi
+		return;		exit 1
+	else
+		source $BASH_SOURCE
+		return;   exit 1
+	fi
+fi		
+gx.progress 10
+# run condition (works kinda like .hushlogin)
+#
+if [[ -e $HOME/.disable-gxbase ]]; then
+	echo "GXBASE is disabled (type gx.on to re-enable it), skipping load."
+	function gx.on()
+	{
+		command rm $HOME/.disable-gxbase -f
+		echo "GXBASE is now re-enabled, start now?"
+		unset REPLY
+		read
+		if [[ ${REPLY^^} == Y ]]; then
+			source $GXBASE_RESTART_TARGET $*
+		else
+			echo "GXBASE will be loaded next time you start your shell."
+		fi
+		unset -f gx.on	
+	}
+	#readlink -f guarantees the path to be absolute, even if it is relative or traverses bidirectionally (ie, ../../usr/local/bin/../gxbase/../gxbase/gxbase) which is bad practice but will still work :)
+	GXBASE_RESTART_TARGET=`readlink -f $BASH_SOURCE`
+	return;	exit 1
+else
+	echo "GXBASE is enabled (type gx.off to disable it), loading now..."
+	function gx.off()
+	{
+		command touch $HOME/.disable-gxbase
+		echo "GXBASE will not run next time you start your shell."
+	}
+	function gx.on()
+	{
+		if [[ -e $HOME/.disable-gxbase ]]; then
+			command rm -f $HOME/.disable-gxbase
+			echo "Previous gx.off action has been canceled."
+		else
+			echo "GXBASE is already on!"
+		fi
+	}
+fi
+	
+
+# strings
+
+# --- must be sourced at the shell level (not from another script) ---
+#     and run under bash(1), PARENT is used to strip all path entities from $0 
+#     this is essential because $0 isn't always bash, sometimes it will be /bin/bash, etc
+
+PARENT=$0
+PARENT=${PARENT##-}
+PARENT=${PARENT##/*/}
+if [ ${PARENT} != bash ]; then
+	echo -e "\n$(basename $BASH_SOURCE) fatal: this script must run under bash(1) and be[1;31m sourced [0at the shell level (not from another script, unless it too is running at shell level, for example .bashrc). You must run this script using the source command (source) or it's short version, a dot (.). Example: . $BASH_SOURCE.\nThis script will now terminate.\n"
+  # guard against accidental shell
+	return 2
+	exit 2
+fi
+
+# ------------------------------------------------- parse flags ------------------------------------------------------------------
+
+#
+# options: -q --quiet     -l [logname] --log=logname   --restart -r     --unload -u
+#          -v --version
+#
+
+OPTSTR=`getopt -o al:ruv --long quiet,log:,restart,unload,version -n $(basename $BASH_SOURCE) -- "$@"`
+gx.progress 15
+if [[ $? != 0 ]]; then
+	return 1;
+	exit 1;
+fi
+
+# process the options
+eval set -- "$OPTSTR"
+while true; do
+	case "$1" in
+	-q|--quiet) GXBASE_QUIETSTARTUP=1; shift ;;
+	-l|--log) GXBASE_LOGOUTPUT="$2"; shift 2;;
+	-r|--restart) unset -f GXBASE_NORESTART; shift ;;
+	-u|--unload) 
+		echo "sending unload signal..."
+		kill -SIGUSR2 $$
+		unset -f GXBASE_NORESTART
+		return 0 ;;
+	-v|--version)
+    if [[ -r $GXBASE_ROOT/version.sh ]]; then
+			$GXBASE_ROOT/version.sh
+		fi
+		return 0 ;;
+	--)
+		shift
+		break ;;
+	*) 
+		echo "Error parsing options, script parser ($SHELL) attempted to execute unreachable code."
+    echo "Terminating..."
+		return 2 ;;
+	esac
+done
+
+## apply options
+if [[ $GXBASE_QUIETSTARTUP == 1 ]]; then
+	STARTUP_REDIRECTOR=/dev/null
+else
+	STARTUP_REDIRECTOR=/dev/stdout
+fi
+if [[ $GXBASE_LOG ]]; then
+	STARTUP_REDIRECTOR=$GXBASE_LOGOUTPUT
+fi
+
+GXBASE_STARTUP_COUNT=$[ 0 + `declare -F | fgrep GXBASE_NORESTART -c` ]
+if [[ $GXBASE_STARTUP_COUNT > 0 ]]; then
+	echo "GXBase already integrated (use --reload to start it over)" > /dev/stderr
+else
+	# record original functions, aliases, and variables (for later removal of gxbase) 
+	# traps are self-removing, so we dont need to record a list here. Also, variables
+	# that are GXBASE prefixxed are to be deleted no matter what! Unloading the system
+	# is done by signalling SIGUSR2 to the shell, all scripts that need to clean up after
+	# themselves must add a trap for it!! (but a list is still kept for future use)
+	GXBASE_ORIGINAL[FUNCS]=`declare -F | grep -Po "(?<=declare -f )" | tr "\n" " "`
+	GXBASE_ORIGINAL[ALIAS]="${!BASH_ALIASES[*]}"
+	GXBASE_ORIGINAL[VARS]=`set | grep -Po "^[A-z]+(?==.+$)" | tr "\n" " " | sed "s/GXBASE[A-Za-z]+//g" | tr -s " "`
+	GXBASE_ORIGINAL[TRAPS]=`trap | sed 's/trap -- //g;s/'\''/"/g'`
+
+	function GXBASE_NORESTART() { return 0; }
+
+fi
+
+# ------------------------------------------------- function declarations --------------------------------------------------------
+
+#
+#  
+#  
+#  
+function gx.log()
+{
+	# date/timestamp/host is written automatically, but the username is removed if --tag is provided
+	# so we have to add that back in. The IP is not added so we have to add that too, along with the
+	# process' pid as well (--id)
+	# end tag will resemble: Jan 1, 1980 23:59:59 localhost johndoe gxbase@192.168.2.1: message body
+	logger --id --tag "gxbase@$(hostname -I)" "$*"
+}
+
+# gxbase_define_pathvar
+# 1=pathvarname 2=physical location
+function gxbase_define_pathvar()
+{
+	if [[ $2 ]]; then
+		eval GXBASE_PATH_$1=\"$2\"
+		return 0
+	else
+		echo "ERROR: path was defined for $1${1:+ }but is missing data!"
+		return 1
+	fi
+}
+
+function gx.func()
+{
+	case ${1,,} in
+		-\?) ;& --\?) ;& -h) ;& --help)
+cat <<-EOF_MARKER
+			Usage: gx.func [COMMAND]... COMMAND OPTIONS...			
+			Execute Special GXBASE Commands
+			
+			  -l, --list      list available commands. This list is subject to update by the
+			                 	command itself (contained in the script)
+			  -h, --help     display this help and exit
+			      --version  output version information and exit
+			
+			Report gx.func bugs to osirisgothra@hotmail.com
+			GXBASE home page: <http://gitorious.org/gxbase/>
+			General help using GXBASE: <http://gitorious.org/gxbase/gxbase>
+			For complete documentation, run: gx.help 'contents'
+EOF_MARKER
+			;;
+		-l) ;& --list) ;& list)
+			echo -e "gx.func		description"
+			echo -e "-----------------------------------------------------------------------------"
+			echo -e "list				list the available gx.func functions"
+			echo -e "fsl				list of block filesystems and their mount points"
+			echo -e "------------------------------------------------------------------------------"
+			;;
+		fsl)
+			lsblk -ln | awk '{ printf $1" ["$7"] \n"; }' | fgrep / | tr -d '[]'
+			;;
+		*)			
+			[[ $1 ]] && echo -e "$FUNCNAME: unrecognized command '$1'"
+			[[ $1 ]] || echo -e "$FUNCNAME: missing operand"
+			echo "Try $FUNCNAME --help for more information."
+			;;
+	esac
+}
+gx.progress 20
+
+# gx.flag ( -[-s]et | -[-d]elete ) ( flag_name ) ( value )
+# \brief gx.flag sets, deletes or sets the value of, a gxbase configuration setting/flag 
+# \param --set sets a flag with an optional value \sa -s
+# \param --delete delets the flag and any associated value \sa -d
+# \param -s same as --set
+# \param -d same as --delete
+# \param flag_name the name of the flag to be set, changed, or deleted
+# \param value if the flag is setting/changing, the value to associate with the flag
+# \returns $? set to a numeric value: zero(0) indicates success, one(1) indicates a failure, usually shown on stdout.
+# \note flags are processed by the 'getopt' shell option handler, see it's manpage for details
+#       flags are stored in $HOME/.config/gxbase, you can modify/set/delete them by hand by creating/modifying/deleting items there
+# \attention flag files must be only a single line, additional lines WILL be ignored, ONLY THE FIRST LINE IS READ, EVEN IF BLANK!
+function gx.flag()
+{
+	OPTS=`getopt -n 'gx.flag' --long set:,delete:,query:,help -o s:d:q:h -- "$@"`
+	if [[ $? != 0 ]]; then
+		return 1
+	else
+		eval set -- "$OPTS"
+		while (true); do
+	  	case "$1" in
+				--set|-s)
+					[[ "$FLAGMODE" == "DELETE" ]] && echo "Warning: overriding previous option: $FLAGNAME with SET" >> /tmp/warnings
+					FLAGMODE=SET; FLAGNAME=$2; shift 2;;
+				--delete|-d)
+					[[ "$FLAGMODE" == "SET" ]] && echo "Warning: overriding previous option: $FLAGMODE with DELETE" >> /tmp/warnings
+					FLAGMODE=DELETE; FLAGNAME=$2; shift 2;;
+				--query|-q)
+					[[ "$FLAGMODE" == "SET" ]] && echo "Warning: overriding previous option: $FLAGMODE with QUERY" >> /tmp/warnings
+					FLAGMODE=QUERY; FLAGNAME=$2; shift 2;;
+				--help|-h)
+					cat <<-help_text
+					
+					Usage: gx.flag [flags]... FLAGNAME [value]
+					Set, Delete, or Query a GXBASE configuration entity known as a flag value.
+
+					Mandatory arguments to long options are mandatory for short options too.
+	
+					The following values can have an optional value after the flag name:
+					  -s, --set         Set a new flag, optionally with a value associated
+
+					The following values can NOT have any value after it:
+					  -d, --delete      delete an existing flag from the configuration entity store
+					  -q, --query       outputs the flag's value, if one exists   
+					  -h, --help        display this help and exit                    
+					 
+			      --version  output version information and exit
+
+					Report gx.flag bugs to osirisgothra@hotmail.com or gabriel@paradisim.twilightparadox.com
+
+								GXBASE source home page: <http://gitorious.org/gxbase/gxbase>
+								General help using GXBASE: <install_prefix/gxbase/docs/index.html>
+								For complete documentation, please see the documents in /gxbase/docs/html
+								Licensing info can be obtained from GNU LGPL2 at http://www.gnu.org
+					help_text
+					return 2;;
+				--)
+					shift; break;;								
+				 *)
+					echo "Fatal: gx.flag function in a corrupted or unknown state, exiting (bad command data from getopt)"
+					return 1;;
+			esac
+		done
+		# using /tmp/warnings because warnings should not show for options that break from command processing, like --help
+		[[ -r /tmp/warnings ]] && { cat /tmp/warnings; rm -f /tmp/warnings; }
+    if [[ -z $FLAGNAME ]] || [[ -z $FLAGMODE ]]; then
+			echo "Fatal: Command did not set a name and/or mode, aborting..."
+			return 1
+		fi
+
+    case $FLAGMODE in
+			SET)
+				mkdir --parents "$HOME/.config/gxbase"
+				if [[ $* ]]; then
+					echo "$*" > "$HOME/.config/gxbase/$FLAGNAME"
+				else
+					touch "$HOME/.config/gxbase/$FLAGNAME"
+				fi
+				if [[ $? -eq 0 ]]; then
+					echo "Flag $FLAGNAME written ok"
+				else
+					echo "Flag $FLAGNAME write failure with code $?"
+				fi
+        return $?;;
+			DELETE)
+				echo "Removing flag files..."
+				rm -f -I "$HOME/.config/gxbase/$FLAGNAME"
+				if [[ $? -eq 0 ]]; then
+					echo "OK"
+				else
+					echo "Failed ($?)"
+				fi
+				return $?;;
+			QUERY)
+				if [[ -r "$HOME/.config/gxbase/$FLAGNAME" ]]; then
+					if [[ -s "$HOME/.config/gxbase/$FLAGNAME" ]]; then
+						cat "$HOME/.config/gxbase/$FLAGNAME"
+						unset GXBASE_LASTFLAG_EMPTY
+					else
+						GXBASE_LASTFLAG_EMPTY=true						
+					fi
+					return 0;
+				else
+					echo "$FUNCNAME: invalid flag"
+				fi
+				return 1
+				;;				
+							
+			*)
+				echo "Fatal: Unknown flagmode, $FLAGMODE, probably a corrupted state caused by getopt or filesystem"
+				return 1;;
+		esac			
+  fi
+	echo "Warning: Caught end of function, which probably means a corrutped environment, consider restarting your shell."
+	return 1
+}
+
+# gxroot_isvalid
+#
+# validates GXBASE_ROOT
+# this very important function verifies that the GXBASE_ROOT variable is in fact pointing to an actual gxbase location
+# by verifying the existence and value of the key, it must match the key we used for gxbase. Please do not modify this function
+# any change can quickly cripple gxbase's functionality, though when correctly set, ensures a strong and sound configuration.
+function gxroot_isvalid() 
+{	
+
+	if [[ -d $GXBASE_ROOT ]]; then
+		# BUGFIX: changed to recognize actual configuration locations, not /usr/local/gxbase, as it was before
+		if (flag_exists GXBASE_ROOT); then
+			export GXBASE_ROOT=$(gx.flag -q GXBASE_ROOT)
+			local GXBASE_UUID=$(cat $GXBASE_ROOT/.gxbase.locator.stamp.uuid | grep -Po "(?<=UUID=).*" | awk ' { print toupper($0); } ')
+			# make case-insensitive for 2aff3ffa-689e-40ea-93f0-71eb7ba419e4 
+			if [[ ${GXBASE_UUID} == "2AFF3FFA-689E-40EA-93F0-71EB7BA419E4" ]]; then
+				return 0
+		  fi
+	 	fi
+	fi
+
+	echo -en "GXBASE location is not valid: (currently set to $GXBASE_ROOT) \n"
+	return 1	
+}
+gx.progress 25
+# ///
+# /// \brief gx_get_readstr
+# /// \args NONE
+# /// \returns stdout: an appropriate 'Reading' progress header, depending on user's terminal
+# /// \note there are currently [2] TODO items inside this function, please see them for details.
+function gx_get_readstr()
+{
+	# no vars exported
+	local rBLK="Reading "
+	local rCLR="[0;1m* [1;32mReading[0m " 
+	local rOUT="(terminal detect error)"
+	#local READING_HC="[0;1m* [1;32mReading[0m " #TODO: design a 256-color result (see below TODO as well!)
+	# make it pretty, if the terminal is supportive of this kind of behavior
+	# tty and ascii, though nonstandard, usually mean the user wants no color
+	if (assert_flag NEVER_COLOR_TERMINAL); then
+		rOUT=$rBLK		
+	elif (assert_flag ALWAYS_COLOR_TERMINAL); then
+		rOUT=$rCLR
+	else
+		if [[ $TERM ]] && [[ ${TERM^^} != TTY ]] && [[ ${TERM^^} != ASCII ]]; then
+			rOUT=$rCLR
+		#elif ## TODO: add support for 256-color terminals!  ---> elif [[ $TERM == xterm_unicode_256color ]] || [ need more id names ]
+			#rOUT= ## PLACEHOLDER ###
+		else
+			# some other unknown terminal type
+			rOUT=$rBLK
+		fi
+	fi
+	echo -ne "$rOUT";
+	# only need this one time
+	unset -f gx_get_readstr
+
+}
+
+# /// \brief assert_flag - used to check for a value, presence, or both
+# /// \param 1 [FLAGNAME]
+# /// \returns (read statement below chart)
+#
+# Flag File Condition     | RETURN VALUE ($?)      $FLAGVALUE        $FLAG_EXISTS            
+# ---------------------------------------------------------------------------------------
+# Exists, but empty       |       0                   <unset>              1
+# Exists, contains "1"    |       1                    "1"                 1
+# Exists, contains "1+1"  |       2                    "1+1"               1
+# Exists, contains string |       0                    string              1
+# Does not exist          |       1                   <unset>              0
+# ---------------------------------------------------------------------------------------
+#
+# This chart demonstrates some possible return values, many more possible values could be
+# when FLAG_EXISTS, however the result will always be the same if FLAG_EXISTS is zero (0).
+# It is recommended that you check FLAG_EXISTS unless you are 100% sure the flag would never
+# have a value (was empty) since it is also possible for the return value to be 1 if the
+# flag has a value of (contains) "1" or even an expression that would evaluate to 1, for
+# example, if the flag contains "((29-19)/2)-4" it will evaluate to "1".
+#
+function assert_flag()
+{
+	unset FLAG_EXISTS FLAGVALUE FLAGVALUEX
+	if [[ -z "$FLAG_PREFIX" ]]; then
+		local FLAGNAME="$1"
+	else
+		local FLAGNAME="$FLAG_PREFIX$1"
+	fi 
+
+	if [[ -r "$HOME/.config/gxbase/$FLAGNAME" ]]; then
+		FLAG_EXISTS=1
+		if [[ -s "$HOME/.config/gxbase/$FLAGNAME" ]]; then
+			read -a FLAGVALUE < "$HOME/.config/gxbase/$FLAGNAME"	
+			# BEHAVIOR CHANGE:
+			# returns numeric value, but FLAGVALUE remains as the string representation of that number
+	    # since flag values could be "1 + 2", which would cause the return value "3"		
+			# the reason I did this was to support string flag values, not just numeric & boolean ones			
+			# the + 0 forces expr to treat as an integer
+			declare -i FLAGVALUEX=$(expr "$FLAGVALUE" + 0 2>/dev/null)				
+			return $FLAGVALUEX
+		else
+			return 0
+		fi
+	else
+		FLAG_EXISTS=0
+		return 1
+	fi		
+}; export -f assert_flag
+
+# \\\ \brief flag_exists checks for presence only, it uses the assert_flag as a delegate to handle this check
+# \\\ \args  see assert_flag
+# vars used: see assert_flag
+# returns: 0 - flag does exist (true)   1 - flag does not exist (false) 
+# note: even though CPL's usually use 1 for true and 0 for false, shell standard says the opposite, gxbase follows this standard
+#       when performing calls, and uses CPL standard when dealing with variables and user-viewable settings. Shell retvals
+#       should only be used for internal non-ui shell calls. Shell calls that reflect error codes should always use this standard.
+# 
+function flag_exists()
+{
+	assert_flag $@
+	if [[ "$FLAG_EXISTS" == "0" ]]; then
+		return 1;
+	else
+		return 0;
+	fi
+}; export -f flag_exists
+
+# abscol(column) column = column (x-position) to move to
+# sets the current column on the same current line as the cursor is positioned
+# bypasses echo function, by the way 
+# parameters: 1=(whole number) a number representing the column (text position) to go to, 0=leftmost 999=rightmost
+#             if invalid or alpha params are sent, they are converted to 0 by the math checker
+function abscol()
+{
+	declare -i NUMVALUE=$[ $1+0 ]
+	set -- $NUMVALUE
+	builtin echo -ne "[${1}G"
+}; export -f abscol
+
+# gxecute(scriptname) = execute scriptname.sh + scriptname.d/*.sh
+# executes a gx script, this is the most important function in the library because:
+#
+# 1: executes all scripts in root with .sh extensions from startup.sh, also checks for .d folders and executes those .sh
+#    related to it in name order
+# 2: checks for valid running environment for scripts as well as proper conditions elsewhere, permissions, rights, etc.
+# 3: used to restart gxbase: 'gxecute restart' which is not an actual script but a pseudo command to reload from here
+#               ***  NEVER USE THE RESTART COMMAND FROM WITHIN THIS FILE IT WILL CAUSE AN INFINITE LOOP ***
+# function inf arguments (all are combined into a single filename preserving spaces)
+# executes a gxbase script (they cannot be invoked directly because they require GXBASE_ROOT and the gxecute uuid)
+# this ensures that the state of the environment is proper before any gxbase script is called, which ensures a valid
+# and secure environment, and scripts that will not fail unexpectedly. If something is wrong, most likely, gxecute 
+# will stop before any script is even called. Other problems, like bad structure, is tested by subscripts, in startup.
+# versions are tested later as well, as these scripts should work with any.
+function gxecute()
+{
+	if [[ -z $GXBASE_RESOURCED ]] && [[ -r "$HOME/.hushlogin" ]]; then
+		export GXBASE_RESOURCED=1
+		gxecute "$@" > "$HOME/.gxbase-last-startup-stdout.log" 2> "$HOME/.gxbase-last-startup-stderr.log"
+		local RETVAL=$?
+		unset GXBASE_RESOURCED
+		return $RETVAL
+	else
+		declare -l READSTR="$(gx_get_readstr)"
+		if [[ ! -d $GXBASE_ROOT ]]; then
+			echo "[gxecute]: GXBASE not properly initialized, please install properly before running"
+			return 1
+		fi
+		if [[ "$1" == "restart" ]]; then
+			CALLERNAME=$GXBASE_PRIMARY
+		else	
+			CALLERNAME="$GXBASE_ROOT/$*.sh"
+		fi
+		if [[ -r "$CALLERNAME" ]]; then
+			# must use this uuidstamp to identify the gxecute function
+			source "$CALLERNAME" "--gxecute@b3b9e346-47bc-4e3e-8a8a-b3b4c9a0cb3c"		
+			#---------------------------------------------------------------------------------------------
+      # Iterator for ordered startups in each category (ie, startup.sh => startup.d/###scriptname.sh
+			# This behaves on a system AND user level. 
+			# system-level scripts go in $GXBASE_ROOT/[name].d/*.sh
+			# user-level scripts go in $GXBASE_ROOT/.local/gxbase/[name.d]/.sh 
+			# (introduced in March 2014)
+			# was changed to this because some users cannot write to gxbase + subdirs at all
+			# *this is used even if the user has it installed under their home directory (compatibility)
+			#  UNLESS the root prefix (GXBASE_ROOT) happens to be $HOME/.local/gxbase, which will cause
+			#  it to be obviously ignored!
+			#---------------------------------------------------------------------------------------------
+				for i in "$GXBASE_ROOT" "$HOME/.local/gxbase"; do
+				CALLERDIR="$i/$*.d"
+				if [[ "$CALLERDIR" == "$LASTCALLERDIR" ]]; then
+					unset LASTCALLERDIR CALLERDIR                # break when gxbase is installed in ~/.local/gxbase
+					break;
+				fi
+				LASTCALLERDIR="$CALLERDIR"
+				if [[ -d "$CALLERDIR" ]]; then
+					if (ls $CALLERDIR/*.sh > /dev/null 2>&1); then
+						echo -e "$READSTR $(basename $CALLERDIR): "
+					fi
+					shopt -s nullglob
+					unset i
+					for i in $CALLERDIR/*.sh; do
+						if [[ -r "$i" ]]; then
+							# items linked in this directory are refed by their respective links and are not auto-executed, so dont delegate!
+							# items for each source, try not to write more than remaining width of messages unless error
+							echo -ne "\t$(basename $i)\t"
+							source "$i" "--gxecute@b3b9e346-47bc-4e3e-8a8a-b3b4c9a0cb3c" "$*" "$BASH_SOURCE"
+							echo -ne "\n"
+						else
+							echo -e "\tWarning: $i is unreadable"
+						fi
+					done
+					if [[ ! -z "$i" ]]; then 			
+						unset i
+					fi		
+				fi
+				done
+		#---------------------------		
+		else
+			# [[ ! -r "$CALLERNAME" ]]
+			echo -ne "GxEcute Error: the file \"$CALLERNAME\" is not readable" 
+			sleep 5
+		fi
+		unset CALLERNAME
+		unset CALLERDIR
+		shopt -u nullglob
+	fi
+}; export -f gxecute
+gx.progress 30
+# ----------------------------------------------- end function declarations ------------------------------------------------------
+
+# ------------------------------------------- beginning of pre-init configuration ------------------------------------------------
+
+## CREATE CONFIGURATION DIRECTORY IF IT DOESNT EXIST
+## 
+if [[ ! -d "$HOME/.config/gxbase" ]]; then
+	echo "Configuration directory missing: First time configuration initiated!"
+	echo -ne "Creating configuration directory..."	
+	(mkdir "$HOME/.config/gxbase" --parents --mode=740) && echo "OK" || echo "ERROR, CANT WRITE CONFIGURATION DIRECTORY, SETTINGS WONT BE SAVED AND THINGS WILL RUN SLOW. ALSO YOU WILL NEED TO RECONFIGURE EACH STARTUP -- PLEASE CHECK YOUR PERMISSIONS IN $HOME/.config"
+fi
+
+## DETECT GXBASE INSTALLATION DIRECTORY [ DIRECTORY COTAINING THE INSTALLER STAMP ]
+##
+echo "locating GXBASE root directory..."
+unset GXBASE_ROOT
+# this will silently fail, which is ok for first-time configuration
+# IMPORTANT!! THIS IS THE FIRST LINE WHERE GXBASE_ROOT IS ASSIGNED [ ON CONFIGURED INSTALLS ] 
+# IMPORTANT!! THESE LINES ARE VITAL TO THE SYSTEM, THINGS WILL BE _BAD_ WITHOUT THESE VARIABLES:
+# GXBASE_ROOT - THE LOCATION OF GXBASE, VERY IMPORTANT (NOTE, _NO_ QUOTES AT ALL!!)
+# GXBASE_SAFEXIT - THE SAFE SCRIPT/SOURCE EXIT CLAUSE, NOTE THE _SINGLE_ QUOTES, ALL VERY IMPORTANT (used like this: " eval $GXBASE_SAFEXIT " )
+GXBASE_ROOT=$(cat "$HOME/.config/gxbase/GXBASE_ROOT" 2>/dev/null)
+GXBASE_SAFEXIT='case $- in *i*) return $?;; *) exit $?;; esac'
+
+
+if (! gxroot_isvalid); then
+  echo "Now going to search for the install directory, this can be done a few different ways, please pick one:"
+  PS3OLD=$PS3
+	PS3="Select one or Enter The Path To GxBase: "
+	select METHOD in "Check Default Locations (fastest)" "Search using Locate (faster than find)" "Search using Find (slow)"; do
+		if [[ ! -z $METHOD ]]; then
+		  case $REPLY in
+					1)  
+					{
+						echo "Checking default locations..."
+						# most likely: first entry, which is the directory in which this script file is initiated from, links will be dereferenced so /my/gxbase = /usr/local/gxbase will return /usr/local/gxbase
+						# also, the user can self-set GXBASE_ROOT_INIT so the configuration validator will find it and save it's location 
+						unset IFS
+						for LOCATION in $(dirname `readlink -e $BASH_SOURCE`) "$GXBASE_ROOT_INIT" "/usr/local/gxbase" "/usr/share/gxbase" "/usr/gxbase" "$HOME/gxbase" "$HOME/.local/gxbase" "/opt/gxbase" "/windows/gxbase"; do
+							if [[ -d ${REPLY}* ]]; then
+								GXBASE_ROOT=${REPLY}*
+								break
+							fi
+						done
+					}
+					;;
+				2)
+					echo "Searching via locate..."
+					{
+						RESULT=$(locate .gxbase.locator.stamp.uuid --limit 1)
+						RESULT=$(dirname $RESULT)
+						if [[ -d $RESULT ]]; then
+							echo "found gxbase in: $RESULT"
+							GXBASE_ROOT=$RESULT
+						fi
+					}				
+					;;
+				3)
+					echo "Searching entire tree using find, this WILL take a while..."
+					{
+						RESULT=$(find / -iname .gxbase.locator.stamp.uuid)
+						RESULT=$(dirname $RESULT)
+						if [[ -d $RESULT ]]; then
+							echo "found gxbase in: $RESULT"
+							GXBASE_ROOT=$RESULT
+						fi
+					}
+					;;
+				*)
+					echo "Invalid Option, Please Enter 1, 2, 3, or a partial or complete path to gxbase."
+					;;
+			esac
+		else
+			if [[ ! -z $REPLY ]]; then
+				# entered yourself
+				if [[ -d ${REPLY}* ]]; then
+					GXBASE_ROOT=${REPLY}*
+					echo "Path set to $GXBASE_ROOT"
+				fi
+			else
+				echo "Please Select Something from the menu!"
+			fi
+		fi
+		if [[ -d $GXBASE_ROOT ]]; then
+			break;
+		fi
+	done	
+	PS3=$PS3OLD
+	export GXBASE_ROOT
+	echo -ne "Writing GXBASE_ROOT to configuration..."
+	echo "$GXBASE_ROOT" > "$HOME/.config/gxbase/GXBASE_ROOT"
+else
+	echo "located in $GXBASE_ROOT, continuing to load..."
+fi
+
+# set rest of variables
+#
+#gxbase_setupvariables $GXBASE_ROOT $USER $(tty) $(hostname -I) $(hostname -b)
+
+
+# --------------------------------------------- end of pre-init configuration -------------------------------------------
+export GXBASE_ROOT
+# now we have it, set the usertime binary/script path into the path
+if [[ -z $GXBASE_BININPATH ]]; then
+	# only want to do this one time, in case rgx (light) or gx.reload is used
+	export GXBASE_BININPATH=1
+	export PATH=$PATH:$GXBASE_ROOT/bin
+fi
+
+if ( flag_exists TEST_ERROR_STDOUT ); then
+	echo "Error Check Flag TEST_ERROR_STDOUT is set, this text is only a test, but will appear as an error to test the error catching mechanism."
+fi
+
+if (gxroot_isvalid); then
+	echo "Validated signature key..."
+	echo "GXBASE is located in $GXBASE_ROOT and is starting up..."
+  gxecute startup
+	gxecute cleanup	
+else
+	echo "No valid GXBASE directory could be located, please check your installation and try again."
+fi
+gx.progress 100
+gx.progress done
+set +x
+if [[ -r $HOME/.gxbase-enable-pre-run-first-time-warnings ]]; then
+	rm -f $HOME/.gxbase-enable-pre-run-first-time-warnings
+	[[ $? -ne 0 ]] && echo "cant delete first-run warnings file in your home folder, $HOME, check your permissions."
+fi
+
+# TODO: put code into installer to fix glitch permanantly, adding a question to user if they want path in front or back
+# temporary fix (installer glitch)
+# move gxbase's bin path entry to front where it is supposed to be
+# unless user specified GXBASE_PREVENT_BIN_PATH_FRONT
+# the second (below here) variable is for when the glitch is fixed  (below here) is temporary
+if [[ $GXBASE_PATH_POSITION != "back" ]] && [[ -z $GXBASE_PREVENT_BIN_PATH_FRONT ]]; then
+	OLDIFS=$IFS
+	IFS=':'
+	for i in $PATH; do
+		case $i in
+			*gxbase*)
+				true;;
+			*)
+				if [[ $NEWPATH ]]; then
+					NEWPATH+=$IFS
+				fi
+				NEWPATH+=$i;;
+		esac
+	done
+	export PATH=$GXBASE_ROOT/bin:$NEWPATH
+fi
+		
+				
+

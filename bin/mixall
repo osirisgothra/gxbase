@@ -1,0 +1,32 @@
+#!/bin/bash
+DEFAULT_CARD=2
+IFS="
+"
+CHANNELFINDER='(?<=Simple mixer control .)(^Bass|^Treble|[A-Z a-z]+)(?=.,[0-9])'
+nul="/dev/null 2>&1"
+mixbin=/usr/bin/amixer
+mixset=sset
+mixcardflag=c
+
+if [ ! -z "$2" ] && [ "$2" -ge 0 ]; then
+	CARD=$2
+else
+	CARD=$DEFAULT_CARD
+	echo "using default card: $CARD (set in script settings mixall)"
+fi
+
+IFS="
+"
+
+if [ ! -z "$1" ] && [ "$1" -ge 0 ]; then
+	echo "Setting all channels on card #$CARD except tone to $(($1+0))..."
+	#for i in $(amixer -c $CARD | grep -Po '(?<=Simple mixer control .)(^Bass|^Treble|[A-Z a-z]+)(?=.,[0-9])')
+	for i in $($mixbin -$mixcardflag $CARD | grep -Po $CHANNELFINDER); do	 
+		eval amixer -c $CARD sset \'$i\' $1 > /dev/null 2>&1 
+	done
+	[ $? -eq 0 ] && echo "OK" || echo "Errors, but ok"
+else
+	echo "No arguments need 0-100"
+fi
+
+unset IFS

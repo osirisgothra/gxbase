@@ -1,0 +1,14 @@
+#!/bin/bash
+# ineed
+#
+# i need this program
+#
+# installs it or finds it, only installing if nothing is to be removed... kinda dumb but i did use it alot
+#
+echo "Doing a Non-Compromising Install..."
+sudo apt-get install -y --no-remove -qq $*
+if [ $? -eq 0 ]; then
+	echo "Finished OK"
+else
+	echo "Finished, NOT OK ($?)"
+fi

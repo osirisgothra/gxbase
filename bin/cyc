@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# do not source! this command will guard against this by starting it properly
+case $- in *i*)
+ echo "[sourced, now invoking properly...]"
+ $BASH_SOURCE $*
+ RETC=$?
+ echo "[returning to source, $RETC]"
+ return $?;;
+esac 
+
+if [[ $1 ]] && [[ ${1^^} != "--HELP" ]] && [[ ${1^^} != "--H" ]]; then
+
+
+	# check all possible positive matches
+	PGREP_RETCODE=`pgrep $1 > /dev/null 2>&1; echo $?`
+	if [[ $PGREP_RETCODE -eq 1 ]]; then
+		echo "Start $1"
+		# invoke on $* in case there are other arguments
+		eval $*
+	else
+		echo "Kill-All $1"
+		# matched, so kill
+		killall -s KILL $1
+	fi
+	echo "Done."
+  exit $?		
+else
+	echo "syntax: cyc [progname]"
+	echo "invoke killall name if process found against pgrep"
+	echo "invoke program name if not found, it must be in the system's path"
+	echo "warning: be careful not to kill everything, im not responsible for you not being careful..."
+	exit 255;
+fi

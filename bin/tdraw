@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ ! -x $TDLOC ]; then
+	TDLOC=`locate THEDRAW.EXE --limit=1`
+else
+	TDLOC=$TDLOC
+fi
+# rem this script will always find the real thedraw.exe if it isnt known
+if [ -x $TDLOC ]; then
+	$TDLOC $*
+else
+	echo "Can't find thedraw and no TDLOC is set!"
+fi
+		

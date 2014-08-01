@@ -1,0 +1,55 @@
+#!/bin/bash
+eval `resize`
+[ "$COLUMNS" ] || COLUMNS=80
+COLORCODE=${1-0;30;40;1}
+BREAKCHAR=${2--}
+HEADER=$3
+BREAKLEN=$[ ${4-$COLUMNS} ]
+
+if [ "${1^^}" == "--HELP" ] || [ "${1^^}" == "-H" ]; then
+
+	# this is a "here" document...
+	cat <<-EOF
+	Prints a line break smartly, considering the width of the terminal, optionally in color.
+
+	syntax: echobreak [color attributes (default=0;30;40;1)] [break character (-)] [header text] [force break length]
+
+		color attributes: Can be any ansi SGR sequence. Do not include the leading ESCAPE and left brace ([), and do not
+		include the trailing terminator code m, they are added afterwords. Natrually only SGR codes can be used due to this
+		and for good reason, security. See wikipedia or other sites for all SGR codes. Quick help: must be a list of numbers
+		separated by semicolons. Each number must be 0-8, 30-38, 40-48. 0 means reset, 1 means bright. the low digit in the
+		30-38/40-48 (0-8) is the actual color, starting with zero, black=0, red=1, green, yellow, blue, magenta, cyan, gray.
+		The 30-38 range is for foreground colors, the 40-48 range is for background colors. If you specify 38 or 48 followed
+		by 5, then the third number can be in the range of 0-255 indicating a 256-color code, these colors are the same as 
+		the VGA palette established for 256-color screen modes on all color noninterlaced CRTs. The low 16 numbers are the
+		same as 30-37, 1;30-1;37.. then a table of increasing values and hues, then at 232-255, shades of gray from dark  
+		to light up to almost white, which is at color 15. Examples: 1;31;44 = bright-red on blue, and 38;5;[0-255] = 256
+		color code access for foreground, 48;5;[0-255] is for background**.
+
+		break character: any character printable, any string will be cut to just the first letter of the string, if you were
+		to specify "#hello" then the break character would be "#"
+
+		header text: text to print just before header (optional), if empty (double quoted) it is ignored. Also, the color that
+		is used to print it is the current color set by the user before the command started, with the bright attribute on.
+
+		force break length (integer): must be an integer but is optional*, it cannot be zero or nothing will be printed. Also
+		if you pass a non-numeric (or a number that cant be parsed), the value will evaluate to zero or the value that the shell
+		picks for arithmetic expansion (in case a variable calculation is used, see bash(1) for details)
+
+		RETURN VALUE
+		returns the value of the COLUMNS variable, if possible, or zero if impossible. any errors are printed to stdout.
+
+		RELATED INFO
+		Your terminal, $TERM, reports a width of $COLUMNS for the current open terminal ($(term))
+
+		Last updated: 7-oct-2013 by gabriel sharp (gabriel@paradisim.tk)
+
+		EOF
+
+	else		
+		[ "$HEADER" ] && echo "[1m$HEADER[21m"
+		printf "[${COLORCODE}m"
+		for ((i=0;i<$BREAKLEN;i++)); do printf -- "$BREAKCHAR"; done
+		echo -e "\n[0m"
+
+fi

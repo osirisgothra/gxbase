@@ -1,0 +1,6 @@
+#!/bin/bash
+if (tty -s); then
+	/usr/bin/X11/alsamixer $*
+else
+	/usr/bin/X11/gnome-alsamixer $*
+fi

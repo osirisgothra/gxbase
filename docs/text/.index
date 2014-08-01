@@ -1,0 +1,4 @@
+#!/usr/bin/vim
+# comma separated values (csv) format file, lines starting with # are ignored
+# lines must contain one and only one comma:  filename,description
+# all remaining commas are considered part of the description (no filenames with commas!!)

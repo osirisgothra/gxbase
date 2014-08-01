@@ -1,0 +1,1 @@
+f__df() { command df -h $* | grep -P "^sd[a-z][0-9]"; v=$?; unset $FUNCNAME; return $v; } f__df

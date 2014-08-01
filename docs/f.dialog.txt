@@ -1,0 +1,40 @@
+--and-widget options            --buildlist T H W tag1 item1 status1 +                                     
+--create-rc "file"              --calendar T H W day month year                                            
+--ascii-lines                   --checklist T H W list H tag1 item1 status1 +                              
+--aspect ratio                  --dselect directory H W                                                    
+--backtitle backtitle           --editbox file H W                                                         
+--beep                          --form T H W form H label1 ly1 lx1 item1 iy1 ix1 flen1 ilen1 +             
+--beep-after                    --fselect filepath H W                                                     
+--begin y x                     --gauge T H W percent                                                      
+--cancel-label str              --infobox T H W                                                            
+--clear                         --inputbox T H W init                                                      
+--colors                        --inputmenu T H W menu H tag1 item1 +                                      
+--column-separator str          --menu T H W menu H tag1 item1 +                                           
+--cr-wrap                       --mixedform T H W form H label1 ly1 lx1 item1 iy1 ix1 flen1 ilen1 itype +  
+--date-format str               --mixedgauge T H W percent tag1 item1 +                                    
+--default-button str            --msgbox T H W                                                             
+--default-item str              --passwordbox T H W init                                                   
+--defaultno                     --passwordform T H W form H label1 ly1 lx1 item1 iy1 ix1 flen1 ilen1 +     
+--exit-label str                --pause T H W seconds                                                      
+--extra-button                  --prgbox T command H W                                                     
+--extra-label str               --programbox T H W                                                         
+--help-button                   --progressbox T H W                                                        
+--help-label str                --radiolist T H W list H tag1 item1 status1 +                              
+--help-status                   --rangebox T H W min-value max-value default-value                         
+--help-tags                     --tailbox file H W                                                         
+--hfile str                     --tailboxbg file H W                                                       
+--hline str                     --Tbox file H W                                                            
+--ignore                        --timebox T H W hour minute second                                         
+--input-fd fd                   --treeview T H W list-H tag1 item1 status1 depth1 +                        
+--insecure                      --yesno T H W                                                              
+--item-help                     --print-size              --no-lines                      --stdout          
+--keep-tite                     --print-version           --no-mouse                      --tab-correct     
+--keep-window                   --quoted                  --no-nl-expand                  --tab-len n       
+--last-key                      --scrollbar               --no-ok                         --time-format str 
+--max-input n                   --separate-output         --no-shadow                     --timeout secs    
+--no-cancel                     --separate-widget str     --no-tags                       --title title     
+--no-collapse                   --shadow                  --nook                          --trace file      
+--no-cr-wrap                    --single-quoted           --ok-label str                  --trim            
+--no-items                      --size-err                --output-fd fd                  --version         
+--no-kill                       --sleep secs              --output-separator str          --visit-items     
+--no-label str                  --stderr                  --print-maxsize                 --yes-label str  

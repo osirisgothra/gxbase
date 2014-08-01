@@ -1,0 +1,5 @@
+This directory contains files that were changed that may cause
+some things to become incompatible in an unforseen way. For this,
+I created this directory. These are the files:
+
+install.sh			original installer without multiple

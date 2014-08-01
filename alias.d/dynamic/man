@@ -1,0 +1,8 @@
+#!/bin/bash -c exit
+name=man
+kind=num
+pos=end
+first=1
+last=9
+step=1
+template=man -s[[index]] [[args]]

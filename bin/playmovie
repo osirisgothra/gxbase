@@ -1,0 +1,19 @@
+#!/bin/bash
+# playmovie
+# plays movies using vlc
+#
+export PLIST=/tmp/request${RANDOM}_${RANDOM}.m3u
+
+declare -i GUIMODE=1
+if (tty -s); then	if [ "$1" == "--gui" ]; then shift;	else GUIMODE=0;	fi; fi
+
+if [ "$1" == "-zen" ]; then
+	GUIMODE=1
+	shift
+elif (tty -s); then
+	unset GUIMODE
+else
+	GUIMODE=1
+fi
+
+

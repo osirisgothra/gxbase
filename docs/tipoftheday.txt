@@ -1,0 +1,22 @@
+Terminal garbled? cant see keystrokes? lines arent breaking right? type "saneterm" to get it back to normal!
+Keep these tips on for a while, if you want them off, type gx.tips.off
+You can type 'gx.' and <Tab> to get an autocomplete list of gxbase functions and aliases.
+You can press <Esc>,<Esc>,<F1> at any time to view the current keyboard bindings.
+You can type 'lil' at any time to list LightFunctions available to you.
+You can use 'li' as a shortcut for gx.light.inject to create new LightFunctions.
+You can turn gxbase on and off (permanantly) just by typing gx.on or gx.off.
+You can stop ALL login/shell init messages by typing 'hush.on' or back on with 'hush.off'.
+You can change the size of your prompt, type prompt.<Tab> for a list of sizes.
+Aliases, variables, and functions can be written on-the-fly using Permas. See docs/permas.txt for more info.
+Permas come in three flavors: permalas, permavars, and permafuncs. See docs/permas.txt for more info.
+All executable scripts not in the startup chain are stored in the '/bin' directory.
+You easily can customize your logoff/logout actions by adding/removing scripts from /shutdown.d.
+The modified vim script will smartly scan your system and choose the best mode and permissions to run with.
+The modified vim script will check usually accessed locations for files if not in your current directory.
+The modified vim script will run in direct mode if it is named 'vim' or indirect if it is 'mvim'.
+You can use the 'cyc' script to cycle an executable on (if not running) or off (kill it, when running).
+You can swap the names of two filesystem objects (files, directories, etc) using the 'sins' command.
+You can perform chmod AND chgrp at the same time, with an identical command line, by using the alias 'chug'.
+You can quickly add aliases by using the command 'gx.alias.edit'.
+You can add one-line aliases just by dumping text into an aliasname (file) stored in alias.d/oneline/<aliasname>.
+You can get the latest version of GxBase from http://gitorious.org/gxbase/gxbase.git.

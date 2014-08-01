@@ -1,0 +1,46 @@
+#!/bin/bash
+#
+# mixer
+#
+# does the following
+#
+#   1) starts a sound mixer if:
+#      - user is root, and in an X session, starts "alsamixer" in a "gnome-terminal"
+#      - user is NOT root, and in an X session, and gnome-alsamixer is not runnable, runs "xfce4-mixer"
+#      - user is not root and in an X session and gnome-alsamixer is runnable, runs "gnome-alsamixer"
+#      - user is not in an X session, and connected to a TTY, runs "alsamixer" in foreground mode
+#      - user is not in an X session, and not connected to a TTY, passes command line to amixer (a non-interactive command line mixer)
+#      - user tries to run as ". mixer" or "source mixer", re-executes this script itself in non-interactive mode. (allowing it to be sourced OR run)
+#      - user passes -cmm as the first arg, runs "amixer"
+
+# prevent-source guard
+case $- in 
+	*i*)
+		echo "source guarded, executing $BASH_SOURCE $* ..."
+		$BASH_SOURCE "$@"
+		return $?
+		;;
+esac
+
+if [[ $1 == "-cmm" ]]; then
+	amixer "$@"
+else
+ echo "executing depending on situation..."
+	if [[ $DISPLAY ]]; then
+		if [[ $UID == 0 ]]; then
+			gnome-terminal -c alsamixer "$@" 
+		else
+			if ( ! gnome-alsamixer "$@" ); then
+				xfce4-mixer "$@"
+			fi
+		fi
+	else
+		if (tty -q); then
+			alsamixer "$@"
+		else
+			amixer "$@" | logger
+		fi
+	fi
+	# protected by sg
+	exit $?
+fi

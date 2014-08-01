@@ -1,0 +1,1 @@
+echo "[2J[1;1H[press any key to end hold of line/tty \"[1m`tty`[0m\"][1;1H"; exec waitk

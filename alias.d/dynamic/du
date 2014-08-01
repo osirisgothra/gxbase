@@ -1,0 +1,1 @@
+f__du() { command du --max-depth=1 -h $* | sort | less -P "   Disk Usage Summary for $DATE - As Invoked by $USER($UID)   "; v=$?; unset $FUNCNAME; return $v; } f__du

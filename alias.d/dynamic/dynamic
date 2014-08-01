@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# dynamic
+#
+# base logic for dynamic commands
+# 
+# Author:
+#    Gabriel Thomas Sharp <osirisgothra@hotmail.com>  
+# 
+# Copyright (C)2013 Paradisim Enterprises, LLC 
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# This file was created 
+# For more support, visit our homepage: http://paradisim.tk
+# Report any bugs to <bugs@paradisim.tk> or visit our FAQ on our website.
+#
+DATAPREFIX=`dirname $BASH_SOURCE`/`basename $BASH_SOURCE`
+DATAFILE=`echo $DATAPREFIX.*`
+if [[ -x $DATAFILE ]]; then
+case $DATAFILE in
+		*.data)
+			cat $DATAFILE;;
+		*.sh)
+			source $DATAFILE;;
+		*.html)
+			lynx $DATAFILE;;
+		*.sudo)
+			sudo `cat $DATAFILE` $*;;
+		*.env)
+			eval `$DATAFILE $*`;;
+		*.prompt)		
+			tPS1=`cat $DATAFILE | grep -Po "(?<=1:).*$"`;
+			tPS2=`cat $DATAFILE | grep -Po "(?<=1:).*$"`;
+			tPS3=`cat $DATAFILE | grep -Po "(?<=1:).*$"`;
+			tPS4=`cat $DATAFILE | grep -Po "(?<=1:).*$"`;
+			[[ $tPS1 ]] && export PS1=$tPS1;
+			[[ $tPS2 ]] && export PS2=$tPS1;
+			[[ $tPS3 ]] && export PS3=$tPS1;
+			[[ $tPS4 ]] && export PS4=$tPS1;;
+		*)
+		eval $DATAFILE;;
+	esac
+fi

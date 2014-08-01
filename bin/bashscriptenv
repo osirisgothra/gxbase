@@ -1,0 +1,27 @@
+#!/bin/bash
+echo "You are in a script environment under bash, issue commands as normal"
+echo "but you will see results as a script would see them, type \"EXIT\" without"
+echo "quotes and in CAPS to exit gracefully, this script."
+echo "While the \e[1;31mBSE\e[0m prompt displays, you are in this mode."
+echo ""
+echo "BSE is Ready."
+echo ""
+REPLY=
+set $REPLY
+while [ x$1 != xEXIT ]; do
+	echo ""
+	echo -en "\e[1;31mBSE \e[1;32m$PWD\e[0;32m:\e[0m "
+	read
+	set $REPLY
+	echo ""
+	if [ x$1 != xEXIT ]; then
+		eval $*
+		echo ""		
+		echo "(return value: $?)"			
+	else
+		echo ""
+		echo "EXIT was given, exiting gracefully..."
+		echo ""
+	fi
+done
+echo "Exited Gracefully, Returning $? to parent process..."

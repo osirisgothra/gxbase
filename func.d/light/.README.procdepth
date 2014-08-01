@@ -1,0 +1,18 @@
+procdepth
+abstract=number of procs under your current shell process (exclusive)
+
+returns a number showing how many sub-processes are running under your terminal at this time ($$)
+NOTE: since procdepth is intended to be used as $(procdepth) it automatically subtracts 2 from the
+number of processes it finds, the first one is for the 'ps' process it launches in order to count
+the running processes. The second is for the process that is created as a result of using the
+subshell parameter expansion [ the $() syntax starts another process, which is figured in ]. If you
+are using it as a function, you will have to use at least the subshell command specifiers, like
+this:
+   (procdepth)
+
+or use it in a string as it is intended:
+
+   echo "$(procdepth) sub-processes running under $$"
+	 -----
+	 3 sub-processes running under 13502
+	 ubuntu@localhost ~/gxbase/func.d/light$ _
