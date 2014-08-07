@@ -1,0 +1,103 @@
+#!/bin/bash
+
+if declare -F choice &> /dev/null; then
+	NOT_INSTALLED=0
+else
+	NOT_INSTALLED=1
+fi
+
+
+function choice()
+{
+	if [[ "$@" =~ ^(|.* )(--help|-(h|\?))(| .*)$ ]]; then
+		# cheat: pretend like getopt was used, since --help can be specified anywhere 
+		cat <<-EOF
+		Collect a response from the user, by asking for a keypress.
+                
+                Syntax: choice [prompt] [keys] {timeout} {defaultkey} | [--help|-h|-?]
+
+		prompt (optional) 	the string displayed before waiting for input
+		                        escape characters are recognized. If no prompt
+		                        is given, nothing or \$CHOICE_PROMPT is used.
+		keys (optional)         the characters that the user may press as a response
+		                        choice. If no keys are provided, then the default
+		                        value of \$CHOICE_DEFAULT_KEYS, or if unset, the
+		                        keys 'YN' will be the default.
+		{timeout} (implicit)	If not provided, no timeout is used, otherwise it
+		                        a time period of seconds will be used before selecting
+		                        the {defaultkey}. If no {defaultkey} is given, then
+					the [ENTER] key is assumed. 
+		{defaultkey}            The keychar used, if you use more than one, it will be
+		                        a match that never happens and therefore ignored.
+		RETURN VALUE            The return value is numeric, of course, which is a value
+		                        that ranges from 0 (the leftmost char in [keys]) to the
+		                        last index in [keys] (ie, 'C' in 'YNC', would be 2, and
+		                        the 'Y' would be '0'). If a {timeout} is given, and the
+		                        {defaultkey} is not set, then the return code will be 
+		                        the length of the [keys] (in the case of YNC, 3).
+		ERRORS			If for some reason an error happens, the error return is
+		                        the same as the value for the [ENTER] key plus an error message.
+		CREDIT			Written by Gabriel Sharp <osirisgothra@hotmail.com> 
+		                        http://paradisim.twilightparadox.com (C)2014 August 7, 2014
+			
+		EOF
+		
+		return
+	fi	
+	if [[ -z $1 ]]; then
+		set -- "${CHOICE_PROMPT}" "${CHOICE_DEFAULT_KEYS-YN}"
+	elif [[ -z $2 ]]; then
+		set -- "${CHOICE_PROMPT}" "$1"
+	fi
+
+	if [[ $4 -ge 1 ]]; then
+		SUFF=" [Default=${3^^} in $4 secs]"
+	elif [[ $3 ]]; then
+		SUFF=" [Default=${3^^}]"
+	else
+		SUFF=""
+	fi
+
+	echo -ne "$1 [${2^^}]${SUFF}? "
+	REPLY=""
+	until [[ ${REPLY^^} =~ [${2^^}] ]]; do
+		[[ $4 -ge 1 ]] && TMOUT=4
+		read -sn1
+		TMOUT=0
+		
+		if [[ $REPLY == "" ]]; then
+			REPLY=${3^^}			
+		fi
+	done
+	echo $REPLY
+	for ((i=0;i<$#2;i++)); do
+		NCH="${2: $i:1}"
+		if [[ ${NCH^^} == ${REPLY^^} ]]; then
+			return $i
+		fi
+	done
+	((i++))
+	echo "Error: unexpected result: $i -- see syntax (--help) for details."
+	return $i
+}
+
+case $- in
+	*i*) 
+		# install only when no parameters are given 
+		if [[ -z $* ]]; then
+			return 0
+		else
+			choice "$@"
+			# not installed before run? dont keep installed (used by gxbase 
+			# to keep comptability with /gxbase/bin/choice script)
+			if [[ $NOT_INSTALLED -gt 0 ]]; then
+				unset -f choice
+			fi
+			return $?
+		fi			
+		;;
+	*)
+		choice "$@"
+		exit $?
+		;;
+esac
