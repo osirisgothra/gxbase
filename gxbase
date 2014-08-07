@@ -32,9 +32,9 @@ case $- in
 				eecho "Warning: skipping addition of gxbase into path"
 			else
 				if [[ -e ~/.config/gxbase/gxbase_in_path_first ]]; then
-					export PATH="$GXBASE_ROOT/bin:$GXBASE_ROOT/res:$PATH"
+					export PATH="$GXBASE_ROOT:$GXBASE_ROOT/bin:$GXBASE_ROOT/res:$PATH"
 				else
-					export PATH="$PATH:$GXBASE_ROOT/bin:$GXBASE_ROOT/res"
+					export PATH="$PATH:$GXBASE_ROOT:$GXBASE_ROOT/bin:$GXBASE_ROOT/res"
 				fi
 			fi
 			eecho "GXBASE Executer v1.0 Startup"

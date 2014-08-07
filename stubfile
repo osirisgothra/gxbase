@@ -1,5 +1,5 @@
 #!/bin/bash -r
-
+# vim:ft=sh:cc=100:ts=4:sw=4:fen:noet:fdm=marker:fcl=all:fdc=2
 ###
 ### gxbase BIOS functions
 ### minimal internal foundation functions to support
@@ -11,7 +11,7 @@
 ###
 
 
-#F gxconf [file] [section] [setting-name] 
+#F gxconf [file] [section] [setting-name] {{{
 function lineof() { cat $1 | grep "$2" --line-number | grep "^[0-9]*" -o; } 
 function gxconf() 
 {
@@ -33,7 +33,7 @@ function gxconf()
 	fi
 
 }                       
-
+#}}}
 
 function gxecholv() 
 {
@@ -61,13 +61,14 @@ function gxecholv()
 #       that may execute under /bin/sh, so no dancing around sh compatibility
 #       is needed here (that dance is left to /etc/profile.d/bash_completion.sh)
 #  (see the figure to the right for a visualization on how bash starts up)
+
 function eecho() 
 { 
 	local RET=$? # save current code no matter what	
 	case Lv$GXBASE_EECHOF_LEVEL in
 		# makes subsequent queries faster than reading the file from disk each time ( you could do this yourself in gxbconf too )
 		Lv)
-		 if [[ -r ~/.gxbase-extended-echo-forced ]]; then
+		 if [[ -r ~/.config/gxbase/extended-echo-forced ]]; then
 				declare -g GXBASE_EECHOF_LEVEL=1
 			else
 				declare -g GXBASE_EECHOF_LEVEL=0
@@ -85,7 +86,7 @@ function eecho()
 
 # TODO: put in place symantics to recover automatically from such problems
 
-if [[ ${BASH_SOURCE[2]} == ~/.bashrc ]]; then
+if [[ ${BASH_SOURCE[-1]} == ~/.bashrc ]]; then
   eecho "Starting GXBASE..."
 	GXBASE_ROOT=$(dirname $(readlink -e $BASH_SOURCE))
 	# must be a symbolic link or we wont be able to figure out the directory that gxbase originates from
@@ -107,7 +108,14 @@ if [[ ${BASH_SOURCE[2]} == ~/.bashrc ]]; then
 		echo "Symbolic link matchup: $BASH_SOURCE is NOT a symlink, you must symlink $BASH_SOURCE to /gxbase_dir/stubfile!!"
 	fi
 else
+	
 	eecho "Deferring call to gxbase (bash_completion must be called from .bashrc)"
+	eecho "trace (caller, callee, grandparent(s))->  "
+	for d in "${BASH_SOURCE[@]}"; do
+		[[ $e ]] && eecho "$d [1m--calls-->[0m $e" || eecho "$d [1m= [target][0m"				
+		e=$d
+	done
+	eecho "[1m[top parent] =[0m $e"
 fi
 
 # if [[ ${BASH_SOURCE[2]} == ~/.bashrc ]]; then
