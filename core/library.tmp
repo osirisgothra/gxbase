@@ -1,0 +1,6 @@
+
+
+
+
+function gx.function.move() { old=$1; new=$2; (echo "function $new()"; declare -f $old | tail -n+2) > /tmp/movefunc.sh; if source /tmp/movefunc.sh; then if unset -f $old; then echo "renamed $old to $new ok."; fi; fi; }
+

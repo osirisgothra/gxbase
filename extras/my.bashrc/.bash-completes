@@ -1,0 +1,3 @@
+ complete -F _longopt locate
+ complete -F _longopt dialog
+ complete -F _longopt ddd

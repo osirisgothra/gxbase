@@ -4,7 +4,7 @@ function __makeblur()
 {
 unset -f $0
 unset PICK_WINDOW IGNORE_NOKDE
-ARGS=`getopt -n ${0//_/} -l help,pick,ignore-no-kde -o h?pi -- "$@"`
+ARGS=`getopt -n ${0//_/} -l unblur,help,pick,ignore-no-kde -o uh?pi -- "$@"`
 [[ $? -ne 0 ]] && { echo "Usage: makeblur [-hpi? | --help --pick --ignore-no-kde] -- [xprop flags]"; return $?; }
 eval set -- "$ARGS"
 while [[ $1 != '--' ]]; do
@@ -17,6 +17,7 @@ while [[ $1 != '--' ]]; do
 
 			syntax: makeblur [-hpi? | --pick|--ignore-no-kde|--help] -- [xprop flags]
 
+			-u  --unblur does reverse (experimental) of making the terminal blur by removing the attribute
 			-p	--pick 
 			 \tdo not autodetect current window, your mouse pointer will change shape, then you must click on
 			\tthe window that you wish to apply the attributes to (or right-click to cancel). The button order
@@ -32,6 +33,9 @@ while [[ $1 != '--' ]]; do
 
 			EOH
 			return 0;;
+		unblur|u)
+				DO_UNBLUR=1
+				;;
 		pick|p)
 			PICK_WINDOW=1;;
 		ignore-no-kde|i)
@@ -66,7 +70,11 @@ if [ $DISPLAY ]; then
 			eval xprop $getspec | grep ^"_NET_ACTIVE_WINDOW" | grep --only-matching "0x[0-9a-fA-F]*" --color=never			
 		}
 		
-		xprop -f _KDE_NET_WM_BLUR_BEHIND_REGION 32c -set _KDE_NET_WM_BLUR_BEHIND_REGION 0 -id `func_getcurrentwindow`
+		if [[ $DO_UNBLUR == 1 ]]; then
+			xprop -remove _KDE_NET_WM_BLUR_BEHIND_REGION -id `func_getcurrentwindow`
+		else
+			xprop -f _KDE_NET_WM_BLUR_BEHIND_REGION 32c -set _KDE_NET_WM_BLUR_BEHIND_REGION 0 -id `func_getcurrentwindow`
+		fi
 
 		RETVAL=$[ $? + 0 ]
 		# just in case we were sourced, undefine the function

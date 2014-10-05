@@ -62,6 +62,13 @@ function gxecholv()
 #       is needed here (that dance is left to /etc/profile.d/bash_completion.sh)
 #  (see the figure to the right for a visualization on how bash starts up)
 
+# eecho levels can't be changed just by adding or deleting configurations
+# you must also delete GXBASE_EECHOF_LEVEL as well (done here), this way
+# one can't just delete a file and change behavior which could be bad
+# if one didn't know what they were doing!
+unset GXBASE_EECHOF_LEVEL
+
+# 		 eecho() [echo cmd line] 
 function eecho() 
 { 
 	local RET=$? # save current code no matter what	

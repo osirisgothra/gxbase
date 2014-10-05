@@ -111,3 +111,24 @@ found*
 .hash
 *.db
 
+# author stuff (nobody needs to worry about this)
+G
+b
+d
+e
+g
+l
+o
+r
+s
+D
+G/*
+b/*
+d/*
+e/*
+g/*
+l/*
+o/*
+r/*
+s/*
+D/*

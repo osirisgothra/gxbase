@@ -1,24 +1,121 @@
-unset ADDOPT
-if [[ -d "$*" ]]; then
-	echo "$* is a directory, recurse it?"
-	if [[ $(read -sn1 r; printf $r) == y ]]; then
-		echo "okay, recursing.."
-		ADDOPT="--recursive"
+#!/bin/bash
+#
+# Make file(s) executable for group members and users (same as 'sudo a+x *' with some checking/assumptions)
+# 
+# Without any arguments, will make all scripts in the current directory executable
+#
+
+case $- in 
+	*i*) $BASH_SOURCE "$@"; return $?;;
+esac	
+
+#vars
+declare exflags=""
+declare sudo=""
+declare -i rv=0 forced=0 forceall=0
+unset IFS;
+
+if ARGS=(`getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all -o RaHf -- "$@"`); then
+	eval set -- "${ARGS[@]}"
+	while [[ $1 != "--" ]]; do
+		case $1 in
+			--all|-a)
+				declare -i forceall=1;;
+			--force|-f)
+				declare -i forced=1;;
+			--recursive|-R)
+				exflags="-R";;
+			--help|-H)
+				echo "syntax: makex [-R|--recursive] [-f|--force] [[filespec] ... ]"
+				echo "        makex [-H|--help]"
+
+				echo "                                                                         "
+				echo " The first command style passes arguments together to the system's chmod "
+				echo " command, of course, barring any other arguments chmod takes. If you need"
+				echo " those commands, use chmod(1) instead"
+				exit 1;;
+			*)
+				echo "Error: unknown argument ($1)"
+				exit 254;;
+	esac
+		shift
+	done
+	shift # remove '--' from list
+	unset DIRMODE
+	case $# in
+		0)
+			echo "No files given, working in single-level autodetect mode..."
+			DIRMODE=Y
+	esac
+	# graft flag back into chmod (this prevents other flags from being passed to chmod)
+	eval set -- "$exflags" "$@"
+
+	if [[ $UID -ne 0 ]] && sudo -ln chmod; then
+		echo "[32mUser is sudo-allowed for chmod (using sudo to make executables)...[0m"
+		sudo="sudo"
+	elif [[ $UID -eq 0 ]]; then
+		echo "[33mUser is root, sudo is not required (all files specified will be changed)...[0m"
+		sudo=""
 	else
-		echo "nevermind."
+		echo "[31mUser is NOT sudo-allowed for chmod (and not root), only files user has access to change will be changed...[0m"
+		sudo=""
 	fi
-fi
-sudo chmod $ADDOPT ug+x $*
-if [[ $? -eq 0 ]]; then
-	declare -i a=0
-	if [[ $ADDOPT ]]; then
-		IFS='
-		'
-		# subtract for the . .. entry 
-    a=$[ $(find $* | grep -Po --count "^.*$") - 2 ];
+	unset FILE EXPLAIN AUTOCOUNT IGNCOUNT suff
+	if [[ $DIRMODE == Y ]]; then
+		declare -i AUTOCOUNT=0 IGNCOUNT=0 
+		let AUTOCOUNT=0
+		for FILE in *; do
+			# dont process files that are already executable
+			if file "$FILE" | grep -q executable && [[ ! -x $FILE || $forced == 1 ]] || [[ $forceall == 1 ]]; then
+				eval set -- "$@" $FILE
+				echo -n "Adding executable $FILE"
+				[[ $forced -eq 1 ]] && echo -n ", forced on already-set"
+				[[ $forceall -eq 1 ]] && echo -n ", forced on ALL files"
+				echo
+				let AUTOCOUNT++
+			else				
+				let IGNCOUNT++
+				echo -n "Skipping $FILE, "
+				if [[ -x $FILE ]]; then
+					echo "(Already Executable)"
+				else					
+					echo "(does not seem to be executable*)"
+					EXPLAIN=1
+				fi 
+			fi
+		done
+	fi
+	[[ $EXPLAIN -eq 1 ]] && echo "[30;1m*executable is not the same as source-able (as in the [4msource command[0;30;1m).[0m"
+	#for debug, uncomment or add $sudo and $@ to your watches in bashdb
+	#echo "command: $sudo chmod a+x [$@]" 
+	if [[ $# -ge 1 ]]; then
+		$sudo chmod a+x "$@" $exflags
 	else
-		for i in $@; do a+=1; done
+		echo "no command called (no files to process)"
 	fi
-	echo "Finished, $a item(s) made executable, without errors."
+
+	if [[ $? -eq 0 ]]; then
+		echo -n "Completed Without Errors, "
+	else
+		rv=$?
+		echo -n "Completed With Errors (chmod returned $rv), "
+		(exit $rv) 
+	fi
+	if [[ -v AUTOCOUNT ]]; then
+		echo "($AUTOCOUNT changed, $IGNCOUNT ignored)"
+	else
+		[[ $# != 1 ]] && suff=s || suff=
+		echo "($# item${suff})"
+		unset suff
+	fi 
+	exit $?
+else
+	# return code from getopt, truncate to 1, if needed
+	[[ $? -lt 1 ]] && exit 1 ||	exit $?
 fi
+
+function _memory_corruption()
+{ echo "Error $?: this file ($BASH_SOURCE, called by ${BASH_SOURCE[1]}) is corrupted either in memory or on disk."
+  echo "Get a good and secure copy at: http://github.com/osirisgothra/gxbase"; }; _memory_corruption $?
+
 

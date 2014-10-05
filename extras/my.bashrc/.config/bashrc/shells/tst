@@ -1,0 +1,140 @@
+<NL>        *@i<C-R>=Perl_JumpCtrlJ()<CR>
+\ft         Snippet: File Tests")<CR>
+\nxs        Snippet: Snippets.regex
+\njt        Snippet: Snippets.jump tags
+\pm         Function: InsertTemplate(g:Perl_Templates,"POD.markup sequences")<CR>
+\pi         Function: InsertTemplate(g:Perl_Templates,"POD.item")<CR>
+\pob        Function: InsertTemplate(g:Perl_Templates,"POD.over, back")<CR>
+\ph3        Function: InsertTemplate(g:Perl_Templates,"POD.head3")<CR>
+\ph2        Function: InsertTemplate(g:Perl_Templates,"POD.head2")<CR>
+\ph1        Function: InsertTemplate(g:Perl_Templates,"POD.head1")<CR>
+\pbt        Function: InsertTemplate(g:Perl_Templates,"POD.begin text, end")<CR>
+\pbh        Function: InsertTemplate(g:Perl_Templates,"POD.begin html, end")<CR>
+\pfc        Function: InsertTemplate(g:Perl_Templates,"POD.for, cut")<CR>
+\ppc        Function: InsertTemplate(g:Perl_Templates,"POD.pod, cut")<CR>
+\xms        Function: InsertTemplate(g:Perl_Templates,"Regex.metasymbols")<CR>
+\xex        Function: InsertTemplate(g:Perl_Templates,"Regex.extended Regex")<CR>
+\xup        Function: InsertTemplate(g:Perl_Templates,"Regex.Unicode Property")<CR>
+\xpc        Function: InsertTemplate(g:Perl_Templates,"Regex.POSIX classes")<CR>
+\vue        Function: InsertTemplate(g:Perl_Templates,"Special Variables.use English")<CR>
+\vs         Function: InsertTemplate(g:Perl_Templates,"Special Variables.POSIX signals")<CR>
+\vr         Function: InsertTemplate(g:Perl_Templates,"Special Variables.regexp")<CR>
+\vio        Function: InsertTemplate(g:Perl_Templates,"Special Variables.IO")<CR>
+\vid        Function: InsertTemplate(g:Perl_Templates,"Special Variables.IDs")<CR>
+\vf         Function: InsertTemplate(g:Perl_Templates,"Special Variables.filehandle")<CR>
+\ve         Function: InsertTemplate(g:Perl_Templates,"Special Variables.errors")<CR>
+\vb         Function: InsertTemplate(g:Perl_Templates,"Special Variables.basics")<CR>
+\ise        Function: InsertTemplate(g:Perl_Templates,"Idioms.STDERR")<CR>
+\iso        Function: InsertTemplate(g:Perl_Templates,"Idioms.STDOUT")<CR>
+\isi        Function: InsertTemplate(g:Perl_Templates,"Idioms.STDIN")<CR>
+\ipi        Function: InsertTemplate(g:Perl_Templates,"Idioms.open pipe")<CR>
+\io         Function: InsertTemplate(g:Perl_Templates,"Idioms.open output file")<CR>
+\ii         Function: InsertTemplate(g:Perl_Templates,"Idioms.open input file")<CR>
+\ip         Function: InsertTemplate(g:Perl_Templates,"Idioms.print")<CR>
+\isu        Function: InsertTemplate(g:Perl_Templates,"Idioms.subroutine")<CR>
+\it         Function: InsertTemplate(g:Perl_Templates,"Idioms.translate")<CR>
+\is         Function: InsertTemplate(g:Perl_Templates,"Idioms.substitute")<CR>
+\im         Function: InsertTemplate(g:Perl_Templates,"Idioms.match")<CR>
+\ir         Function: InsertTemplate(g:Perl_Templates,"Idioms.regex")<CR>
+\ihh        Function: InsertTemplate(g:Perl_Templates,"Idioms.hash+assignment")<CR>
+\ih         Function: InsertTemplate(g:Perl_Templates,"Idioms.hash")<CR>
+\iaa        Function: InsertTemplate(g:Perl_Templates,"Idioms.array+assignment")<CR>
+\ia         Function: InsertTemplate(g:Perl_Templates,"Idioms.array")<CR>
+\idd        Function: InsertTemplate(g:Perl_Templates,"Idioms.scalar_list")<CR>
+\ida        Function: InsertTemplate(g:Perl_Templates,"Idioms.scalar+assignment")<CR>
+\id         Function: InsertTemplate(g:Perl_Templates,"Idioms.scalar")<CR>
+\swh        Function: InsertTemplate(g:Perl_Templates,"Statements.when")<CR>
+\sg         Function: InsertTemplate(g:Perl_Templates,"Statements.given")<CR>
+\sw         Function: InsertTemplate(g:Perl_Templates,"Statements.while")<CR>
+\st         Function: InsertTemplate(g:Perl_Templates,"Statements.until")<CR>
+\sue        Function: InsertTemplate(g:Perl_Templates,"Statements.unless-else")<CR>
+\su         Function: InsertTemplate(g:Perl_Templates,"Statements.unless")<CR>
+\sie        Function: InsertTemplate(g:Perl_Templates,"Statements.if-else")<CR>
+\sei        Function: InsertTemplate(g:Perl_Templates,"Statements.elsif")<CR>
+\se         Function: InsertTemplate(g:Perl_Templates,"Statements.else")<CR>
+\si         Function: InsertTemplate(g:Perl_Templates,"Statements.if")<CR>
+\sfe        Function: InsertTemplate(g:Perl_Templates,"Statements.foreach")<CR>
+\sf         Function: InsertTemplate(g:Perl_Templates,"Statements.for")<CR>
+\sd         Function: InsertTemplate(g:Perl_Templates,"Statements.do-while")<CR>
+\cma        Function: InsertTemplate(g:Perl_Templates,"Comments.macros")<CR>
+\ck         Function: InsertTemplate(g:Perl_Templates,"Comments.keyword comments")<CR>
+\ct         Function: InsertTemplate(g:Perl_Templates,"Comments.date+time")<CR>
+\cd         Function: InsertTemplate(g:Perl_Templates,"Comments.date")<CR>
+\chpo       Function: InsertTemplate(g:Perl_Templates,"Comments.file description pod")<CR>
+\cht        Function: InsertTemplate(g:Perl_Templates,"Comments.file description t")<CR>
+\chpm       Function: InsertTemplate(g:Perl_Templates,"Comments.file description pm")<CR>
+\chpl       Function: InsertTemplate(g:Perl_Templates,"Comments.file description pl")<CR>
+\cme        Function: InsertTemplate(g:Perl_Templates,"Comments.method")<CR>
+\cfu        Function: InsertTemplate(g:Perl_Templates,"Comments.function")<CR>
+\cfr        Function: InsertTemplate(g:Perl_Templates,"Comments.frame")<CR>
+\rh         *@:call Perl_Hardcopy("n")<CR>
+\ry         *@:call Perl_Perltidy("n")<CR>
+\rpnh       *@:call perlsupportprofiling#Perl_NYTprofReadHtml()<CR>
+\rpns       *@:call perlsupportprofiling#Perl_NYTProfSortInput()<CR>
+\rpnc       Function: Perl_NYTprofReadCSV("read","line")<CR>
+\rpn        *@:call perlsupportprofiling#Perl_NYTprof()<CR>
+\rpfs       *@:call perlsupportprofiling#Perl_FastProfSortInput()<CR>
+\rpf        *@:call perlsupportprofiling#Perl_Fastprof()<CR>
+\rpss       *@:call perlsupportprofiling#Perl_SmallProfSortInput()<CR>
+\rps        *@:call perlsupportprofiling#Perl_Smallprof()<CR>
+\podt       *@:call Perl_POD('text')<CR>
+\podm       *@:call Perl_POD('man')<CR>
+\podh       *@:call Perl_POD('html')<CR>
+\pod        *@:call Perl_PodCheck()<CR>
+\xe         *@:call perlsupportregex#Perl_RegexExplain( "n" )<CR>
+\xmm        *@:call perlsupportregex#Perl_RegexMatchSeveral( )<CR>
+\xm         *@:call perlsupportregex#Perl_RegexVisualize( )<CR>
+\xf         *@:call perlsupportregex#Perl_RegexPickFlag( "n" )<CR>
+\xs         *@:call perlsupportregex#Perl_RegexPick( "String", "n" )<CR>j
+\xr         *@:call perlsupportregex#Perl_RegexPick( "Regexp", "n" )<CR>j
+\nts        Function: ChooseStyle(g:Perl_Templates,"!pick")<CR>
+\ntr        Function: ReadTemplates(g:Perl_Templates,"reload","all")<CR>
+\ntl        *@:call mmtemplates#core#EditTemplateFiles(g:Perl_Templates,-1)<CR>
+\nv         *@:call Perl_CodeSnippet("view")<CR>
+\ne         *@:call Perl_CodeSnippet("edit")<CR>
+\nw         *@:call Perl_CodeSnippet("write")<CR>
+\nr         *@:call Perl_CodeSnippet("read")<CR>
+\cub        *@:call Perl_UncommentBlock()<CR>
+\cb         *@:call Perl_CommentBlock("a")<CR>
+\cc         *@:call Perl_CommentToggle()<CR>j
+\cs         *@:call Perl_GetLineEndCommCol()<CR>
+\cj         *@:call Perl_AlignLineEndComm()<CR>
+<C-\>d        :cs find d <C-R>=expand("<cword>")<CR><CR><Tab>
+<C-\>i        :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+<C-\>f        :cs find f <C-R>=expand("<cfile>")<CR><CR><Tab>
+<C-\>e        :cs find e <C-R>=expand("<cword>")<CR><CR><Tab>
+<C-\>t        :cs find t <C-R>=expand("<cword>")<CR><CR><Tab>
+<C-\>c        :cs find c <C-R>=expand("<cword>")<CR><CR><Tab>
+<C-\>g        :cs find g <C-R>=expand("<cword>")<CR><CR><Tab>
+<C-\>s        :cs find s <C-R>=expand("<cword>")<CR><CR><Tab>
+%           * :<C-U>call <SNR>26_Match_wrapper('',1,'n') <CR>
+,gq           :%s/\s\+/ /g<CR>gq1G
+[%          * :<C-U>call <SNR>26_MultiMatch("bW", "n") <CR>
+]%          * :<C-U>call <SNR>26_MultiMatch("W",  "n") <CR>
+_j            :%call Justify('tw',4)<CR>
+gx            <Plug>NetrwBrowseX
+g%          * :<C-U>call <SNR>26_Match_wrapper('',0,'n') <CR>
+~d          * :YcmShowDetailedDiagnostic<CR>
+~ihn          :IHN<CR>
+~is           :IHS<CR>:A<CR>
+~ih           :IHS<CR>
+~K            :call <SNR>17_PreGetPage(0)<CR>
+<Plug>NetrwBrowseX * :call netrw#NetrwBrowseX(expand("<cfile>"),0)<CR>
+<Nul><Nul>d   :vert scs find d <C-R>=expand("<cword>")<CR><CR>
+<Nul><Nul>i   :vert scs find i ^<C-R>=expand("<cfile>")<CR>$<CR><Tab>
+<Nul><Nul>f   :vert scs find f <C-R>=expand("<cfile>")<CR><CR><Tab>
+<Nul><Nul>e   :vert scs find e <C-R>=expand("<cword>")<CR><CR>
+<Nul><Nul>t   :vert scs find t <C-R>=expand("<cword>")<CR><CR>
+<Nul><Nul>c   :vert scs find c <C-R>=expand("<cword>")<CR><CR>
+<Nul><Nul>g   :vert scs find g <C-R>=expand("<cword>")<CR><CR>
+<Nul><Nul>s   :vert scs find s <C-R>=expand("<cword>")<CR><CR>
+<Nul>d        :scs find d <C-R>=expand("<cword>")<CR><CR><Tab>
+<Nul>i        :scs find i ^<C-R>=expand("<cfile>")<CR>$<CR><Tab>
+<Nul>f        :scs find f <C-R>=expand("<cfile>")<CR><CR><Tab>
+<Nul>e        :scs find e <C-R>=expand("<cword>")<CR><CR><Tab>
+<Nul>t        :scs find t <C-R>=expand("<cword>")<CR><CR><Tab>
+<Nul>c        :scs find c <C-R>=expand("<cword>")<CR><CR><Tab>
+<Nul>g        :scs find g <C-R>=expand("<cword>")<CR><CR><Tab>
+<Nul>s        :scs find s <C-R>=expand("<cword>")<CR><CR><Tab>
+<Plug>RestoreWinPosn   :call RestoreWinPosn()<CR>
+<Plug>SaveWinPosn   :call SaveWinPosn()<CR>-- INSERT --

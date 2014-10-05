@@ -1,6 +1,8 @@
 #!/bin/bash
 
 
+
+
 # do x repeat disabling if exclusive child of the x session
 if [[ $DISPLAY ]] && [[ -z $SSH_CLIENT_INFO ]]; then
 	if ( for item in `pidof xinit`; do pgrep --parent $item ".*" -l; done ) | grep $PPID -q; then
@@ -9,6 +11,16 @@ if [[ $DISPLAY ]] && [[ -z $SSH_CLIENT_INFO ]]; then
 		unset	KEY_AGGRESSIVE_MODE
 	fi
 fi
+
+# TODO: check loaded kernel modules to see if pcspk.ko is being used (i hear it usually is not)
+
+	if which beep &> /dev/null; then
+		DOBEEP=1
+	else
+		unset DOBEEP
+	fi
+
+
 
 # TODO: if options exceed these two, use getopts to avoid complications
 # h = draw horizonally, v = draw verticall
@@ -32,22 +44,84 @@ fi
 
 # disable echo, repeat(text ttys only), and hide the cursor
 # which will also rid the screen of accidental key garbage
-stty -echo
-setterm -repeat off -cursor off
+# IMPORTANT: redirecting to $(tty) is essential when using menu for 
+#            storing results to an external variable!!!
+#            (not doing this will cause the ANSI codes generated to
+#             be put in the variable, rather than on the screen!!)
+stty -echo > $(tty)
+setterm -repeat off -cursor off > $(tty)
 [[ $KEY_AGRESSIVE_MODE ]] && xset -r
 
-# colors to use -- in x mode we use the 256 color palette
-# for a bit more contrast. Change these if you like
+# 
+#  DISPLAYS
+#  ========
+#	 many display drivers these days have excellent support for
+#  the X server, but terrible kernel drivers. Because of this
+#  I decided to default to the invert/normal scheme, which WILL
+#  work on anything (unless you are using something from the 1950's
+#  that can't even do that, in which case should not be running this
+#  in the first place!!
+#  
+#  OVERRIDES
+#  =========
+#  If you are cocky and/or know exactly what you are doing, you can
+#  override the program's choice. These are listed in PRIORTY ORDER.
+#  This means, if you define more than one of them, the first in the
+#  list will win during testing for the values. Usually this is done
+#  from most-compatible to least-compatible order (unless you changed
+#  it). Sorry about the text running off screen here!
+#
+#  The default order is this:
+#  Export Variable		What it Does								Priority
+#  USE_2_COLOR_MENU   forces monochrome (inverts) 0 (most compatible)  
+#  USE_16_COLOR_MENU 	forces 8/16 color display		1 (opensource kernel display compatible)
+#  USE_256_COLOR_MENU forces 256 color display    2 (xterm compatible)
+#  USE_HI_COLOR_MENU  forces 8bpc RGB color*      3 (fbterm only, least compatible)
+#
+#  Note: Using fbterm's colors is NOT recommended without the fbterm running
+#        since its not well known to be compatible with anything else.
 
-[[ $DISPLAY ]] && 
-{ 
-	dim="38;5;238"
-	sel="38;5;51" 
-} || 
-{
-	dim="30;1"
-	sel="36;1"
-}
+# Define the colors here
+# If 'dim' and 'sel' are already defined, they will be preserved
+# unset dim and sel if you want them set by us.
+
+if [[ -v dim && -v sel ]]; then
+  true -- na fish sandwich
+else	
+	if [[ ! -v USE_2_COLOR_MENU  &&  $DISPLAY ]] || [[ -v USE_256_COLOR_MENU ]]; then 
+ 
+		dim="38;5;238"
+		sel="38;5;51" 
+	 
+	else
+	
+		if [[ ! -v USE_2_COLOR_MENU ]] && [[ $TERM != "linux" || -v USE_16_COLOR_MENU ]]; then
+			dim="30;1"
+			sel="36;1"
+		else
+		
+			dim="0"
+			sel="0;7"
+		fi
+	fi
+fi
+
+# doing this in another section, because keeping it in the same block
+# makes it too hard to read out
+if [[ ! -v USE_2_COLOR_MENU ]] && [[ ! -v USE_16_COLOR_MENU ]] && [[ ! -v USE_256_COLOR_MENU ]]; then
+	if [[ -v USE_HI_COLOR_MENU ]] || [[ $TERM == "fbterm" ]]; then
+		# warning if fbterm is set and no fbterm running
+		if [[ ! -v DISABLE_MENU_FBTERM_WARNING ]]; then
+			if ! pgrep fbterm &> /dev/null; then
+				echo "Warning: fbterm not running, these codes probably wont work!"
+			fi
+		fi
+		dim = "{24;35;49"
+		sel = "{128,192,256"
+	fi
+fi
+
+
 
 # shell options as needed
 shopt -s interactive_comments
@@ -138,40 +212,53 @@ else
 			if ((Current > First)); then
 				 ((Current--))
 			else
-				beep
+				[[ $DOBEEP ]] && beep
 			fi
 			;;
 			$Right|$Down)
 			if ((Current < Last)); then
 				((Current++))
 			else
-				beep
+				[[ $DOBEEP ]] && beep
 			fi                                                                                                                                                                                                                                                                                    
 			;;
 		esac
 		_draw
 	done
 fi
+
+# fix: needs to be done before returning values (echo WILL embed cursor hiding codes into strings otherwise)
+setterm -repeat on -cursor on > $(tty)
+stty echo > $(tty)
+[[ $KEY_AGRESSIVE_MODE ]] && xset r
+
 case $- in
  #[i]nteractive mode no need to echo : grab the variable
 	*i*)
 			if [[ $DESTVAR ]]; then
 				eval "$DESTVAR=\${ITEMS[Current]}"
 			else
-				REPLY=${ITEMS[Current]}
-				RESULT="$REPLY"
+				RESULT=${ITEMS[Current]}				
 			fi
 			;;
 	*)
+			#fixup: added -ne to chomp newline and handle escape sequences
 			if [[ -z $QUIET ]]; then
-				echo ${ITEMS[Current]}
+				echo -ne ${ITEMS[Current]}				
+			else
+				#fixup: added write to file in case quiet
+				#todo: TODO: make this multi-session and more secure [move to user's dir?, use session id? or term?]
+				# first write menu selection
+				echo -e ${ITEMS[Current]} > /tmp/menuoutput
+				# then write index entry and commandline
+				echo -e $Current >> /tmp/menuoutput
+				echo -e "$@" >> /tmp/menuoutput
+				# use mapfile < /tmp/menuoutput to get these values back		
 			fi
+
 			;;
 esac
 # return the terminal to it's former state
-setterm -repeat on -cursor on
-stty echo
-[[ $KEY_AGRESSIVE_MODE ]] && xset r
 
 # set return code to index (this works for both interactive and non
 # the (parentheses) are very important or the interactive mode will kill the term!

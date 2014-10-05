@@ -1,0 +1,59 @@
+#!/usr/bin/env perl 
+#===============================================================================
+#
+#         FILE: colorit
+#
+#        USAGE: ./colorit  
+#
+#  DESCRIPTION: colorit replacement
+#
+#      OPTIONS: ---
+# REQUIREMENTS: ---
+#         BUGS: ---
+#        NOTES: ---
+#       AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
+# ORGANIZATION: Paradisim Enterprises, LLC - http://paradisim.twilightparadox.com
+#      VERSION: 1.0
+#      CREATED: 09/22/2014 12:54:17 PM
+#     REVISION: ---
+#===============================================================================
+
+use strict;
+use warnings;
+use utf8;
+use v5.18;
+
+
+our %rules = ();
+
+open CONFIG, "<", "/etc/coloritrc"
+	or die "No configuration present: $!";
+while (<CONFIG>)
+{
+	next if m/^\s*$/ or m/^#.*$/;	# skip comments and whitespace
+	chomp (my $line = $_);
+	my @cols = split("(?<!\\\\),",$line); # split with deliberate commas in tact
+	s/\\,/,/g for (@cols);				  # strip leading slash from commas left in tact
+	warn "Configuration line with extra commas detected ($line)" if $#cols > 1;
+	say "find: $cols[0]   replace: $cols[1]";	
+	$rules{$cols[0]} = "$cols[1]";
+}
+close CONFIG;
+
+# TODO: condense into expression modifiers once coding is done
+for my $line (<>)
+{
+	# apply rules to line
+	for my $rule (keys %rules)
+	{
+		if ( $line =~ m/$rule/g )
+		{
+			my $replacement = '"$rules{rule}"';
+			print "replacing $rule with $rules{$rule}\n";
+			$line =~ s/$rule/$rules{$rule}/e;		
+		}
+	}
+	# finally, print result
+	print $line;
+}
+
