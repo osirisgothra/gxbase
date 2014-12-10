@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+use warnings;
+use strict;
+use v5.18;
+use re 'debug';
+
+my $src = $ARGV[0];
+my $search =  qr/$ARGV[1]/;
+my $replace = $ARGV[2];
+
+
+eval "\$src =~ s/$search/$replace/g";
+
+say "result: $src";
+
+

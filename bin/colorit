@@ -1,11 +1,13 @@
 #!/usr/bin/env perl 
 #===============================================================================
 #
-#         FILE: colorit
+#         FILE: colorit.pl
 #
-#        USAGE: ./colorit  
+#        USAGE: ./colorit.pl  
 #
-#  DESCRIPTION: colorit replacement
+#  DESCRIPTION: colorizer placeholder
+#
+#
 #
 #      OPTIONS: ---
 # REQUIREMENTS: ---
@@ -14,46 +16,76 @@
 #       AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
 # ORGANIZATION: Paradisim Enterprises, LLC - http://paradisim.twilightparadox.com
 #      VERSION: 1.0
-#      CREATED: 09/22/2014 12:54:17 PM
+#      CREATED: 12/08/2014 05:51:30 AM
 #     REVISION: ---
 #===============================================================================
 
 use strict;
 use warnings;
 use utf8;
-use v5.18;
+use JSON;
+use File::Slurp::Tiny;
 
+my $jsonfile = "$ENV{HOME}/colorit.rules>";
+my $json = JSON->new->allow_nonref;
+my %rules = (
+	Used => '[1mUsed[0m',
+	Size => '[32;1m$0[0m',
+);
 
-our %rules = ();
-
-open CONFIG, "<", "/etc/coloritrc"
-	or die "No configuration present: $!";
-while (<CONFIG>)
+if ( -r -e -f $jsonfile )
 {
-	next if m/^\s*$/ or m/^#.*$/;	# skip comments and whitespace
-	chomp (my $line = $_);
-	my @cols = split("(?<!\\\\),",$line); # split with deliberate commas in tact
-	s/\\,/,/g for (@cols);				  # strip leading slash from commas left in tact
-	warn "Configuration line with extra commas detected ($line)" if $#cols > 1;
-	say "find: $cols[0]   replace: $cols[1]";	
-	$rules{$cols[0]} = "$cols[1]";
+	my $rulesdata = File::Slurp::Tiny::read_file($jsonfile);	
+	# clear and populate if rules exist (even if the rulesfile was empty)
+	%rules = () if defined $rulesdata;
+	%rules = $json->decode($rulesdata) if defined $rulesdata;
+	
 }
-close CONFIG;
 
-# TODO: condense into expression modifiers once coding is done
-for my $line (<>)
+
+
+s/[\$]0/\$\&/g for values %rules;
+
+
+while (<>)
 {
-	# apply rules to line
+	my $line = $_;
+
 	for my $rule (keys %rules)
 	{
-		if ( $line =~ m/$rule/g )
-		{
-			my $replacement = '"$rules{rule}"';
-			print "replacing $rule with $rules{$rule}\n";
-			$line =~ s/$rule/$rules{$rule}/e;		
-		}
+		
+		eval "\$line =~ s/" . $rule . "/" . $rules{$rule} . "/g";		
 	}
-	# finally, print result
 	print $line;
+
 }
+
+use File::Spec;
+use File::HomeDir;
+
+unless ( -r -f -e $jsonfile ) {
+
+	my $jsontext =  $json->pretty->encode(\%rules);
+	open JSONFILE, ">", $jsonfile or die "While opening rules file $jsonfile: $!";
+	print JSONFILE $jsontext;
+	close JSONFILE or warn "Failed while closing $jsonfile: $!";
+	print STDERR &dots .
+"
+Notice: No colorit.rules found, so I wrote a sample one to your ~/colorit.rules
+	 	If you do not like the default rules (you probably won't want them as they
+		are for example purposes only), You can start off by making the rules file
+		EMPTY. Make sure you leave the highest level of brackets, because it is
+		a JSON file structure that contains a single object with name/value pairs,
+		as you will see. See the perl JSON reference if you need info about perl's
+		JSON format handling and what is acceptable for your locale.
+" . &dots;
+}
+
+sub dots {
+	my $columns = exists($COLUMNS)
+
+
+
+
+
 

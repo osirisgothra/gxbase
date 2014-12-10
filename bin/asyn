@@ -1,0 +1,11 @@
+#!/usr/bin/perl -w
+
+die "no args" if $#ARGV == -1;
+
+my $pid = $$;
+fork;
+if ($pid != $$)
+{
+	system @ARGV;
+}
+

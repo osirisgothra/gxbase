@@ -1,0 +1,55 @@
+#!/usr/bin/bash -c gxbase
+#===============================================================================
+#
+#          FILE: coproc_command_list.rc
+# 
+#         USAGE: ./coproc_command_list.rc 
+# 
+#   DESCRIPTION: configuration file for coproc items
+# 
+#       OPTIONS: 
+#  REQUIREMENTS: gxbase/extras/bashrc and friends
+#          BUGS: ---
+#         NOTES: whitespace and lines starting with # or whitespace+# are ignored
+#        AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
+#  ORGANIZATION: Paradisim Enterprises, LLC - http://paradisim.twilightparadox.com
+#       CREATED: 10/04/2014 20:33
+#      REVISION:  ---
+#===============================================================================
+# types (one or more of):
+#    	owned 		[process &]
+# 	disowned 	[process & disown]
+# 	silent 		[process &> /dev/null &]
+# 	ignored		[process &> /dev/null & disown]
+#[1]	logged		[process &> <logfile>.stderr.stdout	- - NOTICE: ATTRIBUTES FROM HERE-DOWN ARE EXPERIMENTAL/NOT FULLY IMPLEMENTED - -
+# -	splitlogged	[process 1> <logfile>.stdout 2> <logfile>.stderr *
+# -	errlogged	[process 2> <logfile>.stderr
+# -	outlogged	[process 1> <logfile>.stdout
+# -	trapout		adds fg trap to SIGTOUT
+# -	trapin		adds fg trap to SIGTIN
+# -	trapkill	adds notify trap to SIGKILL, SIGTERM, and SIGHUP
+# -	trapstop	auto-continue when SIGTSTP is called (CTRL+Z) or SIGSTOP (sends SIGCONT)
+# -	killusr[1..2]	kill on SIGUSR[1..2] with notify
+# -	logevents	log above events to user activity log
+# -	syslogevents	log above events to system activity log
+# -	nobgsudo	don't allow sudoized commands to be coprocessed
+# -	onlysudo	require sudo permission for coprocessed commands to run
+# -	uid=n		require uid=n to run
+# -	gid=n		require gid=n to run
+# -	not-[cmd]	inverts the meanings of boolean commands (ie, not-uid=1000 means all users except 1000) or (not-ignored is also legal)
+#
+# Notes: [2] splitlogged = same as = errlogged,outlogged
+#        [1] this command and below are experimental or not yet available
+#	  -  means the same note applies as the one above, and so on..
+#
+updatedb disowned
+firefox	 disowned
+chrome	 disowned
+zsnes	 disowned
+
+xterm			silent
+
+
+komodo		ignored
+
+

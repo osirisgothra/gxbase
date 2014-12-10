@@ -1,13 +1,13 @@
 #!/bin/bash
 #
 # Make file(s) executable for group members and users (same as 'sudo a+x *' with some checking/assumptions)
-# 
+#
 # Without any arguments, will make all scripts in the current directory executable
 #
 
-case $- in 
+case $- in
 	*i*) $BASH_SOURCE "$@"; return $?;;
-esac	
+esac
 
 #vars
 declare exflags=""

@@ -1,0 +1,124 @@
+#!/bin/bash - 
+#!/bin/bash
+# vim:ft=sh:smd:sm:shm=nflix:ts=3:sw=3:tw=120:noai:nowrap:tags=~/tags:ve=insert:fdo=search,jump,hor:fcl=all:cuc:cul
+# vim:fdm=marker:fen:cc=100:fml=0:tw=9999:fdc=4
+#===============================================================================
+#
+#          FILE: .bash_completion
+# 
+#         USAGE: ./.bash_completion 
+# 
+#   DESCRIPTION: Programmable Completion Definitions (User Defined)
+# 
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: See /etc/bash_completion.d/ and /usr/share/bash-completion/completions for system-wide definitions
+#        AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
+#  ORGANIZATION: Paradisim Enterprises, LLC - http://paradisim.twilightparadox.com
+#       CREATED: 11/06/2014 10:00
+#      REVISION:  ---
+#===============================================================================
+#[description=Programmable Completion Functions and Config]
+
+
+	shopt -s nullglob	
+	# forward declarations
+	slice_func __isflag
+	slice_func __validflagname
+
+# {{{ FUNCTIONS
+
+# {{{    _dlgopt () --- for '/usr/bin/dialog'
+function _dlgopt () 
+{ 
+    local cur prev words cword split;
+    _init_completion -s || return;
+    case "${prev,,}" in 
+        --help | --usage | --version)
+            return 0
+        ;;
+		  *)
+			  COMPREPLY=($(compgen -W "$(dialog --help | grep -- "${prev,,}")"))
+			;;
+        --*dir*)
+            _filedir -d;
+            return 0
+        ;;
+        --*file* | --*path*)
+            _filedir;
+            return 0
+        ;;
+        --+([-a-z0-9_]))
+            local argtype=$( $1 --help 2>&1 | sed -ne                 "s|.*$prev\[\{0,1\}=[<[]\{0,1\}\([-A-Za-z0-9_]\{1,\}\).*|\1|p" );
+            case ${argtype,,} in 
+                *dir*)
+                    _filedir -d;
+                    return 0
+                ;;
+                *file* | *path*)
+                    _filedir;
+                    return 0
+                ;;
+            esac
+        ;;
+    esac;
+    $split && return 0;
+    if [[ "$cur" == -* ]]; then
+        COMPREPLY=($( compgen -W "$( $1 --help 2>&1 |             sed -ne 's/.*\(--[-A-Za-z0-9]\{1,\}=\{0,1\}\).*/\1/p' | sort -u )"             -- "$cur" ));
+        [[ $COMPREPLY == *= ]] && compopt -o nospace;
+    else
+        if [[ "$1" == @(mk|rm)dir ]]; then
+            _filedir -d;
+        else
+            _filedir;
+        fi;
+			fi
+}
+# }}}
+# {{{    initshow() --- preloader for show() command (in turn, preloads man and apt-cache)
+function initshow()
+{
+	# load completions needed by this command
+	_completion_loader apt-get
+	_completion_loader apt-cache
+	_completion_loader man
+	# set real completions up
+	complete -A variable -A binding -A function -A alias -A user -A variable -A file -A directory -F _man -A builtin -A arrayvar show
+	# this function not needed, unloading it to save memory
+   unset -f $FUNCNAME
+}
+# }}}
+
+# }}}
+
+# {{{ PARSE COMPLETIONS
+# (for completions that are on ramdisk or high-draw shells)
+if __isflag COMPLETE_ALL_BINARIES; then
+	if [[ -r ~/.config/bashrc/flags/complete_all_binaries ]]; then
+		echo "* applying completion to ALL binaries (this will take a minute or two!)"
+		shopt -s nullglob
+		for i in /usr/bin/* /bin/* /usr/sbin/* /sbin/* /usr/local/bin/* /usr/local/sbin/*; do
+			complete -F _longopt $(basename $i)
+		done
+		shopt -u nullglob
+		echo "* completions have been loaded"
+	fi
+
+fi
+
+# needed by 'show'
+
+complete -F _dlgopt dialog
+complete -F _longopt locate
+complete -F _longopt ddd
+complete -F _longopt ctags
+complete -F _longopt ctags-exuberant
+complete -F _longopt ./configure
+complete -F _longopt chmod
+complete -A variable -A arrayvar __xlatv
+complete -F _initshow show
+
+
+# nullglob MUST be off, or completion will NOT work on the command line
+shopt -u nullglob

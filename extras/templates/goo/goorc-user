@@ -1,0 +1,10 @@
+#
+# ~/.goorc
+# user settings for goo(1)
+# provided by gxbase(5) in /gxbase/extras/templates/goo/goorc-user
+#
+
+<Browsers>
+	firefox	/home/gabriel/Apps/firefox/firefox
+	chrome	/usr/bin/google-chrome
+</Browsers>

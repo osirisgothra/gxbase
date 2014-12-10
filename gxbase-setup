@@ -28,7 +28,145 @@
 # Report any bugs to <bugs@paradisim.tk> or visit our FAQ on our website.
 #
 
-dialog
+
+
+# program
+function _gen.dlg()
+{
+	RESULT_FILE=$(tempfile --suffix=".dlg_response")
+	dialog "${DIALOG_GLOBALS[@]}" "$@" 2> $RESULT_FILE
+	RESULT_CODE=$?
+	[[ $RESULT_CODE -ne 0 ]] && return 1;
+	return 0;
+}
+_gen.dlg --no-tags --no-items --menu "Gxbase Settings" 0 0 0 "GxBase Configuration" "Shell Configuration" "Window Manager Configuration"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

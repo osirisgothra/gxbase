@@ -1,0 +1,68 @@
+--- 
+meta: 
+  Producers: 
+    $0: /opt/perl/current/bin/rrr-aggregate
+    File::Rsync::Mirror::Recentfile: 0.0.8
+    time: '1415058842.05136991'
+  aggregator: 
+    - 1d
+    - 1W
+    - Z
+  dirtymark: '1389168541.77335405'
+  filenameroot: RECENT
+  interval: 1d
+  merged: 
+    epoch: '1415057352.88620305'
+    into_interval: 1W
+    time: '1415058061.78859901'
+  minmax: 
+    max: '1415058817.68302608'
+    min: '1415056082.0319829'
+    mtime: '1415058121'
+  protocol: 1
+  serializer_suffix: .yaml
+recent: 
+  - 
+    epoch: '1415058817.68302608'
+    path: 07mirror.yml
+    type: new
+  - 
+    epoch: '1415058817.67964292'
+    path: 07mirror.json
+    type: new
+  - 
+    epoch: '1415058817.29313302'
+    path: 06perms.txt.gz
+    type: new
+  - 
+    epoch: '1415058816.60769391'
+    path: 06perms.txt
+    type: new
+  - 
+    epoch: '1415058813.04275703'
+    path: 01modules.mtime.html
+    type: new
+  - 
+    epoch: '1415058812.89815807'
+    path: 01modules.mtime.rss
+    type: new
+  - 
+    epoch: '1415058812.7789371'
+    path: 01modules.index.html
+    type: new
+  - 
+    epoch: '1415058806.65786695'
+    path: 02packages.details.txt.gz
+    type: new
+  - 
+    epoch: '1415058805.11074805'
+    path: 02packages.details.txt
+    type: new
+  - 
+    epoch: '1415056921.81165409'
+    path: ''
+    type: new
+  - 
+    epoch: '1415056082.0319829'
+    path: 02STAMP
+    type: new
