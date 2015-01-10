@@ -1,0 +1,96 @@
+#!/bin/bash 
+#
+#		   vim:			 ft=sh:fen:fcl=all:fdm=marker:cc=90:tw=90:ts=4:noet:mls=1:fo=aw2tq
+#
+# .bashrc-hash
+# Bash Hash - a list of directories or patterns that are hashed into the hashtable before 
+# executions start. You can also put items into the hash that are not in the PATH.
+#
+#[description=Hash/Fast Load Support Config]
+#
+# Author:
+#		Gabriel T. Sharp <osirisgothra@hotmail.com>
+#
+# Copyright (C)2013-2014 Paradisim Enterprises, LLC
+# <http://paradisim.github.com>
+# <http://www.gitorious.org/+paradisim>
+# <http://paradisim.twilightparadox.com>
+#
+# Created on Thu 28 Aug 2014 07:21:05 AM EDT
+# (Last Major Update on Thu 28 Aug 2014 07:21:05 AM EDT)
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+#
+#  File Revision/Update History
+#  _____________________________________________________________________________
+#
+#  Thu 28 Aug 2014 07:21:05 AM EDT			Initial Creation
+#
+# - Coments are ignored, lines starting with # are ignored, lines are read up until a hash 
+# mark, at this time, hash marks are not allowed. If you need to emulate one use the 
+# character code with a backslash.
+#
+# For best performance, separate with spaces or newlines. Items with spaces should have
+# a \ prepending them.
+#
+# You should use wildcards for spaces (more reliable). This*is*a*file*with*spaces is 
+# guarenteed to work.
+# 
+# Just be warned that it might match "This is a file with spaces" and "This is not a file 
+# with spaces", Too!
+# 
+# Put names of files you wish to override last.
+#
+# Fact #1 ITEMS SPECIFIED LAST WILL OVERRIDE ONES PREVIOUSLY SPECIFIED
+#
+# Example 1-1: Hash Ordering
+#
+# If you have these files (and only these files in each directory, remember this is an 
+# example!): 
+#
+#   > /usr/bin/catman      /usr/local/bin/catman 
+#     /usr/bin/man       > /usr/local/bin/man 
+#   > /usr/bin/factor      /usr/local/bin/factor 
+#
+# If you want to hash the files indicated with a ">", you could do this:
+#
+# /usr/bin/* /usr/local/bin/man 
+#
+# Just know that this would override /usr/bin/man, which was originally selected by 
+# /usr/bin/*, and rehash it as /usr/local/bin/man. Note that with a REAL /usr/bin and 
+# /usr/local/bin directory, you may have to be more explicit depending on what you want 
+# hashed.
+#
+# Fact #2 YOU DO NOT NEED TO HASH ITEMS THAT COME FIRST IN THE PATH! 
+# 
+# If your path is reading: /usr/bin:/usr/local/bin (in the above case), then you would 
+# only  need to hash /usr/local/bin/man, since the others are in the path.
+#
+# Fact #3 HASH ITEMS DONT NEED TO BE IN THE SEARCH PATH
+#
+# Just a reminder: The program /opt/newbin/a hashed in, when it tries to run /opt/newbin/b 
+# it wont, because /opt/newbin is not in the path. Unless of course, it uses your same 
+# startup files before evaluating the situation. Also, don't expect an item's entire 
+# directory to be hashed in unless you use wildcards! Only bash wildcards are accepted.  
+# 
+# Using extglobs extglobs here is also okay, so long as you dont disable them.
+#
+#  
+
+#  {{{ default list 
+
+/usr/bin/apt-cache /gxbase/bin/* /usr/local/bin/*
+
+#  }}} end of .bashrc-hash

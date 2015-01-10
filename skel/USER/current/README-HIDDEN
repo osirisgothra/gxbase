@@ -1,0 +1,13 @@
+gxbase/skel/USER/current : user's home directory files (current version)
+
+* For previous versions of gxbase, look at gxbase/skel/USER/old (mostly kept for archival/informational purposes)
+
+* Make sure you use 'ls -a' so you can view the files, all files in here are hidden because they go in the user's HOME directory. 
+
+* Developers should LINK these to their .bashrc and .config/bashrc to prevent sync problems.
+
+* The .bashrc_dircolors.db file is NOT required, it will be created by the shell if it is not present
+
+* The .bash_logout is the only other item required in the root home directory, all others go into .config/bashrc
+
+

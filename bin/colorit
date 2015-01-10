@@ -22,70 +22,8 @@
 
 use strict;
 use warnings;
-use utf8;
-use JSON;
-use File::Slurp::Tiny;
 
-my $jsonfile = "$ENV{HOME}/colorit.rules>";
-my $json = JSON->new->allow_nonref;
-my %rules = (
-	Used => '[1mUsed[0m',
-	Size => '[32;1m$0[0m',
-);
+use v5.18;
 
-if ( -r -e -f $jsonfile )
-{
-	my $rulesdata = File::Slurp::Tiny::read_file($jsonfile);	
-	# clear and populate if rules exist (even if the rulesfile was empty)
-	%rules = () if defined $rulesdata;
-	%rules = $json->decode($rulesdata) if defined $rulesdata;
-	
-}
-
-
-
-s/[\$]0/\$\&/g for values %rules;
-
-
-while (<>)
-{
-	my $line = $_;
-
-	for my $rule (keys %rules)
-	{
-		
-		eval "\$line =~ s/" . $rule . "/" . $rules{$rule} . "/g";		
-	}
-	print $line;
-
-}
-
-use File::Spec;
-use File::HomeDir;
-
-unless ( -r -f -e $jsonfile ) {
-
-	my $jsontext =  $json->pretty->encode(\%rules);
-	open JSONFILE, ">", $jsonfile or die "While opening rules file $jsonfile: $!";
-	print JSONFILE $jsontext;
-	close JSONFILE or warn "Failed while closing $jsonfile: $!";
-	print STDERR &dots .
-"
-Notice: No colorit.rules found, so I wrote a sample one to your ~/colorit.rules
-	 	If you do not like the default rules (you probably won't want them as they
-		are for example purposes only), You can start off by making the rules file
-		EMPTY. Make sure you leave the highest level of brackets, because it is
-		a JSON file structure that contains a single object with name/value pairs,
-		as you will see. See the perl JSON reference if you need info about perl's
-		JSON format handling and what is acceptable for your locale.
-" . &dots;
-}
-
-sub dots {
-	my $columns = exists($COLUMNS)
-
-
-
-
-
+print while <>;
 

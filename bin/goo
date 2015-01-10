@@ -36,6 +36,7 @@ no warnings 'experimental';
 my $term = 0;
 my $help = 0;
 my $appname = eval { $0 =~ s/^(.*)\/([^\/]+$)/$2/g; return $0; };
+my $browserflags = "";
 
 my @presets_etc = &get_presets( 'etc' );
 my @presets_usr = &get_presets( 'home' );
@@ -56,6 +57,7 @@ GetOptions ( "term"  => \$term,
 		"list-presets" => \$list_presets,
 			 "help"  => \$help,
 			 "joinchars=s" => \$joinexpr,
+"browserflags=s" => \$browserflags,
 		 )
   or die("Error in command line arguments\n");
 
@@ -63,11 +65,13 @@ GetOptions ( "term"  => \$term,
 
 print <<EOF
 usage: $appname [--term|--help] [--preset <n> | --list-presets] [--joinchars <str>] searchterm ...
+                [--browserflags [flag 1,flag 2, ... ]
 
 	--joinchars <str>  	character(s) placed between search terms when put in the url (defaults to '+')
 	--preset <n>    	Select a preset (builtin or defined in .goodirsrc or /etc/goodirs.rc 
 	--list-presets 		Show the table of presets available and their corrosponding number (for use with <n>)
 	--term				prioritize terminal-based browsers
+ 	--browserflags [flags]		quoted string of parameters to pass to browser, separated by commas (,)
 	--help				this help message
 
 EOF
@@ -84,6 +88,7 @@ if ( $list_presets ) {
 my $preset = ( $preset_index < @presets ? $presets[$preset_index] : $presets[0] );
 
 my @browsers = qw ! firefox chromium google-chrome konqueror rekonq !;
+
 splice ( @browsers,0,0,qw ! links2 links lynx !) if $term == 1;
 
 my @paths = ( exists($ENV{PATH}) ? split(":",$ENV{PATH}) : ("/bin","/usr/bin","/usr/local/bin") );
@@ -129,9 +134,13 @@ else
 	# don't fork if running in a terminal priority mode
 	fork unless $term;
 	if ($opid != $$ || $term) {
-		say "arguments: $arg";
 		close STDERR; # no errors, please
-		system $browser,$arg;
+		my @params;
+		@params = length($browserflags) > 0 ? split(',',$browserflags) : "";
+	
+		print "params: $browser \"@params\" \"$arg\"\n";
+		system $browser,@params,$arg or print "warning: command returned with an error code ($?)\n";
+		print "perl warning: $!\n" if $!;
 	}
 	exit 0;
 }

@@ -14,14 +14,15 @@ my $curgrp = int(`id -g`);
 print "take ownership of all files and directories in this directory $PWD, to user $USER ($curusr:$curgrp)?";
 
 my $f = getc;
-my $result = int(system("chown $curusr:$curgrp $PWD -Rv"));
-my $code = $!;
+system("chown $curusr:$curgrp $PWD -Rv");
+my $result = $?;
+my $code = $result >> 8;
 
-if ($result == 0)
+if ($code == 0)
 {
 	print "succeeded ($result)\n";
 }
-elsif ($result == -1) { die "command failed\n"; }  
+elsif ($code == -1) { die "command failed\n"; }  
 else
 {
 	die "failed: with code $result: $code\n";	
