@@ -1,3 +1,0 @@
-#!/bin/bash
-gvim /var/www/*.*
-~/bin/uploadsite

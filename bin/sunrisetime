@@ -1,7 +1,0 @@
-#!/bin/bash
-RESULT=`lynx -accept-all-cookies https://duckduckgo.com/?q=latrobe,pa+sunrise+time -dump | grep -Po "[5-8]\:[0-5][0-9]\s*[aApP][Mm]" | line`
-tty --silent
-case $? in
-0) echo $RESULT;;
-1) zenity --info --text "$RESULT" --title "Sunrise Time";;
-esac

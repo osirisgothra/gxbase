@@ -1,6 +1,0 @@
-#!/bin/bash
-
-echo $0 | egrep "[^\/][-A-Za-z0-9_:;.\>\<\[\]\(\)]*$" > /var/tmp/cmd_name
-CMDNAME=`cat /var/tmp/cmd_name`
-echo Resulting command: ${CMDNAME}
-

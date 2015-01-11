@@ -1,7 +1,0 @@
-#!/bin/bash
-if [[ -z $1 ]]; then
-	fsecho -e "syntax:\n\tqx [command line]\n\nStarts a command in the background, disowned with no tty attachment when executed from a terminal with an attached tty.\nIf you want tty attachment use the builtin command, coproc, instead."
-	(exit 1)
-else
-	$* > /dev/null 2>&1 & disown %
-fi

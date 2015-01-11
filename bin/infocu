@@ -1,3 +1,0 @@
-#!/bin/bash
-cmd="info coreutils "\'"$1 invocation"\'
-eval $cmd

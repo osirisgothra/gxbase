@@ -1,1 +1,0 @@
-amixer sget Master | grep "(?<=  Mono: Playback )[0-9]*(?= \[)"  -Po

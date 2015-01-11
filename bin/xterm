@@ -1,9 +1,0 @@
-#!/bin/bash
-if [[ $1 == --guimode || $1 == --gui ]]; then
-#	zenity --notification --text="Starting XTERM!" & disown %
-	shift
-#	kill -KILL %
-	
-fi
-		
-/usr/bin/xterm -bc -bcn 50 -bcf 1450 -fa "Liberation Mono" -fs 18 -fg white -bg black -uc -rw -cr green $@ & disown %

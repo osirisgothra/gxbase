@@ -1,94 +1,4 @@
-
-#!/bin/bash --norc -rc 'echo "This script must be loaded by bashrc, not explicitly ran."' 
-# {{{ VIM Users Warning: if this file is not organized into folds (vim users) then check your 'modeline' setting (:set modeline, not :set nomodeline) in your .vimrc file!
-#          this file will be hard to edit in any other text editor, or, without folds. }}}
-# {{{ README for (/gxbase/skel/USER/current/.bashrc (original) -> ~/.bashrc (install/link location))
-# {{{ REVISION HISTORY (READ THIS FIRST!)
-# 2012-28-Dec to 2013-9-Oct: gxbase (known previously as my .bashrc 'extras' nicknamed 'extbash' and later 'extbase'
-# ------------------------------------------------------------------------------------------------------------------
-# It started as a collection of files I wanted to keep under version control so I could make changes and keep live
-# backups to my hearts content. I named it because of this, since everything on git has to have a name, this was before
-# I knew about branches and stuff, and was my first year 'back' in linux since the old pre-fedora redhat days (and before that, freebsd, etc)
-# As things got closer to 10/2013, I decided to rename it to gx bash/e or 'general extension of bash configuration files' which
-# later became 'gxbase' which is 'general extension of bash entities' (entities meaning configuration, functions, aliases, builtins, etc)
-# the first years worth of updates were lost due to my inferior knowledge of git and gitorious, but a solid branch finally emerged (re-committed
-# from local backups here and there) into the 0-1-0 branch, which then finally became 0.1.0 and the date-based branch it is today (2015 January)
-# from g-sharp/osirisgothra@hotmail.com -end entry-
-# -
-# 2013-10-Oct to 2014-10-Aug: gxbase 'floating' bash configuration
-#-----------------------------------------------------------------
-# I originally though of gxbase as a 'separate' entity from my .bashrc (or the user's bashrc) and wanted to develop a system tree
-# of it's own, which has now failed not once, not twice, but 3 times. There are so many sparatic bash scripts, linked to each other
-# into .config, ~/.* files, and the occasional doc, vim, and xml extra or config, my brain can't even contain it, and it's all
-# a big mess. It was my fault for not planning it in the first place properly. (half planning is more like it). The
-# gxbase 2-x-x repositories, etc etc [read on in osirisgothra.gitorious.org or github.com gxbase via google]
-#
-# this sad overbloat of textual nightmares leads me now in a text editor that is 95% overworked and
-# a gui that 99% on the brink of being out of memory (using 1% for swapping in/out forever)
-# -end of entry -
-#
-# 2014-11-Aug to 2015-15-Jan: major reform of gxbase code, revisions noted on exact dates below for signifigant changes
-#------------------------------------------------- --------------------------------------------------------------------
-# Revision Aug 11 2014 11:59pm
-# - First addition of migration from gxbase/core|bin into /gxbase/skel/USER/current/.bashrc
-# Revision Sep 16 2014 11:48pm
-# - Fold Insertion for sorting under vim/gvim/qvim (see notes!)
-# Revision Dec 12 2014 11:33am
-# - Major insertions of /gxbase/bin and /gxbase/core, complete rewrite of vimXXX loader
-# - No more info on this until after the revision is done, projected at the 12th of Jan, 2015!
-#
-
-
-# }}}
-#{{{ SPECIAL NOTES
-# 1a. Keep the gxbase file ownership as a group/user combination you can read/write/execute
-#     refrain from giving any gxbase related files root permissions, especially not SetUID/SetGID.
-# 1b. To use tags, make sure you compile the tags file with the makebashtags command from this script
-# 1c. YOU WILL NEED ctags-exhuberant to compile the tags when things change, especially functions.
-# 2. If you change your tags location, make sure you update the modeline (line 8) with the location
-#    which is by default, ~/tags, this is the default for most versions of vim and is always accesibl.
-# 	  if you aren't a admin.
-# 3. This document is best viewed with the following editors:
-#      0: (new) gvim (actually, i am using qvim in disguise since it's style can be edited to match the colorscheme!)
-#		*1: vim (most in-doc features wont work without using vim)
-#      2: komodo
-#      3: kate         4: gedit     5: text editors that support vi emulation
-#    * unless you use vim, this file will be much harder to keep track of since the fold system
-#      is already programmatically set up for you, along with the vim options you'll need. Other
-#      editors do not support such inline things and will require work on your part. I reccomend
-#      you use vim with the YCM, Syntastic, xxx-support (perl-support, bash-support, etc) and the
-#      Unite plugin, all under the control of the Vundle plugin (or vam, if you'd rather).
-#      I DO NOT SUGGEST: lh- plugins <- especially lh-brackets, it seems to mess up everything
-#                        however, the xxx-support plugins dulicate the lh- plugins functioning
-#                        (better) anyway. For viewing the result of using ANSI codes, you may
-#                        want the AnsiEsc plugin as well. And make sure you enable the Manpage
-#                        support too!
-# 4) if you downloaded this, it should have come from: http://gitorious.org/+Paradisim
-#    or http://github.com/osirisgothra. It is packaged with the 'gxbase' collection. Check
-#    there or use the git://github.com/osirisgothra/gxbase repository to get the latest one.
-# 5) USE AT OWN RISK, you are not a little child, you should know what I mean by that.
-#    (not intended for children, if you are wondering)
-# }}}
- #{{{ EXPERIMENTAL!!! <- NOTES ABOUT AREAS WHEN YOU SEE THIS
- # This entire script is pretty much expermental as far as release-ability is concearned. However, there are
- # places that are even more so. Three of those areas need to be noted here. The others are just small fry and
- # can be ignored without too much guilt:
- # 1) PREINIT - since shells are starting up, shutting down, crashing, breaking, debugging, halting, continuing, and all of this
- #              happens in interactive, non-interactive, tty-less, and X-available, multi-terminal modes. This is very complex when
- #              you also decide to add in different users, their preferences, shell configurations, security permissions, and network
- #              locations. Not to mention, good old hardware capability. The PREINIT robustness is in it's process, trying to recognize
- #              a good bit of this to perform a bit better, give extra features to those who need it (and trim out features for those who
- #					 dont/cant have or want it). This will never be done completely, which is why it is disabled by default. If you are curious
- #              take a look but it is a mess. IT WILL BE REWRITTEN SEVERAL THOUSAND TIMES before I start enabling it by default, so dont cry!
- # 2) HOOKS  -  Shell hooks are not essential for most. But if the feature were sound, it could make some great new features of mulittasking
- #		          become available to the shell user. Most of this is in the pursuit of my own terminal emulator, which is not even ready for
- #              testing because it hardly exists. It is for this that I have started this for. Turn it on, and it may cause more harm than
- #              good as it is incomplete.
- # 3) POSTINIT- Cleanup code, mostly, and most of the experimental postinit has to do with reloading the bash config on-demand. That said
- #              MOST of it works with the HOOKS, since they aren't ready yet, neither is this. You CAN use the reload hooks manually, however!
- #
- #}}}
-# }}}
+#!/bin/bash -c 'echo This script must be loaded by bash - please read the README-GXBASE-BASH in docs
 
 # {{{ SANITY CHECKS
 
@@ -98,25 +8,39 @@
 # }}}
 # {{{ SPECIAL SYNTAXES
 
-# {{{ imperitive settings for shell
-
-# {{{ SHOPT (shell options)
-
-shopt -s checkwinsize
-shopt -s histappend
-shopt -s extglob
-shopt -u nullglob
-shopt -s globstar
-
+# {{{ __inject_shell_settings() -- apllies master settings when needed
+function __inject_shell_settings() 
+{
+	local -i MODE=$1
+	case $MODE in
+		0)
+			shopt -s checkwinsize
+			shopt -s histappend
+			shopt -s extglob
+			shopt -u nullglob
+			shopt -s globstar
+			;;&
+		0|1)
+			set +x && [[ -r ~/.debug-bashrc ]] && set -x
+			set +H
+			;;&
+		0|1|2)
+			unset -f $FUNCNAME
+			;;&
+		3)
+			# emergency start mode
+			exec bash --rcfile /etc/skel/.bashrc
+			;;
+		*)
+			echo "$BASH_SOURCE: Unknown mode, mode must be numeric and a valid integer."
+			;;
+	esac
+}; alias __emerge='__inject_shell_settings 3'; __inject_shell_settings 0
 # }}}
 # {{{ SET (environment settings)
-
-set +x && [[ -r ~/.debug-bashrc ]] && set -x
-set +H
-
 # }}}
 
-   #     __builtin_helper STACK builtin_name params ...
+# {{{   _builtin_helper STACK builtin_name params ...
 function __builtin_helper() 
 {
 	local -n _BHSTACK=BASH_${1}_STACK
@@ -130,7 +54,8 @@ function __builtin_helper()
 		_BHSTACK+=( "$*" )
 	fi
 }
-
+# }}}
+# {{{    shopt() shopt builtin helper with stacking support
 function shopt()
 {
 	if [[ ! -v BASH_SHOPT_STACK ]]; then
@@ -140,7 +65,8 @@ function shopt()
 	builtin shopt "$@"
 	return $?
 }
-
+# }}} 
+# {{{    set() set builtin helper with stacking support
 function set()
 {
 	if [[ "$*" == "--help" ]]; then
@@ -152,9 +78,44 @@ function set()
 	builtin set "$@"
 	return $?
 }
-
 # }}}
+# {{{    voperate()  Variable Operational Procedureal Envelope Roster And Target Evaluator
+function voperate()
+	{
+		# syntax: vop [variable] [operation] [procedure] [envelope] [roster] [target] [evaluator]
+		# TODO: still a highly experimental function!!!
+		# not optional:
+		#  variable:  name of variable to operate on
+		#  operation: name of operation to perform, this is a tagname in all CAPS words separated by _ (underscores)
+		# optional:
+		#  procedure: 	some procedure or expression that produces a unary result
+		#  envelope: 	container target[s] for roster, can be a filename, or an array, must be some type of data container
+		#  roster:     list of names and positions where data is separated inside the envelope's target
+		#  target:     actual data (when not an external source [aka 'the actual data')
+		#  evaluator:  additional meta evaluation expression to apply to the target (named like 'operation')
 
+		while true; do
+			VOP=$1; shift
+			[[ -z $VOP ]] && break
+			ACT=$1; shift
+			[[ -v $ACT ]] && VACT=${!ACT} || VACT=0
+   		[[ -z $ACT ]] && { CRIT "No Action Given with VOP: $VOP, failed to finish vop()"; return 2; }
+			# process commands for vop
+			case $VOP in
+				DCOND)	# DCOND [varname,value] - check for condition variable, and delete the variable if it exists and equals nonzero
+
+
+					[[ $VACT -ne 0 ]] && unset $ACT || return 1;;
+				DDIR)	# DDIR [dir] delete a directory
+					[[ -d $VACT ]] && { !rmdir $VACT || return 1; } || return 1;;
+				SWD) #SWD [dir] set working directory
+					[[ -d $VACT ]] && { !builtin cd $VACT || return 1; } || return 1;;
+				*)
+					CRIT "Unknown VOPerative: $VOP [arg was $ACT]" && return 1;;
+			esac
+		done
+	};	vop() { voperate "$@"; };
+# }}}
 # {{{ aliafun, unaliafun - an 'alias builtin with parameter support' emulation
 # {{{ "aliafun" documentation and notes
 # NOTES: - aliafuns are just functions that declare like aliases, they ARE functions in the end
@@ -3689,52 +3650,7 @@ fi
 # {{{ CLEANUP
 
 # change false to true if doing experimental stuff
-if false; then
-# {{{ Experimental Cleanup
-# experimental future working with traps (put on back burner)
-	# map all traps into _BASHRC_EXT_HOOKS in [F]UNCTIONS
-	#or TRAPNAME in `compgen -A signal`; do
-	#echo "Trapping $TRAPNAME..."
-	#trap '__BASH_EXT_HOOK '$TRAPNAME' "${BASH_COMMAND[@]}" "$@"' $TRAPNAME;
-	#one
-	function __checkbashrc()
-	{
-		trap DEBUG
-		trap SIGUSR1
-		if [[ -v BASH_KEY_RESOURCING ]]; then return; fi
-		if [[ ! -v BASH_KEY_SHA ]]; then
-			BASH_KEY_ITEMS=( `for i in ~/.bash!(*.swp); [[ -d $i ]] || echo $i; done` )
-			BASH_KEY_SHA=`eval shasum "${BASH_KEY_ITEMS[@]}" | shasum`
-		else
-			BASH_CHECK_SHA=`eval shasum "${BASH_KEY_ITEMS[@]}" | shasum`
-			if [[ $BASH_CHECK_SHA != $BASH_KEY_SHA ]]; then
-				BASH_KEY_RESOURCING=1
-				__BASH_RELOAD_HOOK
-				unset BASH_KEY_RESOURCING
-				[[ $INGIT ]] || for aname in "${ORIGINAL_ALAISES[@]}"; do alias $aname="${ORIGINAL_ALIASES[$aname]}"; done
-				[[ $INGIT ]] && for aname in "${GIT_ALIASES[@]}"; do alias $aname="${GIT_ALIASES[$aname]}"; done
-				BASH_KEY_SHA=$BASH_CHECK_SHA
-			fi
-		fi
-		trap __checkbashrc DEBUG
-		trap __BASH_RELOAD_HOOK SIGUSR1
-	}
-	# create keys (first pass only)
-	[[ -v BASH_KEY_ITEMS ]] || __checkbashrc
-	trap __checkbashrc DEBUG
-   trap __BASH_RELOAD_HOOK SIGUSR1
-
-	# use SIGUSR1 this way:
-	# in your vimrc, create an autocommand that executes this line:
-	# (make sure you remove the #'s from the following lines!
-	#augroup BASH_AUTORELOAD_CMDS
-	#	au!
-	#	au BufWritePost .bashrc !for procid in `pgrep bash`; do kill -USR1 $procid; done
-	#augroup END
-
-	#}}}
-fi
-#trap DEBUG
+	
 	# remove functions useless outside the .bashrc
 	unset -f mkdirif
 	unset -f _startup_trap
@@ -3757,33 +3673,6 @@ fi
 	declare -A LONGNAMES=( [vop]="voperate" );
 
 	# TODO: move into functions after secure tests
-   function voperate()
-	{
-		# heart and soul operative function
-		# does meta things, simply put:
-		# syntax: vop
-		while true; do
-			VOP=$1; shift
-			[[ -z $VOP ]] && break
-			ACT=$1; shift
-			[[ -v $ACT ]] && VACT=${!ACT} || VACT=0
-   		[[ -z $ACT ]] && { CRIT "No Action Given with VOP: $VOP, failed to finish vop()"; return 2; }
-			# process commands for vop
-			case $VOP in
-				DCOND)	# DCOND [varname,value] - check for condition variable, and delete the variable if it exists and equals nonzero
-
-
-					[[ $VACT -ne 0 ]] && unset $ACT || return 1;;
-				DDIR)	# DDIR [dir] delete a directory
-					[[ -d $VACT ]] && { !rmdir $VACT || return 1; } || return 1;;
-				SWD) #SWD [dir] set working directory
-					[[ -d $VACT ]] && { !builtin cd $VACT || return 1; } || return 1;;
-				*)
-					CRIT "Unknown VOPerative: $VOP [arg was $ACT]" && return 1;;
-			esac
-		done
-	};	vop() { voperate "$@"; };
-
 
 	# very important
 	set -ET
@@ -3794,9 +3683,6 @@ fi
  	export BASH_IS_INITIALIZING=0
 
 # }}}
-#{{{ Revision Information
-# -- has been moved to header
-#}}}
-# {{{ Modeline (keep at the end, needs no closing fold
+
 # vim:ft=sh:smd:sm:shm=nflix:ts=3:sw=3:tw=120:noai:nowrap:tags=~/tags:ve=insert:fdo=search,jump,hor:fcl=all:cuc:cul:fdm=marker:fen:cc=100:fml=0:tw=9999:fdc=4:foldlevel=0
 

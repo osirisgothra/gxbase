@@ -1,7 +1,0 @@
-#!/bin/bash
-trap : TSTP
-trap
-read
-echo "You typed: \"$REPLY\" "
-
-

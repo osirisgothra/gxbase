@@ -1,1 +1,0 @@
-Never install an installable command after a command is not found, even if there is one (force flag)

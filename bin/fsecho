@@ -1,9 +1,0 @@
-#!/bin/bash
-if (tty -s); then
-	echo $*
-else
-	zenity --info --title $USER --text "$(echo $*|sed 's/\[[0-9;]*[A-Za-z]//g')"
-# ensures exit code will be duplicated exactly the way it would be if it had been echoed
-# for scripts that rely on that sort of info (it could happen right?)
-	(echo $* > /dev/null 2>&1)
-fi

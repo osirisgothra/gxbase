@@ -1,1 +1,0 @@
-vlc --start-time=94 --stop-time=$[ (60*22)+26 ] ~/episodes/Mushishi/

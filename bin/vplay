@@ -1,9 +1,0 @@
-#!/bin/bash
-if [ -z $MEDIAPLAYER ]; then
-	MEDIAPLAYER=/usr/bin/X11/vlc
-fi
-
-$MEDIAPLAYER "`locate $(echo $*|sed "s/ /\./g")(avi|mp4|asf)$`" > /dev/null 2>&1 &
-disown %
-
-

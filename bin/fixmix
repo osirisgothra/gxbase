@@ -1,6 +1,0 @@
-#!/bin/bash
-/home/gabriel/bin/mixall ${1-77}
-if [[ $2 ]]; then
-	CUR=$(sget Master | grep -Po "[0-9]*(?=%)")
-	amixer sset Master $[ ${2} ]
-fi
