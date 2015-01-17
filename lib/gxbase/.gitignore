@@ -1,0 +1,29 @@
+#!/bin/false
+#===============================================================================
+#
+#          FILE: .gitignore
+# 
+#         USAGE: ./.gitignore 
+# 
+#   DESCRIPTION: ignore files or directories for the repo of gxbase (created in branch 0.2.1.15)
+# 
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
+#  ORGANIZATION: Paradisim Enterprises, LLC - http://paradisim.twilightparadox.com
+#       CREATED: 01/17/2015 13:14
+#      REVISION: 1/17/2015 - ignores the submodule because i didn't want 
+#                            to make it a submodule (at this time. i'm lazy :)
+# 
+#===============================================================================
+
+	ignore-these-items:
+	helpers
+	.gitignore.swp
+	.helpers.pm.swp
+	.core.pm.swp
+	*.*~
+
+# vim: ft=sh:hls:tw=0:cc=17:noet:ts=4:sw=4:fdo=all:fcl=all:fdm=indent:fen

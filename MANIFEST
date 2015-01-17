@@ -1,0 +1,25 @@
+Build.PL
+Changes
+lib/gxbase.pm
+lib/gxbase/core.pm
+lib/gxbase/helpers.pm
+MANIFEST			This list of files
+README
+t/00-load.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t
+lib/gxbase/.gitignore
+lib/goo.pm
+lib/dwm-datemon.pm
+lib/picosay.pm
+lib/perlhelp-open.pm
+lib/gxbase.pm
+lib/pt.pm
+lib/perlhelp.pm
+lib/readsay.pm
+/bin
+/bin/.perlhelp-open.swp
+/bin/makex.sh
+/bin/cp.sh
+/bin/makeblur.sh

@@ -1,134 +1,19 @@
-# C++ objects and libs
-
-*.slo
-*.lo
-*.o
-*.a
-*.la
-*.lai
-*.so
-*.dll
-*.dylib
-
-# Qt-es
-
-/.qmake.cache
-/.qmake.stash
-*.pro.user
-*.pro.user.*
-*.moc
-moc_*.cpp
-qrc_*.cpp
-ui_*.h
-Makefile*
-*-build-*
-
-# QtCreator
-
-*.autosave
-
-# vim
-
-.*.swp
-
-# kde (items that may get automatically generated accidently by users 1: setting icons or 2: making shortcuts)
-.directory
-*.desktop
-
-
-# windows (usually wine's explorer)
-Thumbs.db
-desktop.ini
-# windows files never allowed in the tree, ever
-*.BAT
-*.EXE
-*.COM
-*.DLL
-*.MSI
-*.NFO
-*.bat
-*.exe
-*.com
-*.dll
-*.msi
-*.nfo
-*.ME
-*.me
-*.NOW
-*.now
-*.URL
-*.url
-*.js
-*.java
-*.jscript
-*.vb
-*.VB
-*.mmc
-*.MMC
-*.vbs
-*.VBS
-*.wsh
-*.WSH
-*.WSC
-*.wsc
-*.vba
-*.VBA
-*.SCR
-*.scr
-*.CPL
-*.cpl
-# ** vba is also locally known as a (unix) vimball archive, i am not sure who used it first, microsoft or vim, but it is a dangerous (not to me)
-#    extension that is targedted at "stupid people" in hopes they will run it and ruin their machine, i filter it out just because i dont want
-#    any files that may be a flag raiser to antivirus programs, since lately they treat people like morons and try to quarentine EVERYTHING and
-#    are overly paranoid
-# *** i discourage use of 3-lettered extensions that fail to clearly identify the file or are needless (like 'readme.now' when 'README' will do)
-#     i also will not use UPPERCASE filenames on anything other than text documentation files used solely for informational purposes at install or
-#     unpack time. The uppercase filenames are intended to allow the user/developer to easily spot the files they first need to read amongst the 
-#     other ones they dont.
-
-# it (tracker in dosbox)
-
-CACHE.ITS
-CACHE.ITI
-
-# unix
-# *~ = backups    found* = files usually found in the /lost+found/ directory 
-*~
-found*
-
-# gxbase-specific or generated files (not meant to be in the source tree, that is)
-# each entry should be explained,
-#  .hash  - used by *-sudo commands in conjunction with 'meanmode' used to hash out binaries so 
-#           the scan does not take as long sucessive times in a row. delete this file if you need
-#           a new scan (developers usually not users) or have added some script/binary to gxbase/bin
-#           NOTE: this is the file name ".hash" not the extension, files with the extension ".hash"
-#           like "gxbase.hash" would still be considered for tree. This will be a one-filename entry!
-#  *.db   - ext used by any generated database (file-format agnostic). This could be but not limited
-#           to, (in order of probability, most likely to least likely): plain text (UTF-8), unicode
-#           text (UTF-16, LE), csv database (UTF encoded 8 or 16-LE), mysql, berkely (libdb), accdb
-#           (odbc, unlikely though), and even least likely, other database formats i never use :)
-#
-.hash
-*.db
-
-# author stuff (nobody needs to worry about this)
-G
-b
-d
-e
-g
-l
-o
-r
-s
-D
-G/*
-b/*
-d/*
-e/*
-g/*
-l/*
-o/*
-r/*
-s/*
-D/*
+Makefile
+Makefile.old
+Build
+Build.bat
+META.*
+MYMETA.*
+.build/
+_build/
+cover_db/
+blib/
+inc/
+.lwpcookies
+.last_cover_stats
+nytprof.out
+pod2htm*.tmp
+pm_to_blib
+gxbase-*
+gxbase-*.tar.gz
+lib/gxbase/helpers
