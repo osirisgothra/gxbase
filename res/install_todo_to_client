@@ -1,2 +1,0 @@
-ln -s xterm+256color xterm-256color
-[[ xterm-256color == xterm ]] && export TERM=xterm-256color
