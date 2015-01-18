@@ -18,8 +18,7 @@ lib/gxbase.pm
 lib/pt.pm
 lib/perlhelp.pm
 lib/readsay.pm
+/tools/makex.sh
+/tools/cp.sh
+/tools/makeblur.sh
 /bin
-/bin/.perlhelp-open.swp
-/bin/makex.sh
-/bin/cp.sh
-/bin/makeblur.sh

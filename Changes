@@ -1,5 +1,35 @@
 Revision history for gxbase
 
-0.01    Date/time
-        First version, released on an unsuspecting world.
+0.00		Date/time
+			First version, released on an unsuspecting world.
 
+0.01 thru   Please read README.md, and read the documentation supplied in /doc for the
+0.03		older branches you wish to read about. They have been archived because the
+			project (as of 2015's version 0.3.1.15) is going through a complete rewrite
+			and transformation. Even so, the repository branches are still there, should
+			you wish to use or view them.
+			
+			------ ^ transition from Stage 0 (unorganized r&d) to Stage 1 (structuring) v ------
+
+0.3.1.15	Jan 17 2015 - Beginning of GxBase's True Structural Design and Purpose
+
+			During this stage (for an unspecified amount of time), I will be drawing the final blueprints
+			for the design of gxbase. There have been MANY experimental frameworks, designs, scripts, functions,
+			cross-language tests, IDEs, helper experimentation, module dissections, disassembling, recompiling, forking,
+			and so on, enough to make my git trees into a nasty old forest.  Now is the time that I will be accepting any
+			input for the actual makeup and function of the main program, now that there is to be one (gxbase originally
+			was baseless and non-centric). In order to create the omnipresence I need in bash, I will be running gxbase
+			as a perl program, it will be in charge of spawning, monitoring, and controlling bash session. There was just
+			not enough control (without a lot of work and messy script code) to be had with pure bash. gxbase will be on
+			display (it's plans) on the website, for details visit http://gxbase.github.io, or osirisgothra.github.io/gxbase
+
+			latest version?   type 'git clone git://github.com/gxbase' or
+								   'git clone git://gitorious.org/gxbase/main.git'
+					
+			IMPORTANT TODOS: The helpers NEED to go to submodule soon, it's a pain and I sure would love it if someone else
+							 could allow me to be lazy and show me how to get that lined up so i dont get inconsistencies like
+							 I always do when dealing with submodules (and when getting rid of them, which seems quite annoying)
+
+	
+
+ 
