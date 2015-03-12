@@ -49,7 +49,7 @@ versioning for generation 2 will be like so:
                                     which will actually be represented only by the first four digits since the
                                     likelyhood of a commit with the same 4 first digits in the same version code
                                     is HIGHLY unlikely. If for some reason there is a ambiguity, I'll add enough
-                                    extra digits to resolve it.								
+                                    extra digits to resolve it.								                                                      
 
 <h3>0-2-0 FINAL NOTE</h3>
 
@@ -72,6 +72,8 @@ when you see this because it is probably not generally good practice to do this,
 (or using) git at all when this project began. Those branches that are detached are just imported from that era.
 As stated above, the 0.2.0.1 branch will be deleted since it is near-identical to the first commit of 0.2.8.14, and
 as I confirm this, I plan to be rid of it by 1.2.1.15, which is the projected first release version.
+
+PLEASE VIEW THE README FILE "README" FOR UP-TO-DATE INFO!
 
 
 <p><font style="size:x-small">(End of README.md)</font></p>

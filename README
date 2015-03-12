@@ -5,6 +5,10 @@ how to install the module, any machine dependencies it may have (for
 example C compilers and installed libraries) and any other information
 that should be provided before the module is installed.
 
+(It is also noted that I am lazy and have no intersest in changing 
+boilerplate text, though I did put this note here, so it kind just contra-
+dicts what I just said...)
+
 A README file is required for CPAN modules since CPAN extracts the README
 file from a module distribution so that people browsing the archive
 can use it to get an idea of the module's uses. It is usually a good idea
@@ -60,4 +64,27 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see L<http://www.gnu.org/licenses/>.
+
+
+...We now return you to your regularly scheduled README file....
+
+
+README (Information about this distro)
+
+All the update information shall be here from 0.3.15.1 on, otherwise
+you can see 'README.md' for a more general (be it outdated) description
+of the project.
+
+0.3.15.1 - Due to unpopular demand, I have constructed a crude versioning system
+           and dub it the 'MNYM' system. (Major.miNor.Year.Month system). It has
+           a nice ring, if you can bring yourself to actually pronounce it.
+           
+0.3.15.2 - Nothing here but monthly updates (this text)
+
+0.3.15.3 - Making the rest of my hub projects confirm to MNYM will be the task of
+           this month and hopefully will be complete by 0.3.15.5.
+                     
+
+
+
 
