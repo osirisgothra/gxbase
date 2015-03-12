@@ -83,7 +83,13 @@ of the project.
 
 0.3.15.3 - Making the rest of my hub projects confirm to MNYM will be the task of
            this month and hopefully will be complete by 0.3.15.5.
-                     
+
+0.3.15.3 - Commencing some changes to the tree, now following the official (at least
+           as far as I could find via google) CPAN module tree. And yes, gxbase is 
+           now officially to be written in 90% PERL / 10% BASH instead of the previous
+           agreed 90% BASH / 10% PERL ratio... I just had it backwards :)
+
+                                
 
 
 
