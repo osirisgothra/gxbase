@@ -34,7 +34,7 @@ versioning for generation 2 will be like so:
      OFFICIAL-RELEASE-NUMBER.2.TWO-DIGIT-YEAR.MONTH (.commit)  
 
         OFFICIAL-RELEASE-NUMBER			Should be self explanitory. Since I havent done any official releases
-                                    yet, this will stay at '0' for now.
+                                    yet, this will stay at '0' for now. **This has been officially named 'MNYM' notation!!**
 
         2                           Marker for generation 2. This is done in order to keep it separate from
                                     the generation 1 code, in case it ever gets restarted, i could possibly
