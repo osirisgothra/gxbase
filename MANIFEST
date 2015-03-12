@@ -18,7 +18,7 @@ lib/gxbase.pm
 lib/pt.pm
 lib/perlhelp.pm
 lib/readsay.pm
-/tools/makex.sh
-/tools/cp.sh
-/tools/makeblur.sh
-/bin
+tools/makex.sh
+tools/cp.sh
+tools/makeblur.sh
+/src/gxbase/tools/filters/diff-dirs-color

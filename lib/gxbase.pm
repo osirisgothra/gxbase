@@ -1,53 +1,63 @@
+#!/usr/bin/env perl
 package gxbase;
+our $VERSION = '0.01';
 
-use 5.18;
+use v5.18;
 use strict;
 use warnings FATAL => 'all';
+use lib '/gxbase/lib';
+use gxbase::core;
+use gxbase::core::command;
+use gxbase::ui;
+
+my $core = 0;
+my $ui = 0;
+my $initialized = 0;
+my $view = 0;
+
+sub new
+{
+	  print "creating instance...";
+		die "fatal: required = classname" unless @_ > 0;
+		die "fatal: calling new on already initted class gxbase" if $initialized > 0;
+
+    my $class = shift;
+    my $self = bless {}, $class;
+
+		$core = gxbase::core->new() or die ("fatal: can't create core ($!)");
+		$ui = gxbase::ui->new() or die ("fatal: can't create ui ($!)");
+
+		$initialized++;
+		print "ok\n";
+
+    return $self;
+}
+
+sub bootstrapper
+{
+		die "fatal: cannot bootstrap w/o initializing!" unless $initialized == 1;
+}
+
+1; # End of gxbase DO NOT REMOVE THIS LINE!!!
+
+__END__
 
 =head1 NAME
 
-gxbase - The great new gxbase!
+gxbase
 
 =head1 VERSION
 
 Version 0.01
 
-=cut
-
-our $VERSION = '0.01';
-
-
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+Bottom level code file for gxbase, it is used by '/gxbase' which is the calling script.
 
-Perhaps a little code snippet.
-
-    use gxbase;
-
-    my $foo = gxbase->new();
-    ...
 
 =head1 EXPORT
 
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
+none
 
 =head1 AUTHOR
 
@@ -94,6 +104,7 @@ L<http://search.cpan.org/dist/gxbase/>
 
 =head1 ACKNOWLEDGEMENTS
 
+Me
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -115,4 +126,4 @@ along with this program.  If not, see L<http://www.gnu.org/licenses/>.
 
 =cut
 
-1; # End of gxbase
+

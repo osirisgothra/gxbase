@@ -42,7 +42,8 @@ my @presets_etc = &get_presets( 'etc' );
 my @presets_usr = &get_presets( 'home' );
 
 
-my @presets_builtin = qw ^ http://www.duckduckgo.com/?q=%s+!
+my @presets_builtin = qw ^ http://images.google.com/search?q=%s
+			   http://www.duckduckgo.com/?q=%s+!
                            http://www.duckduckgo.com/?q=%s
                            http://www.google.com/search?q=%s&Btni=l
 			   http://www.google.com/search?q=%s ^;
@@ -87,7 +88,7 @@ if ( $list_presets ) {
 
 my $preset = ( $preset_index < @presets ? $presets[$preset_index] : $presets[0] );
 
-my @browsers = qw ! firefox chromium google-chrome konqueror rekonq !;
+my @browsers = qw ! surf firefox chromium google-chrome konqueror rekonq !;
 
 splice ( @browsers,0,0,qw ! links2 links lynx !) if $term == 1;
 
@@ -137,8 +138,8 @@ else
 		close STDERR; # no errors, please
 		my @params;
 		@params = length($browserflags) > 0 ? split(',',$browserflags) : "";
-	
-		print "params: $browser \"@params\" \"$arg\"\n";
+		@params = grep /\A\S.+\S\z/, @params;
+		print "params: \"$browser\" \"@params\" \"$arg\"\n";
 		system $browser,@params,$arg or print "warning: command returned with an error code ($?)\n";
 		print "perl warning: $!\n" if $!;
 	}
@@ -147,10 +148,9 @@ else
 
 sub get_presets($)
 {
+	return ();
 	my $kind = shift; # "etc" or "home"
 	my $filespec  = Path::Class->dir("etc");
-
-
 	given ($kind)
 	{
 		when (/etc/) {

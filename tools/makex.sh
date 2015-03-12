@@ -13,7 +13,7 @@ esac
 #vars
 declare -ag exflags=( )
 declare -g sudo=""
-declare -i rv=0 forced=0 forceall=0 
+declare -i rv=0 forced=0 forceall=0 CM_ERR_COUNT=0
 declare -g opmode=detect
 unset IFS;
 
@@ -28,7 +28,7 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 				else
 					echo "Fatal: invalid mode '"$1"' specified (user, root, or sudo expected)."
 					exit 2
-				fi;;			
+				fi;;
 			-u) opmode=user;;
  			-r) opmode=root;;
 			-s) opmode=sudo;;
@@ -103,7 +103,7 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 
 	unset FILE EXPLAIN AUTOCOUNT IGNCOUNT suff
 	if [[ $DIRMODE == Y ]]; then
-		declare -i AUTOCOUNT=0 IGNCOUNT=0 
+		declare -i AUTOCOUNT=0 IGNCOUNT=0
 		let AUTOCOUNT=0
 		for FILE in *; do
 			# dont process files that are already executable
@@ -114,15 +114,15 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 				[[ $forceall -eq 1 ]] && echo -n ", forced on ALL files"
 				echo
 				let AUTOCOUNT++
-			else				
+			else
 				let IGNCOUNT++
 				echo -n "Skipping $FILE, "
 				if [[ -x "$FILE" ]]; then
 					echo "(Already Executable)"
-				else					
+				else
 					echo "(does not seem to be executable*)"
 					EXPLAIN=1
-				fi 
+				fi
 			fi
 		done
 	else
@@ -132,7 +132,7 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 		for i in "$@"; do
 			if [[ ! -x "$i" ]]; then
 				echo "$i (queued to be set)"
-				NEEDEDFILES+=( $i )				
+				NEEDEDFILES+=( $i )
 			else
 				echo "$i (already executable, skipped)"
 				IGNCOUNT+=1
@@ -143,16 +143,21 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 			set -- "${NEEDEDFILES[@]}"
 		else
 			set --
-		fi			
+		fi
 	fi
 	#for debug, uncomment or add $sudo and $@ to your watches in bashdb
 	#echo "command: $sudo chmod a+x [$@]" 
 	if [[ $# -ge 1 ]]; then
-		$sudo chmod a+x "$@" $exflags
+		if ! $sudo chmod a+x "$@" $exflags; then
+			CM_ERR_LAST_CMD="$_"
+			CM_ERR_LAST=$?
+			let CM_ERR_COUNT++
+		fi
 	else
 		echo "no command called (no files to process)"
 	fi
-	if [[ ! -r ~/.config/bashrc/flags/DISABLE_MAKEX_EXPLAIN ]]; then 
+
+	if [[ ! -r ~/.config/bashrc/flags/DISABLE_MAKEX_EXPLAIN ]]; then
 		# disables it all together if configured to do so in gxbase's bashrc-setup program!
 		[[ $EXPLAIN -eq 1 ]] && [[ ! -r /tmp/explained-makex ]] && {
 			echo "* Note: Some files might be sourceable, however they are not marked executable unless they have an interpreter specified at the first"
@@ -164,20 +169,21 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 		}
 	fi
 
-	if [[ $? -eq 0 ]]; then
-		echo -n "Completed Without Errors, "
+	if [[ $CM_ERR_COUNT -eq 0 ]]; then
+		echo "Completed Without Errors"
 	else
-		rv=$?
-		echo -n "Completed With Errors (chmod returned $rv), "
-		(exit $rv) 
+		rv=$CM_ERR_LAST
+		echo -e "Completed With Errors\nLast error: $CM_ERR_LAST_CMD returned $rv)"
+		(exit $rv)
 	fi
 	if [[ -v AUTOCOUNT ]]; then
-		echo "($AUTOCOUNT changed, $IGNCOUNT ignored)"
+		FINALCOUNT=$(( AUTOCOUNT - CM_ERR_COUNT - IGNCOUNT))
+		echo "$CM_ERR_COUNT error(s), $FINALCOUNT processed, $IGNCOUNT ignored"
 	else
 		[[ $# != 1 ]] && suff=s || suff=
 		echo "($# item${suff})"
 		unset suff
-	fi 
+	fi
 	exit $?
 else
 	# return code from getopt, truncate to 1, if needed

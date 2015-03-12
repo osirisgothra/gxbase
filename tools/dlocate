@@ -1,0 +1,161 @@
+#!/bin/bash - 
+#===============================================================================
+#
+#          FILE: dlocate
+# 
+#         USAGE: ./dlocate 
+# 
+#   DESCRIPTION: Locate Items on Filesystem and Perform Commands 
+# 
+#       OPTIONS: ---
+#  REQUIREMENTS: bash4 dialog grep cat
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: Dr. Fritz Mehner (fgm), mehner.fritz@fh-swf.de
+#  ORGANIZATION: FH Südwestfalen, Iserlohn, Germany
+#       CREATED: 02/11/2015 06:33
+#      REVISION:  ---
+#===============================================================================
+
+function setup()
+{
+	shopt -s interactive_comments
+	set -o nounset                              # Treat unset variables as an error
+	
+	declare -g  repl=""
+	declare -g  cmd=""
+	declare -g  i=""
+	declare -g  backtitle="$(cat $BASH_SOURCE | grep -Po '(?<=DESCRIPTION:\s).*$')"
+	declare -g  dialog="dialog --backtitle \"$backtitle\""
+	declare -g  locate="locate"
+	declare -g  dialogsizes="0 0"
+	declare -gx IFS=$'\n'
+	declare -gi count=0
+
+
+	echo "backtitle: $backtitle"
+	echo "dlg: $dialog"
+	
+	eval "$dialog --msgbox \"Welcome to dlocate, press OK to continue!\" 0 0"
+	
+
+	if cmdinit init; then
+		return 0
+	else
+		echo "Failed: Terminal Not Supported or Term Init Error (check your TERM variable!)"
+		return 1
+	fi
+
+}
+
+function _dialog()
+{
+	#val "command $dialog --output-fd 1 \"\$1\" $dialogsizes \"\${@: 2}\""
+	dialog --output-fd 1 "$1" 0 0 "${@: 2}"
+}
+
+function _locate()
+{
+	eval "command $locate \"\$@\""
+}
+
+function cmdinit() 
+{
+	case $1 in
+	pre|init)	clear		
+				stty sane
+				setterm -cursor on
+				;;&
+		pre)	echo "ABOUT TO PERFORM $cmd ON THIS LIST, PRESS [c] TO CONFIRM"				
+				read -sn1
+				[[ $REPLY == c ]] && return 0 || return 1;;
+		post)	echo "COMMAND COMPLETED, PRESS [ENTER] TO CONTINUE"
+				read -sn1;;
+		fatal)	
+				echo "FATAL: caught exception, exiting!"
+				exit 125;;
+	esac
+	return 0
+}
+
+
+
+if setup; then
+#	while true; do 
+		TORESULTS=0
+		#if repl=$(
+		while true; do
+			if [[ $TORESULTS != 1 ]]; then
+				while [[ $# -eq 0 ]]; do
+					set -- `dialog --output-fd 1 --no-tags --inputbox "You didnt specify search criteria! Please enter some search criteria (wildcards ok)" 0 0`
+				done	
+				declare -ga RESULTS=() 
+				declare -ga RAWRESULTS=()
+				unset IFS
+				IFS=$'\n'
+				set +xv
+				echo "searching..."
+				RAWRESULTS=( `locate $*` )
+				echo "parsing..."
+				if [[ "${#RAWRESULTS[@]}" != "0" ]]; then
+					for i in "${RAWRESULTS[@]}"; do 
+						RESULTS+=( "$i" "${i##*/}" )				
+					done			
+				else
+					RESULTS=( "<NO RESULTS>" "No files were found for this search criteria." )
+				fi
+			else
+				TORESULTS=0
+			fi
+			echo "presenting..."
+			repl=$(dialog --no-tags --output-fd 1 --extra-button --extra-label "Search Again" --menu "Locate Results for $*" 0 0 0 "${RESULTS[@]}")
+			case $? in
+				0)	# OK
+					echo "OK, COMMAND DOING COMMAND ON THIS FILES..."
+					if cmd=$(dialog --output-fd 1 --inputbox "Type the Command To View This File" 0 0 "$cmd"); then 
+						cmdinit pre
+						$cmd "$repl"
+						cmdinit post
+					fi
+					dialog --yesno "Do you wish to exit at this time?" 0 0 && break					
+					dialog --extra-button --extra-label "New Search" --cancel-label "Repeat Search" --ok-label "Return to Results" --yesno "Please specify what you want to do:" 0 0					
+					case $? in
+						3) # NEW SEARCH
+							set --;; 							
+						1) # REPEAT SEARCH
+							echo "Restarting search with same criteria...";;
+						0) # RETURN TO RESULTS						
+							TORESULTS=1;;
+						*) # EXCEPTION
+							echo "Fatal: exception $? caught in subsection 0, exiting!"
+							exit 126;;
+					esac
+					;;
+				1)  # CANCEL
+					echo "Goodbye"
+					break
+					;;
+				3)  # SEARCH AGAIN
+					echo "Restarting search cycle!"
+					set --
+					;;
+				*)	echo "Fatal: caught critical exception, exiting..."
+					exit 127
+					;;
+			esac
+		done	
+					
+			
+		#); then	
+	#		
+#		else 
+#			break
+#		fi
+#	done
+fi
+
+ 
+
+
+ # note: when file gets bigger, then add fcl=all
+ # vim: ft=sh:fdm=syntax:fcl=:fdo=hor:tw=0:ts=4:noet:hls:cc=80

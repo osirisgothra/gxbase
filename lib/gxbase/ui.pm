@@ -1,4 +1,4 @@
-package gxbase::helpers;
+package gxbase::ui;
 use strict;
 
 
