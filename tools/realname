@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+#
+# 			Name: realname*
+#
+#      * not to be confused with 'realpath'
+#
+#    Description: get the 'real' name of a binary or script depending on the input provided
+#   Requirements: coreutils, util-linux, grep, which, whereis, locate, realname, basename, dirname, tail, head, tr bash
+#
+# [noflag] returns which realname [item] 
+# -n returns basename which realpath [item]
+# -d returns dirname which realpath [item]
+# -l use locate -bel1 instead of which (-b = basename search, -e = existing files only, -l = limit to single file search)
+# -w use whereis instead of which, and grep the first result of entries
+# -W same as -w except do not limit # of entries!
+#
+
+#set -vx
+
+FLAG=none
+if [[ $1 =~ ^- ]]; then
+	FLAG=$1
+	shift
+fi
+
+process()
+{
+	case $FLAG in
+		none) realpath $(which "$*");; 
+		*n) basename $(realpath $(which "$*"));; 
+		*d) dirname $(realpath $(which "$*"));; 
+		*l) realname $(locate -e -b -l1 "$*");; 
+		*w) realname $(whereis -u -b $* | tr ' ' '\n' | head -n+2 | tail -n1);; 
+		*W) realname $(whereis -u -b $* | tr ' ' '\n' | head -n+2 );; 
+		*) echo "$0: failed; $FLAG is not a supported flag!"; return 12;;
+	esac
+} 
+				
+# reprocess each entry, exiting if errors happen				
+if [[ $# -ge 1 ]]; then
+	for item in "$@"; do
+		if result=`process "$item" 2>&1`; then
+			echo $result;
+		else
+			RESULT=$?
+			if [[ $RESULT -gt 10 ]]; then
+				echo $result
+				#exit $[ RESULT - 9 ]		
+			else
+				if [[ "$FLAG" != "-q" ]]; then
+					echo "$item: no match found"
+				#e;se
+					# quiet!
+				fi
+			fi		
+			#exit $RESULT
+		fi
+	done
+else
+	echo "usage: $0 [-ndlwW] [item] ..."
+fi
