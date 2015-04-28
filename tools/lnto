@@ -1,0 +1,76 @@
+#!/bin/bash
+declare -i j=0;
+RESUME=NO
+# be certain that COLUMNS is > 34
+# if not, we must force that length 
+# esp if 0, because that causes it to be
+# a negative number (-2) which causes head/tail
+# to show EVERYTHING except the last/first two bytes
+# for big files this is disasterous! This failsafe
+# ensures that never happens!!
+eval `resize`
+if [[ $COLUMNS -lt 34 ]]; then
+	COLUMNS=34
+fi
+
+if [[ -r /tmp/lnto.last ]]; then
+	printf "\n*** A session file $(stat --format '%s bytes long, owned by %u' /tmp/lnto.last), has been found!"
+	[[ $USER != $(stat --format '%u' /tmp/lnto.last) ]] && {
+		printf "\n\nWARNING: This file does not come from you! Make sure you know what the contents of the file are before starting this transaction!"
+		printf "\n\e[1m---Output of Summary Signature---\n\e[7m"
+		# causes the first Line+Half to be glued to Last Line+Half (3 Lines Total)
+		# will look weird if COLUMNS is not the actual size (rare these days)
+		printf "\e[32m$(head -c$[COLUMNS + (COLUMNS/2)] /tmp/lnto.last)"		
+		printf "\e[33m<-->\e[31m$(tail -c$[COLUMNS + (COLUMNS/2) - 3] /tmp/lnto.last)"	
+		printf "\e[0;1m\n---End of the Output File Data---\e[0;0m\n"
+	}
+	
+	printf "\e[0;1mwould you like to resume from this incompleted session? [y/\e[7m[n]\e[0;1m]\e[0m"
+	if [[ $(read -en1 2>&1) == y ]]; then
+		echo "attempting recovery..."
+		unset ITEMS
+		if source /tmp/lnto.last; then
+			k=${#ITEMS[@]}
+			unset IFS
+			if [[ $k -ge 1 ]]; then			
+				RESUME=YES
+			fi
+		fi
+		if [[ $RESUME != YES ]]; then
+			echo "Items are not found, resume failed, starting over..."
+			echo "Proceeding [ctrl-c to abort] in 2 seconds..."
+			sleep 2			
+		fi
+	else
+		echo "User opt-out, continuing normally..."
+	fi
+fi
+
+if [[ $RESUME != YES ]]; then		
+	IFS=$'\n';
+	ITEMS=( `locate "$1"` );
+	k="${#ITEMS[@]}"; 
+	unset IFS; 
+	declare -p ITEMS > /tmp/lnto.last
+else
+	echo "resuming with $k items..."
+fi
+
+# update every 4 seconds - refresh every time and it would take forever
+LSEC=$SECONDS
+for i in "${ITEMS[@]}"
+	do 
+	{
+		let j++; 
+		cp "$i" "$2" --symbolic-link --no-clobber; 
+		if [[ $[ $SECONDS - $LSEC ] -ge 4 ]]; then
+			LSEC=$SECONDS
+			printf "[s[2K$(basename $i) ... [$[COLUMNS/2]G"
+			printf "$[$j * 100 / $k ]%% ($j of $k files -- "
+			printf "$[ $k - $j ] remaining)[u";
+		fi
+	}
+done
+
+printf "\ndone!"
+rm /tmp/lnto.last

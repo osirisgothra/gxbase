@@ -1,0 +1,27 @@
+#!/bin/bash
+[[ $- =~ [vx] ]] && set -xv
+
+case $# in
+	2)	PRI=${1,,} NAME=$2
+		[[ $PRI =~ ^(lo|med|hi)$ ]] || { echo "bad priority" ; exit 1; }
+		for i in `pidof $NAME`; do
+			echo "Setting $NAME to $PRI"
+				unset NICE_PRI IONICE_PRI
+				case $PRI in
+					lo)	NICE_PRI=20;	IONICE_PRI=( "-c" "3" );;
+					med) NICE_PRI=0;    IONICE_PRI=( "-c" "2" "-n" "4" );;
+					hi) NICE_PRI="-20"; IONICE_PRI=( "-c" "1" "-n" "0" );;
+				esac
+			echo "NICE: $NICE_PRI IONICE: ${IONICE_PRI[@]}"
+			set -x
+			sudo renice -n $NICE_PRI -p $i
+			sudo ionice ${IONICE_PRI[@]} -p $i
+			set +x
+		done;;							
+	
+	
+	
+	0)	echo "usage: pri [lo|med|hi] process-name";;
+esac	
+	
+	

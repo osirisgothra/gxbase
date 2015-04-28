@@ -1,0 +1,117 @@
+#!/usr/bin/env bash
+# vim: ft=sh
+
+# new syntax:
+# 
+#  man [(=)term] 
+#  man --help
+#  man [man options]
+#  man --info [info options]
+#  man (no options at all gives you the 'whine tag')
+#  
+#  intended use is the first three forms
+#  the last two forms are less used and probably not all that useful since its just extra typing
+#  on the other hand if you love extra typing, at least --info will be autocompleted, so you got that..
+#  
+#  the last form is useful when you use it interactively with 'source' or '.' from bash
+#  in which case it will trigger the interactive-mode completion installer
+#  (you should add ". /[gxbase]/tools/man" (where [gxbase] is your gxbase install dir)
+#  to your ~/.bash_completion file (or create it) this file is run automatic by the
+#  completion engine AFTER all other completions are loaded, so this is the best way.
+
+
+# REMOVED: lots of code from previous author was wrong:
+#          1) dont check /usr/share/info manually because it doesnt do any good
+#          2) need to show ALL options and be compatible when --help is in use because of (ba/z)sh completion
+#          3) use a prefix for installing (no prefix is a no-no)
+#          4) use 'info -w' to verify if manpages or info pages are being used
+#          5) always fall back to >2 args (to man) because automated programs that
+#             expect the process "man" to run from here, and use exec with it so the
+#             program doing PID tracking doesn't return early thinking the process exited
+#             or sends IPC data to the wrong PID, (our PID should be MAN PID!!)
+
+if [[ $- =~ i ]]; then
+	echo "Interactive mode detected, installing completion handler..."
+	complete -F _longopt man
+	echo "done, use man<TAB> to see completions."
+	return 0
+fi
+
+# let the installer set these
+# they should be the same as the --prefix='...' setting when
+# the package was first configured...
+
+PREFIX="/usr"
+MAN="$PREFIX/bin/man"
+INFO="$PREFIX/bin/info"
+# adjust for 100% terminal compatibility for those dinosaur terms that still dont use ANSI???
+# this example shows how much trouble we have to go to because of you 0.001% 75-year old
+# company managers that refuse to join the 21st century (hell, join the 1980s or 90s in fact):
+if tput sgr0; then
+	CLEARTOEND="$(tput el)"
+	INVERT="$(tput rev)"
+	NORMAL="$(tput sgr0)"
+else
+	CLEARTOEND="***"
+	INVERT="***"
+	NORMAL="***"
+	if tty -s; then
+		echo ""
+		echo "Warning: Your terminal is (mostly) dumb, and cannot use extended sequences (bad TERM var?)"
+		echo ""
+		# 1/3 second so the user knows its there but dont wait forever because who knows where the user is..
+		sleep 0.33 
+	else	
+		echo ""
+		# user not seeing this, its being redirected to (file?) and therefore its pointless to show warning
+	fi
+	
+fi
+
+
+case $# in
+	0)
+		echo "Which info/man page do you want?"
+		exit 0
+		;;
+	
+	1)	# important DO NOT USE "exec" here (we need to come back to make more calls!)
+		# after last echo we could, but what's the point, just stay!
+		if [[ $1 == "--help" ]]; then
+			echo -e "$INVERT$(which -a man | tail -n1)$CLEAR$NORMAL"
+			$MAN --help
+			echo -e "$INVERT$(which -a info | tail -n1)$CLEAR$NORMAL"
+			$INFO --help
+			echo ""
+			echo "--info		Use info as main program for >1 arg mode, instead of man"
+			echo ""
+			echo "This listing is for both info and man, (C) their respective authors"
+			echo "This script (gxbase/tools/man) was written by Gabriel T. Sharp"
+			echo "and is licensed under the GNU GPL v2, which can be found at"
+			echo "http://gpl.gnu.org or in the LICENSE file(s) supplied with gxbase"			
+			exit 0
+		
+		# The next three calls out use 'exec' to ensure our PID is used by the new program and
+		# the process group new child count stays at 1. It also removes our script from the
+		# process and hands it over to the newly started one. Never remove exec from here or
+		# programs that rely on man/info may break in scarry!
+		elif [[ ${1: 0:1} == "=" ]]; then
+			# if you use the override, =, you can FORCE the use of the manpage
+			# for example: 'man =bash' will always run /usr/bin/man bash!
+			exec $MAN ${1: 1}
+		elif [[ $($INFO -w $1) == "*manpages*" ]]; then
+			exec $MAN $1		
+		else
+			exec $INFO $1		
+		fi
+		;;
+	*)  if [[ $1 == "--info" ]]; then
+			# when the --info flag is used, the fallback program becomes 'info' instead of man
+			MAN="$INFO"
+			shift
+		fi
+		exec $MAN "$@"
+		;;
+esac
+echo "Fatal: program reached a (thought to be) unreachable point, file possibly corrupted (did you run out of disk space?)"
+exit 119

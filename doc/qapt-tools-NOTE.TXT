@@ -1,0 +1,99 @@
+NOTE.TXT
+
+Notes on the perl program tools for qapt-* 
+
+Contents
+	A	Purpose
+	B	Using/Install
+	C	Programmer's Notes (for script readers or developers [aka forkers])
+	
+A	PURPOSE
+
+	To facilitate an automated means to run qapt-* programs from /usr/bin/qapt-* without having to
+	change attributes of the files to SUID, which is usually either a bad idea, or doesn't fully work
+	as expected to. Obviously a single command can replace these scripts but the use of them is meant
+	more for programs that refuse to allow intervention and expect NO CHANGE in the process' PID after
+	started from fork->exec or spawn and continue to monitor or communicate with it via it's PID or access
+	files in it's /proc/PID/ directory!
+	
+	This is a unix program, though portable it may be, has no real use under anything else. If you use
+	a platform where this is useful to you - consider requesting or forking. Forking is probably best
+	if you are the only one requesting.
+	
+	This program requires sudo access to the above programs, and perl 5.016 or better. No special modules
+	are required (no "core" modules are even used).
+	
+	This program requires you to make changes that only an administrator would be allowed to do to the file
+	system. If you are not the owner of the machine/system, have your admin do this for you.
+	
+	IMPORTANT: This program BREAKS the associated packages UNTIL it is uninstalled!! Please make sure you
+			   are aware of that and know how to install properly before doing so!
+			   
+B 	Usage/Install
+
+	Please read section A first and then follow these steps, you must be admin:
+	
+	make BACKUP copies of /usr/bin/qapt-* and place them in a safe place FIRST
+	
+	MOVE /usr/bin/qapt-* to /usr/lib (non-pkg version of qapt using users may use /usr/local/lib)
+	
+	COPY /<installation-of-gxbase-dir>/tools/qapt-* to /usr/bin and VERIFY copies with diff 
+	
+	be SURE the owner is 0:0 and attributes are u+rwx a+rx (755) of these files you copied if they are not
+	
+	VERIFY the files: /usr/bin/qapt-[*] -rwxr-xr-x <nonzero file size> <date not in future> <--- matches this as close as possible!
+	
+	TEST as a NORMAL USER to ensure that nothing went wrong
+	
+	if you cant get it working, CONTACT us, or, UNINSTALL (see below)
+	
+	
+	UNINSTALL
+	
+	MAKE SURE your backup files are safe, if not, find your distro's versions and get them downloaded to a safe place
+	
+	TEST your backup files to ensure they work, and that you can access them properly
+	
+	DELETE each filename you find under /gxbase-install-dir/tools/qapt-* in your /usr/bin directory:
+	
+	for item in /gxbase/tools/qapt-*; do rm /usr/bin/$(basename $i) -v; done
+	
+	*IMPORTANT* DO NOT do a "rm /usr/bin/qapt-*"!!! you could have some new files with that name and can destroy their install!
+	
+	(always keep a log of what you did!)
+	
+	If you have a working installation:
+		MOVE the files from /usr/lib back into /usr/bin, remember to NOT use qapt-*, go by the list in /gxbase/tools/qapt-*
+		
+	If your install is broken/missing:
+		MOVE the files from your backup location to /usr/bin
+		You need not worry about using *, since no other files should be in there :)
+	
+	If you downloaded new qapt-* files because you lost them:	
+		FOLLOW THE STEPS FROM THE INSTALLATION ON HOW TO VERIFY AND SET THE ATTRIBUTES OF THE NEWLY COPIED FILES!!
+	
+	That's it, if you have problems, contact me, panic, or find a tall building!
+	
+	contact: osirisgothra@hotmail.com
+		web: http://github.com/osirisgothra
+		
+
+C	PROGRAMMER'S NOTES
+
+Unless you are a developer you can safely ignore this:
+
+0 - usually programmer error, also for testing the distribution package
+1 - always executes, tested with FAIL (see 3 & 4)
+2 - used for testing the distribution, not for user's use (same for 3/4)
+3 - sends FAIL to get an error code from lib/bin
+4 - sends FAIL to check fork doesnt give back an error even when failed (checks to make sure that happens)
+    and guarentees fork works
+5   actual run, always does (0,"command line"), also tested in chapter tests for distro 
+
+
+
+-------------------------------------------------------------------------------------------------------------------
+qapt-tools-NOTE.TXT 		Last Modified Mar 23, 2015 9:14AM
+This Document, (C)2015 Gabriel T. Sharp <etherial_raine@outlook.com> http://paradisim.twilightparadox.com/?q=author
+Authenticate: Copy this text and paste it to your terminal (in the same directory this file is saved) and press ENTER if needed to verify authenticity (you may need to turn on word wrap if you are using a terminal editor)
+sh -c 'cat qapt-tools-NOTE.TXT|head -n-2|sha1sum|grep '24e02991a3bb60aa6e0f0321e33dea144f7042fa' && echo "PASSED" || echo "FAIL"'

@@ -133,11 +133,11 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 			if [[ ! -x "$i" ]]; then
 				echo "$i (queued to be set)"
 				NEEDEDFILES+=( $i )
+				AUTOCOUNT+=1
 			else
 				echo "$i (already executable, skipped)"
 				IGNCOUNT+=1
-			fi
-			AUTOCOUNT+=1
+			fi			
 		done
 		if [[ $AUTOCOUNT -ge 1 ]]; then
 			set -- "${NEEDEDFILES[@]}"
@@ -177,7 +177,7 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 		(exit $rv)
 	fi
 	if [[ -v AUTOCOUNT ]]; then
-		FINALCOUNT=$(( AUTOCOUNT - CM_ERR_COUNT - IGNCOUNT))
+		FINALCOUNT=$(( AUTOCOUNT - CM_ERR_COUNT ))
 		echo "$CM_ERR_COUNT error(s), $FINALCOUNT processed, $IGNCOUNT ignored"
 	else
 		[[ $# != 1 ]] && suff=s || suff=
