@@ -1,0 +1,9 @@
+#!/bin/bash
+if tty; then
+	while true; do
+		eval '$(eval "dialog --no-tags --output-fd 1 --menu \"systemsettings 5.2.2\" 0 0 0 $(cat $AX_BASE/etc/k4.dlist $AX_BASE/etc/k5.dlist | tr '\''\n'\'' '\'' '\'')")'
+		(($?)) && break
+	done
+else
+	st -g 190x60+96+96 -e "$BASH_SOURCE"
+fi

@@ -1,0 +1,30 @@
+#!/usr/bin/python3
+import os;
+import sys;
+import re;
+from sys import argv;
+
+if len(sys.argv) <= 1:
+	print("need some arguments!")	
+else:
+	# remove COMMAND from args
+	sys.argv.remove(sys.argv[0])
+	if len(sys.argv) > 1 and re.match('^[0-9]+$',argv[0]) != None:
+		cnt=int(argv[0])
+		argv=argv[1:]		
+	else:
+		cnt=2		
+	rmarker=0
+	for x in argv:
+		marker=0
+		if rmarker > 0:
+			print(" ",end="")
+		rmarker+=1								
+		while marker < cnt:
+			if marker > 0:
+				print(" ",end="")
+			print(x,end="")
+			marker+=1
+		
+		
+			

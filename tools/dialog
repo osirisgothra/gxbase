@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+
+# 
+#    Filename:  <?:gxbase>/tools/dialog
+# Description:  _longopt compatible dialog wrapper
+#
+# SYNOPSIS
+#
+# Using _longopt with most programs that accept them works rather
+# well. It also works with dialog, sort of. The problem is that when
+# the help text is shown, they also include options contained in
+# braces (aka "optional" options). Because of this, a drop-in filter
+# or 'wrapper' was created. This program removes the braces when
+# dialog is called with --help only, which is how _longopt calls it.
+# Any other method of calling dialog is done IDENTICAL to the original
+# dialog program, in every way possible.
+#
+# IDENTICAL
+#
+# This means, that, the pid for this 'dialog' program will stay the
+# same (and exit this code) after execution is started. This ensures
+# that tools checking PIDs or expecting dialog to run as it always
+# does, in the same manner. Since only longopt seems to depend on --help,
+# I added a single handler for it and delegated the rest.
+#
+# DELEGATION
+#
+# Delegation is done when --help is not the ONLY option sent.
+# Delegation causes the real dialog to be run, in the same process
+# and instead of this program. This protects compatibility.
+#
+# COMPATIBILITY
+#
+# Compatible with any dialog-based scripts.
+#
+# BUGS
+#
+# None seen yet
+#
+# PACKAGING
+#
+# This software is part of GXBASE, and is licensed under the same
+# GNU GPL 3 license that GXBASE is licensed under. Please read the
+# license file "<gxbase>/doc/LICENSE" for details or visit:
+# 
+# http://www.gnu.org/gpl3     or   http:///osirisgothra.github.io
+# mail bugs to: osirisgothra@hotmail.com
+
+use warnings;
+use strict;
+use v5.18;
+
+
+unshift @ARGV, '/usr/bin/dialog';
+
+if ( @ARGV > 1 && $ARGV[1] =~ /^--help$/ ) 
+{
+	# TODO: convert to internal perl
+	system("@ARGV | grep -Po -- '--[^\][:space:]]+' | uniq | sort");
+}
+else
+{
+	exec @ARGV
+}
+	

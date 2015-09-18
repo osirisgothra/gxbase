@@ -58,23 +58,22 @@ if [ $DISPLAY ]; then
 	else
 		function func_getcurrentwindow()
 		{
-			if (tty -s); then
-				if [[ $PICK_WINDOW ]]; then
-					unset getspec
-				else
-					getspec='-root'
-				fi			
-			else
-				unset getspec
-			fi
-			eval xprop $getspec | grep ^"_NET_ACTIVE_WINDOW" | grep --only-matching "0x[0-9a-fA-F]*" --color=never			
+			
+			eval xprop -root | grep ^"_NET_ACTIVE_WINDOW" | grep --only-matching "0x[0-9a-fA-F]*" --color=never			
 		}
-		
-		if [[ $DO_UNBLUR == 1 ]]; then
-			xprop -remove _KDE_NET_WM_BLUR_BEHIND_REGION -id `func_getcurrentwindow`
+		if [[ $PICK_WINDOW != 1 ]]; then
+			USEID="-id `func_getcurrentwindow`"
 		else
-			xprop -f _KDE_NET_WM_BLUR_BEHIND_REGION 32c -set _KDE_NET_WM_BLUR_BEHIND_REGION 0 -id `func_getcurrentwindow`
+			unset USEID
 		fi
+		echo "USEID=$USEID"
+		set -x
+		if [[ $DO_UNBLUR == 1 ]]; then			
+			eval xprop -remove _KDE_NET_WM_BLUR_BEHIND_REGION $USEID
+		else
+			eval xprop -f _KDE_NET_WM_BLUR_BEHIND_REGION 32c -set _KDE_NET_WM_BLUR_BEHIND_REGION 1 $USEID
+		fi
+		set +x	
 
 		RETVAL=$[ $? + 0 ]
 		# just in case we were sourced, undefine the function

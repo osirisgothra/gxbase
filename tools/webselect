@@ -1,0 +1,27 @@
+#!/bin/bash
+
+for x in firefox chrome arora opera safari x-www-browser elinks midori rekonq konqueror; do
+	pgrep "$x" && {
+		tmp=$(mktemp)
+		# fail with this if cant do it!
+		[[ -r $tmp ]] || tmp='/dev/null'
+		echo "using running process $x"
+		[[ $tmp != /dev/null ]] && echo "logging to $tmp (deleted after next crontab)"
+		echo "continuing $x via IPC..."
+		echo "$x" --new-tab "$@" \&\> $tmp \& disown
+		"$x" --new-tab "$@" &> $tmp & disown
+		echo "done startup finished"
+		if pgrep $x; then
+			echo "finished ok"
+			[[ $- =~ i ]] && return 0
+			exit 0
+		else
+			echo "fatal: process gone! going to the next one..."
+			continue
+		fi
+	} || { echo "$x - not available"; }
+done
+# none found, use x-www-browser
+echo "none available, using default: /etc/alternatives/x-www-browser"
+x-www-browser "$@" &> /dev/null & disown
+echo "done with code $?"

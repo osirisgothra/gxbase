@@ -1,0 +1,16 @@
+#!/usr/bin/bash
+#
+# to handle terminal:// urls
+
+# bash bridge to konsole
+
+# dont pass the args, because firefox gives us dumb shit
+# write the args to /tmp/mkterminal
+#
+
+echo "$@" > /tmp/mkterminal
+
+/usr/bin/konsole -e bash &
+disown
+
+# return to parent

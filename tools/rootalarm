@@ -1,0 +1,105 @@
+#!/usr/bin/env bash 
+#======================================================================================================================
+#
+#          FILE: rootalarm
+# 
+#         USAGE: ./rootalarm 
+# 
+#   DESCRIPTION: 
+# 
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
+#  ORGANIZATION: Paradisim Enterprises, LLC, PA, USA
+#       CREATED: 05/31/2015 00:34
+#      REVISION:  ---
+#  HELP CONTENT:
+#					usage: rootalarm <arguments>
+#					
+#					<arguments>		options you can pass to rootalarm
+#									
+#					This script (C) Copyright 2014-2015 Paradisim Enterprises, LLC, PA, USA, Licensed under GNU GPL v3
+#					You may get a copy of this LICENSE at the website: http://gpl.gnu.org
+#					For more info, contact the author Gabriel Thomas Sharp osirisgothra@hotmail.com
+#======================================================================================================================
+
+if [[ $UID -ne 0 ]]; then
+	if sudo "$BASH_SOURCE"; then
+		RV=$?
+		echo "ran as root completed!"
+		exit $RV
+	else
+		echo "This program must be run by root!"
+		exit 255
+	fi
+fi
+
+
+echo "When do you want to get up [hh:mm] (24h format):"
+read
+#
+#  Use a simplex regex to resolve a proper date
+#  example: 0:00 = midnight, valid          	00:00 = improper way of specifing midnight, invalid
+#           19:00 = ok, valid 			91:00 = hour out of range, invalid
+#
+if [[ $REPLY =~ ^([1-2]|)[0-9]:[0-5][0-9]$ ]]; then
+
+	declare -i HOUR MIN ALRM H M 
+
+	HOUR=`echo $REPLY | sed -r 's/:.*//g'`
+	MIN=`echo $REPLY | sed -r 's/^[^:]+:0?//g'`
+	if [[ $HOUR -lt 24 && $HOUR -ge 0 ]] && 
+	   [[ $MIN -lt 60 && $MIN -ge 0 ]]; then
+	   	echo "Ok, set alarm to $HOUR:$MIN (waiting)"
+		ALRM=0
+		while true; do
+			declare -i H=$(date +%H | sed -r 's/^0+//g')
+			declare -i M=$(date +%M | sed -r 's/^0+//g')
+			[[ -v GXBASE_TOOLS_ROOTALARM_DIAGNOSTIC ]] && set -x
+			if [[ $H == $HOUR ]] && [[ $MIN == $M ]]; then
+				ALRM=1
+				break;
+			fi
+			set +x
+			sleep 0.5
+		done
+		if [[ $ALRM == 0 ]]; then
+			echo "alarm aborted before alarm criteria could be met!"
+			exit 1
+		else
+			echo "Alarm Trigger!!!"
+			echo "Beeping 1 per second, for a while (15 minutes)"
+			echo "Press the 'A' key anytime to end it!"
+			modprobe pcspkr
+			# block break key press since we dont want module to remain!
+			trap '' SIGINT SIGTSTP SIGTTOU SIGTTIN
+			# resets the rotating second timer
+			SECONDS=0
+			REPS=60
+			FREQ=440
+			DELAY=1000
+			while [[ $REPS -gt 1 ]]; do
+				echo "Playing beeps every $(( DELAY / 1000 )) seconds for $REPS times at ${FREQ}hz..."
+				beep -f $FREQ -d $DELAY -r $REPS -l "$(( 2000 - DELAY ))"
+				let REPS/=2 FREQ*=2 DELAY/=2
+				unset REPLY
+				TMOUT=1
+				read -sn1
+				TMOUT=0
+				[[ $REPLY =~ [Aa] ]] && break
+			done
+			modprobe -r pcspkr
+		fi
+	else
+		echo "Time's hour=$HOUR[valid range 0-23] minute=$MIN[valid range 0-59], this time is not valid!! aborting..."
+		exit 2
+	fi
+else
+	echo "Bad time format! aborting..."
+	exit 3
+fi
+
+	
+	

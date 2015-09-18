@@ -1,0 +1,170 @@
+#!/bin/bash
+
+# set this to wherver the etc/k4.dlist and etc/k5.dlist is located (usually /usr/share/ax)
+# first line: autodetect already-set or use some user-supplied value (does NOT have a meaningful value upon first install!)
+# uncomment X line if needed to....
+# second: use without ax configured for whole system
+# third: if you have a prefix-configured environment
+# fourth: if you are using autox for single-user only
+
+COMPANY_NAME=paradisim-enterprises-llc
+PROGRAM_NAME=ks
+PRODUCT_NAME=$COMPANY_NAME/$PROGRAM_NAME
+USER_CACHE=~/.cache
+USER_SETUP=~/.config
+L_CACHE=$USER_CACHE/$PRODUCT_NAME
+L_CONF=$USER_SETUP/$PRODUCT_NAME
+[[ -d $L_CACHE || -d $L_CONF ]] || mkdir --parents $L_CACHE $L_CONF
+
+
+
+[[ -d $AX_BASE ]] || AX_BASE=/ax
+#AX_BASE=/usr/share/autox
+#AX_BASE=$PREFIX/share/autox
+#AX_BASE=~/.autox
+
+function dialog()
+{
+ 	command dialog --backtitle "ks 1.25.0715 ($(kcmshell5 --version))" "$@"
+}
+if [[ $1 == RELOAD ]]; then
+	dialog --infobox "$BASH_SOURCE\nReloaded OK!" 0 0
+	sleep 1.5
+fi
+
+# features:
+# debug, inlined source (via 'source' or '.') protection
+#set -x
+[[ $- =~ i ]] && { $BASH_SOURCE "$@"; return $?; }
+exit() { (($#)) || { echo "Press Any Key [or 4 seconds pass]"; TMOUT=4; read -sn1; TMOUT=0; }; clear; builtin exit "$@"; }
+# comment this line out if you want to see the path of confiruation too
+USETAGS="--no-tags"
+DFLAGS="$USETAGS --output-fd 1"
+HW="0 0"
+MH=0
+L_KC=$L_CACHE/kcmshell.cache
+if [[ ! -r $L_KC ]]; then
+	dialog --infobox "Generating List, One Moment Please" 0 0
+	( for i in 4 5; do kcmshell$i --list 2> /dev/null | tail -n+2; done ) | perl -wpe 's/($|\s+(?=-)|(?<=-) )/\"/g;s/(?<=\")-(?=\")/ /g;s/(Configure the )([^w])/\U$2/g;s/(Configure )(.(?!he))/\U$2/g' | sort | awk ' { if (last != $1) {  print; } last=$1 }' | sed 's/" "/"\n"/g' | sed 's/^[^"]/"\0/g;s/^.$//g' > $L_KC
+	dialog --infobox "Done!" 0 0
+	sleep 0.5
+fi
+
+if ! tty -s; then
+	# terminal-less source protection for x-terminals
+	if xprop -root &> /dev/null; then
+		x-terminal-emulator -e "$BASH_SOURCE"
+	else
+		# no terminal available either way
+		# generic return
+		exit 2
+	fi
+else
+	if [[ -r $AX_BASE/etc/kcmshell.dat ]]; then
+		LISTCONTENT=( )
+		LISTCONTENT+=( $(cat $AX_BASE/etc/kcmshell.dat) )
+		while true; do
+			OKSEARCH=0
+			if ITEM=$(dialog $DFLAGS --menu "Operation" $HW $MH $(argclone All Search Debug Reload Exit)); then
+				case $ITEM in
+					Reload)
+						if bash -n "$BASH_SOURCE"; then
+							if dialog --keep-window --yesno "Checked Script on disk: OK, Reload script ($BASH_SOURCE) from disk?" 0 0; then
+								# warning: script leaves context here						
+								exec "$BASH_SOURCE" RELOAD "$@"				
+							fi
+						else
+							dialog --msgbox "Checked script on disk ($BASH_SOURCE)..FAILED. Can't execute the script, please fix it or reinstall it and retry!" 0 0	
+						fi;;												
+					Debug)
+						if dialog --yesno "Debug mode is a specialized mode for debugging the kde settings (ks) CLI. It is intended for developers of this program. Do you still want to enter debug mode?" 0 0; then
+							clear
+							echo "Entering Debug Mode"
+							echo "Type exit to return to ks!"
+							while true; do
+								read -p "ks-debug> " KSDBG
+								case $KSDBG in
+									exit)	break;;
+									help|\?)
+										echo "help"
+										echo
+										echo "vars - show all relevant variables and values"
+										echo "exit - return to ks GUI/CLI"
+										echo
+										echo "Any other command will be sent to bash for evaluation*"
+										echo "(* there is no check for destructive commands!)"
+										;;
+									vars)
+										echo "vars:"
+										declare -p LISTCONTENT SEARCH OKSEARCH KSDBG ITEM DFLAGS HW MH AX_BASE BASH_COMMAND
+										;;
+									""|nop) echo "Nothing Done Successfully!";;
+									*)
+										eval $KSDBG;;
+								esac
+							done						
+						fi;;
+					All)
+						SEARCH=".*"
+						OKSEARCH=1
+						;;
+					Search)
+						while true; do
+							if SEARCH=$(eval dialog $DFLAGS --inputbox Term $HW); then
+								if [[ ${LISTCONTENT[@]} =~ .*${SEARCH}.* ]]; then
+									OKSEARCH=1
+									break
+								else									
+									dialog --msgbox "No items were found, please try again" 0 0
+								fi
+							else
+								break								
+							fi
+						done
+						;;
+					Exit)
+						if dialog $DFLAGS --yesno "Exit $BASH_SOURCE?" $HW; then
+							exit 0
+						else
+							continue
+						fi
+						;;
+					*)
+						beep
+						echo "WARNING: ITEM=[$ITEM]"
+						sleep 2;
+						;;
+				esac
+				if [[ $OKSEARCH == 1 ]]; then
+					while true; do					
+						# old way:
+						 ITEM='$(eval "dialog $DFLAGS --menu \"systemsettings 5.2.2\" 0 0 0 $(cat $AX_BASE/etc/kcmshell.dat | grep ".*${SEARCH}.*" | tr '\''\n'\'' '\'' '\'')")'
+						 eval "$ITEM"
+						# new way:
+						
+						
+						read -sn1 -p PRESSAKEY
+									
+					done
+				fi
+			else
+				# cancelled
+				if dialog $DFLAGS --yesno "Really Exit $BASH_SOURCE?" $HW; then
+					exit 0
+				else
+					continue
+				fi
+			fi
+		done
+		clear || echo '[3J[2J'
+	
+		echo "Thanks For Using The kdesettings script (ks) v1.0"
+	else	
+		echo "AX_BASE variable must be set (is ${AX_BASE-not set}), if you are using ks outside autox, please set it to the root directory of autox's extract path, where the script 'autox' is located!!!"
+		echo "You can edit $BASH_SOURCE yourself and change the assignment if you want to hard-code the location of k4.dlist/k5.dlist"
+		echo "You can also create your own text listing of the kde system settings commands yourself."
+		echo 'There should be a command, followed by a description, both in quotes like this: "/usr/bin/kcmshell4 somecmd" "some command"'
+		echo "The quotes are essential! Don't leave them out. And remember, each line must have a valid command to work, and a PAIR of items must appear every line!"
+		read
+	fi
+fi

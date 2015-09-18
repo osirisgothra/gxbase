@@ -1,0 +1,47 @@
+#!/usr/bin/env perl
+# vim: noet:ts=4:tw=0:fo=:sw=4:nowrap:fen:fcl=all:fdo=hor:fdm=marker:fmr={,}
+use warnings;
+use strict;
+use v5.18;
+use File::Slurp::Tiny 'read_file';
+
+my $badcmdretvalue = -1;			# returned when command not found
+
+my %cmds = 	(	sysrq => \&sysrq, 	# list of functions and their commands
+				help => \&help,     # that map to them (usually same name)
+			);
+
+sub sysrq
+{
+	my $value = shift // -1;
+	if ($value >= 0)
+	{
+		my $oldvalue = sysrq(-1);
+		open SYSRQFILE,">","/proc/sys/kernel/sysrq"
+			or die("Can't open sysrq file: $!");
+		say "Setting new value: $value";
+		print SYSRQFILE $value;
+		close SYSRQFILE;
+		return $oldvalue;		
+	}
+	else
+	{
+	 	$value = int(read_file("/proc/sys/kernel/sysrq"));
+		say "/proc/sys/kernel/sysrq => $value";
+		return $value;
+	}
+}		
+sub help
+{
+	say "usage: $0 [help,sysrq] [command arg(s)]\n";
+	say "commands:";
+	say "       $0 sysrq [bitmask 0-65535]";
+	say "       $0 help (this screen)\n";
+	return 2;
+
+}
+die "No arguments specified, use \"$0 help\", for help! $!" if scalar(@ARGV) < 1;
+my $cmd = shift @ARGV;
+say "Unknown command $cmd, use the help command to see a list!" unless exists($cmds{$cmd});
+exit(exists($cmds{$cmd}) ? $cmds{$cmd}->(@ARGV) : $badcmdretvalue); 
+

@@ -1,0 +1,12 @@
+#!/bin/bash
+[[ ! -v DMENU_CMD ]] && DMENU_CMD=dmenu.xft
+[[ ! -v DMENU_CMDLINE ]] && DMENU_CMDLINE='-l 12 -fn "Onuava-24:normal" -nf #888 -nb #004 -sf #FFF -sb #00F'
+if which $DMENU_CMD; then
+	printf "using $DMENU_CMD with a command line of: ${DMENU_CMDLINE:-no command line set in DMENU_CMDLINE}\n"
+	if RESULT=$(eval ls -C1 ${PATH//[:.]/ } | grep '.*:.*' -v | $DMENU_CMD $DMENU_CMDLINE); then
+		printf "$BASH_SOURCE: spawning $RESULT...\n"
+		$RESULT
+	fi
+else
+	printf "$BASH_SOURCE error: dmenu not found, and is required"
+fi

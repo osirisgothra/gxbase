@@ -1,0 +1,14 @@
+#!/bin/bash
+if [[ $# -gt 1 ]]; then
+	for x; do
+		$BASH_SOURCE "$x"
+	done
+	exit $?
+elif [[ $# -lt 1 ]]; then
+	# stdin mode
+	tput -S
+else
+	cat $1 | grep '^\s*#.*' -v | tr -s ' ' | tr -s '\n' | sort | uniq | grep -P '^\s*\S+.*$' | tput -S
+fi
+	
+		

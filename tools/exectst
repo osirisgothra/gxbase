@@ -1,0 +1,31 @@
+#!/bin/bash
+
+fexectst()
+{
+if [[ $# -ne 3 || $1 == help ]]; then
+	[[ $1 == help ]] && shift
+	echo "usage exectst [progname] [progid] [progcmd]"
+	echo "    |  "
+	echo "    \---used--as-----> exec \$PROGID:$2 \$PROGCMD:$3 \$PROGNAME:$1"
+	[[ $- =~ i ]] && return || exit
+fi
+
+PROGID=$2
+PROGCMD=$3
+PROGNAME=$1
+
+echo "going to: exec $PROGID $PROGCMD $PROGNAME"
+echo 'press [CTRL-C] to stop or [ANYKEY] to resume!'
+read -sn1
+
+exec $PROGID $PROGCMD $PROGNAME
+
+echo "returned!"
+}
+if [[ $- =~ i ]]; then
+	#interactive mode
+	echo "exectst: test function loaded, use 'fexectst' to run it"
+else
+	echo "noninteractive mode - instant invoke enabled..."
+	fexectst "$@"
+fi

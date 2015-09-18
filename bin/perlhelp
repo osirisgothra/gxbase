@@ -166,9 +166,9 @@ sub _try(@) {
 
 				unless ($noswitch) {
 						unless ( $ENV{TERM} =~
-								m/(cons|linux|ansi|tty|vt[0-9]*|dumb|none|raw|^$)/ )
+								/(cons|linux|ansi|tty|vt[0-9]*|dumb|none|raw|^$)/ )
 						{
-								local $ENV{TERM} = "xterm";
+								local $ENV{TERM} = "x-terminal-emulator";
 								xterm_conf "-T", "Perl Help Viewer";
 						}
 						sleep 1;

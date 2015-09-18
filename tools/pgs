@@ -1,0 +1,73 @@
+#!/usr/bin/env bash 
+# BEGIN GPL3 LICENSED Content (notes such as these are local to this file only)
+# vim: fo=:ft=sh:ts=4:noet:tw=0:sw=4:fen:fdm=marker:fmr=#{,#}:fcl=all:fdo=hor
+#======================================================================================================================
+#
+#          FILE: pgs
+# 
+#         USAGE: ./pgs (standalone) 
+# 
+#   DESCRIPTION: starts playgame selector -- aka 'pgs'
+# 
+#       OPTIONS: no options
+#  REQUIREMENTS: must be running an X-compatible server with DISPLAY set to ':[0-9]' (local only!)
+#          BUGS: none known
+#         NOTES: you must create the aliased items in your path somewhere to use this
+#                script. Automation is not provided because it is a private script.
+#        AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
+#  ORGANIZATION: Paradisim Enterprises, LLC, PA, USA
+#       CREATED: 06/30/2015 10:19
+#      REVISION: None planned, Public Domain
+# BEGIN HELP SUB-CONTENT:
+#
+# usage: pgs <arguments>
+#	
+#	<arguments>		options you can pass to pgs
+#	(arguments are passed to program that is run, no local arguments accepted)
+#
+# WARNING!!!					
+# USE ARGS WITH CAUTION: 
+#  dont hard-code options, different emulators accept different things and 
+#  may have bizarre behavior if you send it the same arguments as another program!!!
+#
+# YOU HAVE BEEN WARNED!
+# END HELP SUB-CONTENT
+#									
+#					This script's library (C) Copyright 2014-2015 Paradisim Enterprises, LLC, PA, USA
+#                                       it is distributed with GXBASE and AUTOX, which are licensed under GNU GPL3.
+#                                       However the script (and no other script unless specified in that script) is PUBLIC DOMAIN!
+#					For more info, contact the author Gabriel Thomas Sharp osirisgothra@hotmail.com
+#======================================================================================================================
+
+
+# End GPL3 Content (local to file)
+# Main Script
+# Begin Public Domain Content (local to file)
+
+case $DISPLAY in
+	:[0-9]*)
+		echo "using display $DISPLAY"
+		echo "starting kdialog..."
+		set -x
+		[[ -r ~/.config/pgsrc ]] && E=$(cat ~/.config/pgsrc)
+		set +x
+		while F=$(kdialog --cancel-label "Exit PlayGame Selector" --title "PlayGame Selector v0.1.7.15" --default "${E:-None}" --combobox "Please Select the Emulator You Wish To Use" "None" "Playstation Emulator With Extra Game Support" "Playstation Emulator With Fast-Forward + Rumble" "Playstation Emulator With Gameshark" "Super Nintendo Emulator" "Windows Super Nintendo Emulator"); do
+			if which "$F"; then
+				"$F"
+				echo "$F" > ~/.config/pgsrc							
+				echo "restarting dialog since exit was okay - use 'cancel' to quit"
+			else
+				echo "selected an exit choice: $F"
+				break
+			fi
+		done
+		true
+		;;
+	*)
+		echo "error, could not find a display ($DISPLAY)"
+		false
+		;;
+esac
+
+# end Main Script
+# end Public Domain Content

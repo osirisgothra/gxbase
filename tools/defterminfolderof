@@ -1,0 +1,4 @@
+#!/bin/bash
+FOLDERNAME=$(dirname "$*")
+cd "$FOLDERNAME"
+exec x-terminal-emulator

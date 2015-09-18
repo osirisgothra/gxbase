@@ -1,0 +1,61 @@
+#!/bin/bash
+if xprop -root &> /dev/null; then
+
+	if [[ $* =~ I.failed ]]; then
+
+	
+	echo "I have no idea where your system's settings are stored"
+	echo "type the location now: "
+	unset REPLY
+	while [[ ! -x $REPLY ]]; do
+		[[ $REPLY ]] && "No good, $REPLY is not executable!"
+		read
+	done
+	echo "$REPLY" >> ~/.config/.autosettings-lastresort
+	echo "I've stored your preference, you wont be asked again unless you delete ~/.config/autosettings-lastresort, so dont forget"
+	sleep 2 # so you can read my awesome message
+	"$REPLY"		
+
+	else
+	
+	if pgrep xfce4-session; then
+		exec /usr/bin/xfce4-settings-manager
+	elif pgrep kwrapper; then
+		exec /usr/bin/systemsettings
+	elif pgrep lxsession || pgrep openbox; then
+		exec /usr/bin/obconf
+	elif pgrep compiz; then
+		exec /usr/bin/ccsm
+	elif pgrep dwm; then
+		# there is no configuration editor
+		# just edit the source if we have it
+		# obviously this could, and might, fail!
+		# but! ..drum roll.. not for me~eee... jealous??  (what.. your not? ... hey now dont walk away!)
+		# ok, ok, you can use this feature too:
+		# 1 make sure /etc/alternatives is in place for editor
+		# 2 make sure you downloaded dwm's source and are using it
+		# 3 make sure you run updatedb& as admin after all that
+		# What's that? It works great and you want to name your firstborn after me? thanks!
+		exec editor `locate -n1 */dwm*/config*.h`
+		# i try! :)
+	else
+		OKAY=0
+		if [[ -r ~/.config/autosettings.lastresort ]]; then
+			LASTRESORT="$(cat ~/.config/autosettings.lastresort)"
+			if [[ -x $LASTRESORT ]]; then
+				"$LASTRESORT"			
+				OKAY=1			
+			fi
+		fi	
+		if [[ $OKAY -eq 0 ]]; then
+			# and when I fail...
+			# this takes us up to the start of the block ^^ but with an xterm terminal
+			xterm -e "$BASH_SOURCE" "I-failed"				
+		fi
+	fi
+
+	fi
+
+else
+	echo "This program requires a GUI environment"
+fi

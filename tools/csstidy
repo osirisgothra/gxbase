@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# WARNING - quick fix
+#           use 'csstidy.bin' for the original
+#
+# does the following:
+# * makes it compatible with stdin use
+# * gets rid of this messages that are useless since they dont come out on stderr
+#   and are not even commented out in the output!!
+# * handle --help and -? as they should be
+# example:
+#
+#   cat file.txt | csstidy.txt
+#
+
+case "$1" in
+	--help|-?) csstidy.bin 2>&1 | sed -r 's/(\||\[|\]|=)/ /g' | sed -r 's/(--\S+)(.*)/\1\n\t\2/g' | tr '_' '-';;
+	*) csstidy.bin /dev/stdin --silent=true "$@";;
+esac
+
+

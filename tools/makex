@@ -80,12 +80,21 @@ if ARGS=( `getopt -n $(basename $BASH_SOURCE) --longopt=recursive,help,force,all
 			DIRMODE=Y
 	esac
 	# graft flag back into chmod (this prevents other flags from being passed to chmod)
+	sudoreq=0
+	for i do [[ ! -w $i ]] && sudoreq=1; done
 	set -- "${exflags[@]}" "$@"
 
 	if [[ $opmode == detect ]]; then
+		
 		if [[ $UID -ne 0 ]] && sudo -ln chmod &> /dev/null; then
-			opmode=sudo
-			sudo="sudo"
+			if [[ $sudoreq == 1 ]]; then
+				opmode=sudo
+				sudo="sudo"
+			else			
+				echo "info: you are sudo-capable, however, detection verified no items are unread/writable, therefore user mode is being used."
+				opmode=user
+				sudo=""
+			fi				
 		elif [[ $opmode == root ]] || [[ $UID -eq 0 ]]; then
 			opmode=root
 			sudo=""

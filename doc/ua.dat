@@ -1,0 +1,24 @@
+       --install link name path priority [--slave link name path]...
+              Add a group of alternatives to the system.  link is the generic name for the master link,
+              name  is  the name of its symlink in the alternatives directory, and path is the alterna‐
+              tive being introduced for the master link.  The arguments after --slave are  the  generic
+              name,  symlink  name  in  the alternatives directory and the alternative path for a slave
+              link.  Zero or more --slave options, each followed by three arguments, may be  specified.
+              Note  that  the  master  alternative must exist or the call will fail. However if a slave
+              alternative doesn't exist, the corresponding slave alternative link will  simply  not  be
+              installed  (a  warning  will still be displayed). If some real file is installed where an
+              alternative link has to be installed, it is kept unless --force is used.
+
+              If the alternative name specified exists already in the  alternatives  system's  records,
+              the  information supplied will be added as a new set of alternatives for the group.  Oth‐
+              erwise, a new group, set to automatic mode, will be added with this information.  If  the
+              group is in automatic mode, and the newly added alternatives' priority is higher than any
+              other installed alternatives for this group, the symlinks will be updated to point to the
+              newly added alternatives.
+
+       --set name path
+              Set the program path as alternative for name.  This is equivalent to --config but is non-
+              interactive and thus scriptable.
+
+       --remove name path
+              Remove an alternative and all of its associated slave links.   name  is  a  name  in  the

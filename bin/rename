@@ -1,42 +1,46 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
+use v5.18;
+use warnings;
 use strict;
-
 use Getopt::Long;
+
 Getopt::Long::Configure('bundling');
 
-my ($verbose, $no_act, $force, $op);
-die "Usage: rename [-v] [-n] [-f] perlexpr [filenames]\n"
+my $verbose;
+my $no_act;
+my $force;
+my $op;
+
+die "syntax: rename [-n|-f|-v] [expression;[...]] [file [...]]\n"
     unless GetOptions(
 	'v|verbose' => \$verbose,
 	'n|no-act'  => \$no_act,
 	'f|force'   => \$force,
-    ) and $op = shift;
+    ) and ($op = shift);
 
-$verbose++ if $no_act;
+$verbose=1 if $no_act;
 
-if (!@ARGV) {
-    print "reading filenames from STDIN\n" if $verbose;
+if (@ARGV < 1) {
+    say "reading input items from <STDIN>, send EOF (Ctrl+D) to end:" if $verbose;
     @ARGV = <STDIN>;
-    chop(@ARGV);
+    chomp @ARGV;
 }
 
-for (@ARGV) {
+
+foreach (@ARGV) {
     my $was = $_;
     eval $op;
     die $@ if $@;
-    next if $was eq $_; # ignore quietly
-    if (-e $_ and !$force)
-    {
-	warn  "$was not renamed: $_ already exists\n";
+    next if $was eq $_;
+    if (-e $_ and !$force) {
+	warn "\nCan't rename $was to $_ because it exists.\n";
     }
-    elsif ($no_act or rename $was, $_)
-    {
-	print "$was renamed as $_\n" if $verbose;
+    elsif ($no_act or rename $was, $_) {
+	say "$was => $_\n" if $verbose;
     }
-    else
-    {
-	warn  "Can't rename $was $_: $!\n";
+    else {
+	warn  "\n$was left unchanged $_: $!\n";
     }
 }
 

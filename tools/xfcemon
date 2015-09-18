@@ -1,0 +1,129 @@
+#!/bin/bash
+                                           
+
+case $1 in	
+	*DEBUG*)
+		set -xvEHT
+		shift
+		;;&
+	*TRACE*)
+		for x in `compgen -A signal`; do  trap 'echo '$SIGNAME' $BASH_COMMAND $@ exit=$?' $SIGNAME; done
+		shift
+		;;&
+		
+esac
+		
+case $1 in
+	
+	--list)
+		# !!Caution!!
+		# -A5 not -A6 to view 6 lines, (grep match=1 line   context lines=5 lines, so: 
+		# match(1)+context(5) = total(6) (but -A is used to specify CONTEXT lines
+		# the MATCH line is of course always returned :P
+		grep '^\s*#PRESET\s*$' $BASH_SOURCE -A5 | sed -r 's/[\\?]/?/g;s/#//g;s/(PRESET|ENDPRESET)//g' |
+		sed -r 's/^\s*#(END)?PRESET\s*$//g' | 
+		sed -r 's/[\)\|]/ /g';
+		;;
+	
+	
+	#PRESET
+	LOAD)
+	#DESC=Shows System Load or individual CPU Usage if Above 10%[1]
+	#SYNTAX=xfcemon LOAD [percentage (do not include the %)] 
+	#EXAMPLE='xfcemon LOAD 10' is a use by an individual
+	#ENDPRESET
+	if RESPONSE=$(ps --format='%C %c(%u%p)' -e | grep -P '^\s*([5-9]\.[0-9]|[1-9][0-9]\.[0-9]).*'); then
+		printf "Caution: $RESPONSE"
+	else
+		printf "$(date +%X$(tput cr;tput cr)%x)"
+	fi
+	
+		
+		;;
+	#PRESET
+	--help|-\?)
+	#DESC=SKIPME
+	#SYNTAX=xfcemon --help
+	#EXAMPLE=same
+	#ENDPRESET
+	
+		echo
+		cat << EOF_STAMPER 1>&2; echo | sed 's/^\t{2}//g'
+	XFCEMON(1)$(for ((x=0;x<((COLUMNS/2)-24);x++)); do printf x; done)General Commands Manual				XFCEMON(1)
+		
+		NAME		
+			xfcemon, kstdoutpm, gncstats — write preset status messages
+		 
+		SYNOPSIS		
+			xfcemon [PRESET] [OPTION]
+			xfcemon --list [FILTER]
+			xfcemon --help [<PRESET>]
+			xfcemon -?
+		
+		DESCRIPTION
+		
+		xfcemon is designed to be used by the "Generic Monitor" in xfce4-panel and the 'STDOUT Plasmoid' plugin in plasma-desktop. It can also be used by a variety of other window managers and their tools. You can use	it with xsetroot -name in generic WMs that rely on the root name for a status window like in dwm/gxdwm/fdwm, etc. It can even be used in non-gui programs such as byobu, screen, or tmux (of course, a bit of knowledge is required since you will be needing to write your own support script for that.
+		
+		When dealing with listing presets, using the FILTER is the same as using a GLOB in sh(1) or bash(1). As a quick reference, plain text is matched exactly, * means zero or more characters, and ? means exactly one character. Extended globs are a bit more complicated but are always surrounded in x() or [] where x is the meta character used for that extglob. 
+		
+		The braces [] are used as a matchset. You can use [ab] to match one character, but it has to be either a or b. You can use ranges like [a-z] too, or [0-9]. You can generate ranges too, {1..4} generates 1 2 3 4. Use generation carefully because it can generate unintended whitespace. 
+		
+		Any pattern surrounded in '' or "" will be treated as-is without expansion. Be aware that you must escape these sequences so your shell does not pre-expand them before they get to this program. Most likely to send a quoted pattern you will need to use this style command line:
+		
+		xfcemon --list '"ignore[these]braces"'
+		
+		...or...
+		
+		xfcemon --list "'[ignore_my_braces_please]'"
+		
+		For further information, please see the bash(1) documentation for a detailed reference of passing extended patterns and globs. There is also an info page for bash that is even more detailed and up to date, use $(tput bold)'info bash'$(tput sgr0) to access it.
+		
+		Manditory long options are manditory for short options too. 
+		
+		[PRESET]s are (until later development) hard-coded and therefore there is no real reason to document beyond what is available. See examples within the script for how to create your own. To figure out what [PRESET] you can specify, use the list flag, detailed next.
+		
+		--list
+			list all available presets, assuming they are properly placed within the script. Items that do not follow the preset implementation specification will NOT be listed even if they (appear to/actually) work when entered.
+		--help, -?
+			obviously the help text you are reading this instant :). You can also specify a PRESET name afterwords, which, if properly configured will
+			give you information about preset-specific options you may want to use for a preset. Again, if a preset is not properly configured, the
+			help is not displayed, that is, if you cannot see it with --list, you cannot see it with --help either.
+		
+		When presets are invoked (properly), their output is written to /dev/stdout or /proc/self/fd/0. There is no input support except for when a dedicated terminal is created (gui only). When help text is written, it is also written to /dev/stdout. If the text being written is the result of an error of any kind, from any command, it's text is written to stderr AND to (if it exists) stdlog.
+		
+		Output from other programs always get their channels merged (stdout/err) and then rerouted according to status of the caller. This ensures it reaches it's intended destination.
+			
+	AUTHOR
+		Written by Gabriel Thomas Sharp <etherial_raine@hotmail.com>.
+		
+	REPORTING BUGS
+		Please report bugs to the project website: <http://github.com/osirisgothra/gxbase>
+	
+	COPYRIGHT
+		Copyright © 2013 Paradisim Enterprises, LLC, Co Ltd.   License  GPLv3+:  GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>. 
+	
+	SEE ALSO
+		Bash Reference Manual, Brian Fox and Chet Ramey
+    	The Gnu Readline Library, Brian Fox and Chet Ramey
+    	The Gnu History Library, Brian Fox and Chet Ramey
+    	Portable Operating System Interface (POSIX) Part 2:  Shell  and  Utilities, IEEE -- http://tiswww.case.edu/~chet/bash/POSIX -- a description of posix mode
+		sh(1), ksh(1), csh(1)
+		emacs(1), vi(1)
+		readline(3)
+	
+	KNOWN ISSUES
+		No way to edit except inline for now!
+		It is incomplete!
+		Documentation is too lengthy!
+
+	GXBASE tools	March, 2015		xfcemon(1)
+EOF_STAMPER
+	### END OF HELP TEXT ###
+		;;
+	*)
+		echo "fatal: ${1-no command supplied, use --help for help.}${1+ is an unknown preset, flag, or command. Please use --help}"
+		;;
+esac
+
+		
+	

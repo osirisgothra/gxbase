@@ -1,0 +1,186 @@
+#!/bin/bash
+
+#===============================================================================
+#
+#          FILE: disps
+# 
+#         USAGE: ./disps 
+# 
+#   DESCRIPTION: 
+# 
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: Gabriel Thomas Sharp (gts), osirisgothra@hotmail.com
+#  ORGANIZATION: Paradisim Enterprises, LLC - http://paradisim.twilightparadox.com
+#       CREATED: 01/12/2015 10:00
+#      REVISION:  ---
+#===============================================================================
+
+set +o nounset
+unset LL
+
+# no X, problem! ($DISPLAY will _always_ be valid if this returns true)
+if xprop -root &> /dev/null; then
+	echo "X session available (as $DISPLAY)"
+else
+	echo "No X session available"
+	if [[ $DISPLAY ]]; then
+		echo "Check your host configuration or use xhost to add this workstation"
+	elif [[ $TERM == linux ]]; then
+		if pgrep 'X[o]rg' &> /dev/null; then
+			echo "X is running on your system, but you are not in it."
+			echo "You are in a physical terminal, please switch to your X session."
+		else
+			echo "You must start an X session in order to use this program."
+			echo "Try 'startx' or 'start $(cat /etc/X11/default-display-manager || echo xdm)'."
+		fi		
+	else
+		echo "You may need to set your DISPLAY variable (again)"
+	fi
+	echo "You do not need to use a terminal to start this program."
+	echo "A terminal window will be created upon start of this program if needed."
+	exit 1
+fi
+
+# assign orientation modifiers -v means invert!
+if [[ $1 =~ ^-([vi]|-?invert)$ ]]; then
+	echo "inverted configuration of displays: left/top will become right/bottom and vice-versa..."
+	RH=left	LH=right
+	TH=below BH=above
+	shift
+else
+	RH=right LH=left
+	TH=above BH=below
+fi
+
+
+
+# no tty, no problem!
+if [[ $# == 0 ]]; then
+if [[ $DISPLAY ]] && ! tty -s; then
+	# use x-terminal-emulator.
+	x-terminal-emulator -e "$BASH_SOURCE" "$@"
+	exit
+elif ! tty -s; then
+	# to primary console, if no display is available!
+	sudo "$SHELL" -c "$BASH_SOURCE" > /dev/console
+fi
+
+function echo()
+{
+	dialog --msgbox "$*" 0 -1
+}
+
+fi
+
+TOP="VGA-0"
+RIGHT="$TOP"
+MODETOP="--mode 1280x1024"
+MODERIGHT="$MODETOP"
+
+BOTTOM="DVI-I-0"	
+LEFT="$BOTTOM"
+MODEBOTTOM="--mode 1920x1080 --primary --panning 1920x1080 --scale-from 1920x1080"
+MODELEFT="$MODEBOTTOM"
+
+MENU_PRESETS=( 
+				TB	"DVI-FPD Enabled Above, HDTV-VGA Enabled Below" 
+				
+			 	T	"Digital Video Interface Flat-Panel Display (DVI-FPD)" 
+				B 	"High Definition Television Via Video Graphics Array (HDTV-VGA)" 
+				
+				LR  "HDTV-VGA Enabled Left, DVI-FPD Enabled Right"				
+				
+				L	"Digital Video Interface Flat-Panel Display (DVI-FPD)" 
+				R 	"High Definition Television Via Video Graphics Array (HDTV-VGA)"
+
+				LRS "HDTV-VGA Enabled Left/DVI Right (Stretched to 1080)"
+				
+			 )
+# for help feature (comming soon)
+HELPTXT="Select from any video mode in the list: ${MENU_PRESETS[@]}"
+
+case $# in
+	1)
+		PRESET="$1"; shift
+		case $PRESET in
+			T|R)
+				xrandr --output $BOTTOM --off
+			  xrandr  --output $TOP $MODETOP
+			  ;;
+			B|L)
+				xrandr --output $TOP --off
+				xrandr --output $BOTTOM $MODEBOTTOM
+				;;
+			TB|LR)
+				xrandr --output $TOP $MODETOP
+				xrandr --output $BOTTOM $MODEBOTTOM
+				;;&
+			TB)
+				xrandr --output $TOP --${TH} $BOTTOM
+				xrandr --output $BOTTOM --${BH} $TOP
+				;;
+			LR) xrandr --output $TOP --${RH}-of $BOTTOM
+				xrandr --output $BOTTOM --${LH}-of $TOP
+				;;
+			LRS)
+				xrandr --output $TOP $MODETOP --scale-from 1280x1080
+				xrandr --output $BOTTOM $MODEBOTTOM
+				xrandr --output $TOP --${RH}-of $BOTTOM
+				xrandr --output $BOTTOM --${LH}-of $TOP
+				;;
+
+
+
+			*)
+				echo "Unknown preset '$PRESET'."
+				;;
+
+		esac
+		echo
+		echo "Current Configuration"
+		echo
+		xrandr |
+		grep '^(?=\S)' -P |
+		sed -r 's/(connected|disconnected)/[20G\1[35G/g;
+						s/[()]//g;
+						s/Screen.*/\0\n/g;s/^/\t\0/g;
+						s/^\s+Screen/* Screen/g;
+						s/connected/[1m\0[0m/g;
+						s/dis\[1mconnected/[30;1mdisconnected[0m/g;
+						s/([-\*:,+]|normal)/[36m\0[0m/g;
+						s/(left|right)/[32;1m\0[0m/g;
+						s/(top|bottom|primary)/[33;1m\0[0m/g;
+						s/inverted/[34;1m\0[0m/g;
+						s/\<(x|y) axis\>/[35;1m\0[0m/g;
+						s/\<[0-9]+[a-z]*\s?[x+]\s?[0-9]+[a-z]*\>/[36;1m\0[0m/g;
+
+						'
+
+
+		echo
+
+		;;
+	0)
+
+		 if LL=`dialog --output-fd 1 --backtitle "Display Preset Selector" --menu "Select a Display Preset"  0 0 0 "${MENU_PRESETS[@]}" Done "Exit Display Selector"`; then
+			if [[ $LL != Done ]]; then
+				disps $LL
+				# at this point execution transfers to a brand new copy
+				# this allows for the source to update itself in-run
+				exec disps
+			fi
+		else
+				dialog --msgbox --backtitle "Display Preset Selector" --msgbox "Cancelled" 0 -1
+		fi
+		clear
+
+		;;
+	 
+
+	*) echo "fatal error - unexpected value in shell command line count ($# items: $*)!"
+esac
+
+# vim: tw=0:ts=4:noet:hls:ft=sh
