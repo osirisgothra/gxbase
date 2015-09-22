@@ -1,6 +1,0 @@
-#!python
-
-
-import pathutil
-import os
-import sys
