@@ -1,0 +1,127 @@
+do{ my $x = [
+       {
+         'ARGV' => []
+       },
+       {},
+       {
+         'recurse_into' => [],
+         'conflicts' => {},
+         'installdirs' => 'site',
+         'verbose' => undef,
+         'create_packlist' => 1,
+         'script_files' => undef,
+         'needs_compiler' => '',
+         'bindoc_dirs' => [
+                            'blib/script'
+                          ],
+         'tap_harness_args' => {},
+         'dynamic_config' => 1,
+         'base_dir' => '/src/gxbase',
+         'install_path' => {},
+         'install_base' => undef,
+         'prereq_action_types' => [
+                                    'requires',
+                                    'build_requires',
+                                    'test_requires',
+                                    'conflicts',
+                                    'recommends'
+                                  ],
+         'test_files' => undef,
+         'sign' => undef,
+         'mb_version' => '0.4208',
+         'module_name' => 'gxbase',
+         'create_license' => undef,
+         'configure_requires' => {
+                                   'Module::Build' => 0
+                                 },
+         'dist_name' => 'gxbase',
+         'dist_abstract' => undef,
+         'pureperl_only' => 0,
+         'extra_compiler_flags' => [],
+         'html_css' => '',
+         'test_file_exts' => [
+                               '.t'
+                             ],
+         'program_name' => undef,
+         'has_config_data' => undef,
+         'perl' => '/opt/activeperl/bin/perl-static',
+         'use_rcfile' => 1,
+         'recursive_test_files' => undef,
+         'use_tap_harness' => 0,
+         'build_bat' => 0,
+         'recommends' => {},
+         'bundle_inc' => [],
+         'debugger' => undef,
+         'meta_merge' => {},
+         'build_class' => 'Module::Build',
+         'requires' => {},
+         'install_base_relpaths' => {},
+         'mymetafile2' => 'MYMETA.json',
+         'build_requires' => {
+                               'Test::More' => 0
+                             },
+         'original_prefix' => {},
+         'xs_files' => undef,
+         'meta_add' => {},
+         'extra_linker_flags' => [],
+         'autosplit' => undef,
+         'build_script' => 'Build',
+         'prefix_relpaths' => {},
+         '_added_to_INC' => [
+                              '/opt/activeperl/lib'
+                            ],
+         'license' => 'GPL_3',
+         'cpan_client' => 'cpan',
+         'debug' => undef,
+         'release_status' => 'stable',
+         'quiet' => undef,
+         'share_dir' => undef,
+         'test_requires' => {},
+         'build_elements' => [
+                               'PL',
+                               'support',
+                               'pm',
+                               'xs',
+                               'share_dir',
+                               'pod',
+                               'script'
+                             ],
+         'libdoc_dirs' => [
+                            'blib/lib',
+                            'blib/arch'
+                          ],
+         'extra_manify_args' => undef,
+         'include_dirs' => [],
+         'dist_author' => [
+                            'Gabriel Sharp <etherial_raine@outlook.com>'
+                          ],
+         'metafile2' => 'META.json',
+         'pm_files' => undef,
+         'destdir' => undef,
+         'dist_version_from' => 'lib/gxbase.pm',
+         'scripts' => undef,
+         'dist_version' => '0.01',
+         'blib' => 'blib',
+         'PL_files' => undef,
+         'dist_suffix' => undef,
+         'bundle_inc_preload' => [],
+         'pod_files' => undef,
+         'orig_dir' => '/src/gxbase',
+         'allow_mb_mismatch' => 0,
+         'auto_configure_requires' => 1,
+         'pollute' => undef,
+         'create_makefile_pl' => 'traditional',
+         'config' => undef,
+         'allow_pureperl' => 0,
+         'create_readme' => undef,
+         'config_dir' => '_build',
+         'prefix' => undef,
+         'mymetafile' => 'MYMETA.yml',
+         'magic_number' => undef,
+         'install_sets' => {},
+         'c_source' => undef,
+         'metafile' => 'META.yml',
+         'get_options' => {}
+       }
+     ];
+$x; }

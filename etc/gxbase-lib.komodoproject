@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Komodo Project File - DO NOT EDIT -->
+<project id="220f6a7a-14f3-42b4-8bc7-328cf5679900" kpf_version="5" name="gxbase-lib.komodoproject">
+<file id="8eb4c5ca-8f41-4178-849e-dca2c53bb129" idref="220f6a7a-14f3-42b4-8bc7-328cf5679900" name="command.pm" url="file:///gxbase/lib/gxbase/core/command.pm">
+</file>
+<file id="95ff6f5a-c936-44b4-a45d-0bc62ac41924" idref="220f6a7a-14f3-42b4-8bc7-328cf5679900" name="helpers.pm" url="file:///gxbase/lib/gxbase/helpers.pm">
+</file>
+<file id="bf0c761e-cf9c-4017-9740-1179fb38d237" idref="220f6a7a-14f3-42b4-8bc7-328cf5679900" name="core.pm" url="file:///gxbase/lib/gxbase/core.pm">
+</file>
+<file id="d6fad76e-1dbd-4ed9-be2a-32e98d3df78b" idref="220f6a7a-14f3-42b4-8bc7-328cf5679900" name="gxbase" url="file:///gxbase/bin/gxbase">
+</file>
+<file id="f3b5d894-9344-4b22-ac3c-9c02200b358a" idref="220f6a7a-14f3-42b4-8bc7-328cf5679900" name="gxbase.pm" url="file:///gxbase/lib/gxbase.pm">
+</file>
+<file id="ffded422-8598-4044-a1cf-16785d4c217f" idref="220f6a7a-14f3-42b4-8bc7-328cf5679900" name="ui.pm" url="file:///gxbase/lib/gxbase/ui.pm">
+</file>
+<preference-set idref="220f6a7a-14f3-42b4-8bc7-328cf5679900" id="project" preftype="project">
+  <long id="prefs_version">1</long>
+</preference-set>
+</project>
