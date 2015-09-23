@@ -8,10 +8,11 @@ of the document for how standardization changed. The original README has changed
 to suit forkers, the only people who would want to get this project's code
 and is also included below this paragraph:
 
+| |
 |-----------------------------------------------------------------|
 | BEGIN gxbase/README (the inline version of gxbase/README) |
 |-----------------------------------------------------------------|
-	
+| |	
 
 NOTICE - DEPRECIATED
 --------------------
