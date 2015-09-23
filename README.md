@@ -40,25 +40,21 @@ dev - fifth (gxbase final, dev*)
 crazy reason I change my mind or someone decides to fork, it will be available to fill that need. The branches that
 are related (or not related) are:
 
-Unrelated Branches		|	Comment(s)
-----------------------------------------------------------------------------------------------------------------------------
-0.0.0.0				|	no relations
-----------------------------------------------------------------------------------------------------------------------------
-0.1.0.0				|	no relations
-----------------------------------------------------------------------------------------------------------------------------
-0.2.0.0				|	no relations, but contents may have been duplicated from above
-----------------------------------------------------------------------------------------------------------------------------
 
-Related Branches			How?
+Unrelated Branches			| Comment(s)
 ----------------------------------------------------------------------------------------------------------------------------
-0.2.0.1 			|	original rewrite of gxbase
+0.0.0.0						|	no relations
+0.1.0.0						|	no relations
+0.2.0.0						|	no relations, but contents may have been duplicated from above
+
+
+Related Branches			| How?
 ----------------------------------------------------------------------------------------------------------------------------
-- old insignifigant changes 	|	changes done in 2013-14
-----------------------------------------------------------------------------------------------------------------------------
-master				|	merged from changes above and LOCKED
-----------------------------------------------------------------------------------------------------------------------------
-dev				|	merged from master and LOCKED
-----------------------------------------------------------------------------------------------------------------------------
+0.2.0.1 					|	original rewrite of gxbase
+old insignifigant changes 	|	changes done in 2013-14
+master						|	merged from changes above and LOCKED
+dev							|	merged from master and LOCKED
+
 
 Possible Installation - USE AT OWN RISK!
 ----------------------------------------------------------------------------------------------------------------------------
