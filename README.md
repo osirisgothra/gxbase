@@ -8,9 +8,7 @@ of the document for how standardization changed. The original README has changed
 to suit forkers, the only people who would want to get this project's code
 and is also included below this paragraph:
 
-| |
-|-|---------------------------------------------------------------|
-| BEGIN gxbase/README (the inline version of gxbase/README) |
+> **BEGIN** gxbase/README (the inline version of gxbase/README) |
 
 
 NOTICE - DEPRECIATED
@@ -65,46 +63,39 @@ dev          |merged from master and LOCKED
 The below install instructions were for the release that did not happen. If you wish to *try* to use gxbase, follow
 these instructions:
 
-1) start a bash shell and login as the user you wish to use gxbase with, if you want system-wide then
-   login with the root account or use sudo before the commands.
+1)	Start a bash shell and login as the user you wish to use gxbase with, if you want system-wide then login with the root account or use sudo before the commands.
+2)	Type (or cut and paste) the following -- typing is recommended because less errors are likely:
 
-2) Type (or cut and paste) the following -- typing is recommended because less errors are likely!
+	For Current User Only
+	---------------------
 
+	```bash
+	mkdir ~/.local/share -p
+	cd ~/.local/share
+	git clone git://github.com/osirisgothra/gxbase
+	cd ~/.local/share/gxbase
+	echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> ~/.bashrc
+	```
 
-For Current User Only
----------------------
-``bash
-mkdir ~/.local/share -p
-cd ~/.local/share
-git clone git://github.com/osirisgothra/gxbase
-cd ~/.local/share/gxbase
-echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> ~/.bashrc
-``
+	Entire System-Wide
+	------------------
 
-Entire System-Wide
-------------------
-``bash
-mkdir /usr/local/share -p
-cd /usr/local/share
-git clone git://github.com/osirisgothra/gxbase
-cd /usr/local/share/gxbase
-echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> /etc/bash.bashrc
-``
-
-3) after logging off and logging back on, the gxbase interpreter ('gxbase') and it's tools
-will be available. However, it is depreciated so it never got into development, so unless
-you are forking this project, doing so is pointless for the most part unless you are
-just curious.
-
-4) **Stop here until you wish to rid yourself of GXBASE**
-
-5) Uninstallation is the reverse of the installation
-   assuming you didnt modify your .bashrc or bash.bashrc since
-   the installation:
+	```bash
+	mkdir /usr/local/share -p
+	cd /usr/local/share
+	git clone git://github.com/osirisgothra/gxbase
+	cd /usr/local/share/gxbase
+	echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> /etc/bash.bashrc
+	```
+	
+3)	After logging off and logging back on, the gxbase interpreter ('gxbase') and it's tools will be available. However, it is depreciated so it never got into development, so unless you are forking this project, doing so is pointless for the most part unless you are just curious.
+4)	**Stop here until you wish to rid yourself of GXBASE**
+5)	Uninstallation is the reverse of the installation assuming you didnt modify your .bashrc or bash.bashrc since the installation:
 
 User
 ----
-``bash
+
+```bash
 TMP=$(mktemp)
 rm -fr ~/.local/share/gxbase
 cat ~/.bashrc | grep gxbase -v > $TMP
@@ -112,11 +103,12 @@ mv $TMP ~/.bashrc -f
 unset TMP
 source ~/.bashrc #to get rid of gxbase in path
 hash -r #to get rid of refs to gxbase executables
-``
+```
 
 System-Wide
 -----------
-``bash
+
+```bash
 TMP=$(mktemp)
 rm -fr /usr/local/share/gxbase
 cat /etc/bash.bashrc | grep gxbase -v > $TMP
@@ -124,7 +116,10 @@ mv $TMP /etc/bash.bashrc -f
 unset TMP
 source /etc/bash.bashrc #to get rid of gxbase in path
 hash -r #to get rid of refs to gxbase executables
-``
+```
+
+6)	Check out autox :)
+
 
 :sparkle:&nbsp;It is probably better just to relogin than to rely on sourcing but
 it nearly fool proof, except on heavily customized systems.
