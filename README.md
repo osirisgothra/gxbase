@@ -2,19 +2,19 @@
 <h2>GXBASE Related Projects</h2>
 <h3>GXBASE is now depreciated</h3>
 
-This project is now depreciated and has moved on to [1][autox]. I have however
+This project is now depreciated and has moved on to [autox](http://osirisgothra.github.io/autox). I have however
 standardized this repository and made installation easier. Please read the end
 of the document for how standardization changed. The original README has changed
 to suit forkers, the only people who would want to get this project's code
 and is also included below this paragraph:
 
-
-**BEGIN gxbase/README (this is a inline version of gxbase/README)**
-
-README
-gxbase/README
+|-----------------------------------------------------------------|
+| BEGIN gxbase/README (the inline version of gxbase/README) |
+|-----------------------------------------------------------------|
+	
 
 NOTICE - DEPRECIATED
+--------------------
 
 This project is now depreciated and will not be getting
 anymore updates except for coercing/directing those interested
@@ -29,13 +29,16 @@ very different stages that originall had codenames but since I
 cant remember exactly, I decided to just sick with the numbering
 system:
 
-0.0.0.0 - first incantation (core?)
-0.1.0.0 - second incantation (gxcore or xc?)
-0.2.0.0 - third (gx or excore?)
-0.2.0.1 - fourth (gxbase I)
-master - fifth (gxbase final)
-dev - fifth (gxbase final, dev*)
-
+| Branch | Branch Description
+|--------|--------------------------------------------------------|
+|0.0.0.0 | first incantation (core?)                              |
+|0.1.0.0 | second incantation (gxcore or xc?)                     |
+|0.2.0.0 | third (gx or excore?)                                  |
+|0.2.0.1 | fourth (gxbase I)                                      |
+|-----------------------------------------------------------------|
+|master  | fifth (gxbase final)                                   |
+|dev     | fifth (gxbase final, dev*)                             |
+|--------|--------------------------------------------------------|
 *though 'dev' implies future development, it is likely not to happen. I set this up like this so that if for some
 crazy reason I change my mind or someone decides to fork, it will be available to fill that need. The branches that
 are related (or not related) are:
@@ -56,7 +59,7 @@ master       |merged from *old/misc mods* above and LOCKED
 dev          |merged from master and LOCKED
 
 
-Possible Installation - USE AT OWN RISK!
+*Possible* Installation - USE AT OWN RISK!
 ----------------------------------------------------------------------------------------------------------------------------
 
 The below install instructions were for the release that did not happen. If you wish to *try* to use gxbase, follow
@@ -67,39 +70,41 @@ these instructions:
 
 2) Type (or cut and paste) the following -- typing is recommended because less errors are likely!
 
+
 For Current User Only
 ---------------------
-```bash
+``bash
 mkdir ~/.local/share -p
 cd ~/.local/share
 git clone git://github.com/osirisgothra/gxbase
 cd ~/.local/share/gxbase
 echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> ~/.bashrc
-```
+``
 
 Entire System-Wide
 ------------------
-```bash
+``bash
 mkdir /usr/local/share -p
 cd /usr/local/share
 git clone git://github.com/osirisgothra/gxbase
 cd /usr/local/share/gxbase
 echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> /etc/bash.bashrc
+``
 
 3) after logging off and logging back on, the gxbase interpreter ('gxbase') and it's tools
 will be available. However, it is depreciated so it never got into development, so unless
 you are forking this project, doing so is pointless for the most part unless you are
 just curious.
 
-**Stop here until you wish to rid yourself of GXBASE**
+4) **Stop here until you wish to rid yourself of GXBASE**
 
-4) Uninstallation is the reverse of the installation
+5) Uninstallation is the reverse of the installation
    assuming you didnt modify your .bashrc or bash.bashrc since
    the installation:
 
 User
 ----
-```bash
+``bash
 TMP=$(mktemp)
 rm -fr ~/.local/share/gxbase
 cat ~/.bashrc | grep gxbase -v > $TMP
@@ -107,11 +112,11 @@ mv $TMP ~/.bashrc -f
 unset TMP
 source ~/.bashrc #to get rid of gxbase in path
 hash -r #to get rid of refs to gxbase executables
-```
+``
 
 System-Wide
 -----------
-```bash
+``bash
 TMP=$(mktemp)
 rm -fr /usr/local/share/gxbase
 cat /etc/bash.bashrc | grep gxbase -v > $TMP
@@ -119,7 +124,7 @@ mv $TMP /etc/bash.bashrc -f
 unset TMP
 source /etc/bash.bashrc #to get rid of gxbase in path
 hash -r #to get rid of refs to gxbase executables
-```
+``
 
 :sparkle:&nbsp;It is probably better just to relogin than to rely on sourcing but
 it nearly fool proof, except on heavily customized systems.
@@ -144,26 +149,15 @@ watch because someone may decide to take over the project. But don't hold your b
 :sparkle:&nbsp; The original README now follows, it is pointless, but here it is...
 
 
-
-
-
-
 Original Documentation
-----------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------
+The original README section is omitted to prevent confusion and worthless
+duplication. Open (or click) the [README](http://github.com/osirisgothra/gxbase/blob/master/README) document for that!
 
-Below is the original README, I don't think much of it applies anymore, see above for install instructions
-that *might* work, the instructions below were working toward the release that didnt happen.
+|-----------------------------------------------------------------|
+| **END** of gxbase/README (the inline version of gxbase/README) |
+|-----------------------------------------------------------------|
 
-
-
-original
-----------------------------------------------------------------------------------------------------------------------------
-The original README section is omitted to prevent confusion, open
-the [2][README] document for that!
-
-
-
-**END OF gxbase/README**
 
 Standardization
 ---------------
@@ -185,6 +179,4 @@ For a usable implementation of what you see here, please visit instead the autox
 
 http://osirisgothra.github.io/autox
 
-[1]:http://osirisgothra.github.io/autox
-[2]:http://github.com/osirisgothra/gxbase/blob/master/README
 
