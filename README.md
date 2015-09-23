@@ -41,19 +41,19 @@ crazy reason I change my mind or someone decides to fork, it will be available t
 are related (or not related) are:
 
 
-Unrelated Branches			| Comment(s)
+Unrelated | Comment(s)
 ----------------------------------------------------------------------------------------------------------------------------
-0.0.0.0						|	no relations
-0.1.0.0						|	no relations
-0.2.0.0						|	no relations, but contents may have been duplicated from above
+0.0.0.0   | no relations
+0.1.0.0   | no relations
+0.2.0.0   | no relations, but contents *may* have been duplicated from above
 
 
-Related Branches			| How?
+Related      | How?
 ----------------------------------------------------------------------------------------------------------------------------
-0.2.0.1 					|	original rewrite of gxbase
-old insignifigant changes 	|	changes done in 2013-14
-master						|	merged from changes above and LOCKED
-dev							|	merged from master and LOCKED
+0.2.0.1      |original rewrite of gxbase
+old/misc mods|changes done in 2013-14
+master       |merged from *old/misc mods* above and LOCKED
+dev          |merged from master and LOCKED
 
 
 Possible Installation - USE AT OWN RISK!
@@ -179,7 +179,7 @@ This project is dated.
 Most of this project is being stripped of it's parts and being incorporated into autox, which represents the 'meat'
 of the project's 3-year research/development run. I never intended this to be a serious project and was certain
 it would never be released. However, since it was a lot of sidework, i choose to keep it here (plus I can't really
-remove this repository anyway).                
+remove this repository anyway).
 
 For a usable implementation of what you see here, please visit instead the autox website:
 
