@@ -8,7 +8,7 @@ of the document for how standardization changed. The original README has changed
 to suit forkers, the only people who would want to get this project's code
 and is also included below this paragraph:
 
-> **BEGIN** gxbase/README (the inline version of gxbase/README) |
+> **BEGIN** gxbase/README (the inline version of gxbase/README)
 
 
 NOTICE - DEPRECIATED
@@ -28,19 +28,19 @@ cant remember exactly, I decided to just sick with the numbering
 system:
 
 | Branch | Branch Description
-|--------|--------------------------------------------------------|
+| -----: | :----------------------------------------------------- |
 |0.0.0.0 | first incantation (core?)                              |
 |0.1.0.0 | second incantation (gxcore or xc?)                     |
 |0.2.0.0 | third (gx or excore?)                                  |
 |0.2.0.1 | fourth (gxbase I)                                      |
-|-----------------------------------------------------------------|
 |master  | fifth (gxbase final)                                   |
 |dev     | fifth (gxbase final, dev*)                             |
-|--------|--------------------------------------------------------|
-*though 'dev' implies future development, it is likely not to happen. I set this up like this so that if for some
+
+<font size=8>
+* though 'dev' implies future development, it is likely not to happen. I set this up like this so that if for some
 crazy reason I change my mind or someone decides to fork, it will be available to fill that need. The branches that
 are related (or not related) are:
-
+</font>
 
 Unrelated | Comment(s)
 ----------|-----------------------------------------------------------------------------------------
@@ -66,27 +66,27 @@ these instructions:
 1)	Start a bash shell and login as the user you wish to use gxbase with, if you want system-wide then login with the root account or use sudo before the commands.
 2)	Type (or cut and paste) the following -- typing is recommended because less errors are likely:
 
-	For Current User Only
-	---------------------
+For Current User Only
+---------------------
 
-	```bash
-	mkdir ~/.local/share -p
-	cd ~/.local/share
-	git clone git://github.com/osirisgothra/gxbase
-	cd ~/.local/share/gxbase
-	echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> ~/.bashrc
-	```
+```bash
+mkdir ~/.local/share -p
+cd ~/.local/share
+git clone git://github.com/osirisgothra/gxbase
+cd ~/.local/share/gxbase
+echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> ~/.bashrc
+```
 
-	Entire System-Wide
-	------------------
+Entire System-Wide
+------------------
 
-	```bash
-	mkdir /usr/local/share -p
-	cd /usr/local/share
-	git clone git://github.com/osirisgothra/gxbase
-	cd /usr/local/share/gxbase
-	echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> /etc/bash.bashrc
-	```
+```bash
+mkdir /usr/local/share -p
+cd /usr/local/share
+git clone git://github.com/osirisgothra/gxbase
+cd /usr/local/share/gxbase
+echo export PATH=$_/tools:$_/bin:$_/lib:$_:$PATH >> /etc/bash.bashrc
+```
 	
 3)	After logging off and logging back on, the gxbase interpreter ('gxbase') and it's tools will be available. However, it is depreciated so it never got into development, so unless you are forking this project, doing so is pointless for the most part unless you are just curious.
 4)	**Stop here until you wish to rid yourself of GXBASE**
@@ -149,9 +149,7 @@ Original Documentation
 The original README section is omitted to prevent confusion and worthless
 duplication. Open (or click) the [README](http://github.com/osirisgothra/gxbase/blob/master/README) document for that!
 
-|-----------------------------------------------------------------|
-| **END** of gxbase/README (the inline version of gxbase/README) |
-|-----------------------------------------------------------------|
+> **END** of gxbase/README (the inline version of gxbase/README)
 
 
 Standardization
