@@ -1,9 +1,18 @@
 #!/bin/bash
-if tty; then
-	while true; do
-		eval '$(eval "dialog --no-tags --output-fd 1 --menu \"systemsettings 5.2.2\" 0 0 0 $(cat $AX_BASE/etc/k4.dlist $AX_BASE/etc/k5.dlist | tr '\''\n'\'' '\'' '\'')")'
-		(($?)) && break
-	done
+echo "WARNING: this file is depreciated -- left behind by gxbase but ported anyhow"
+echo "         be sure files are in AX_BASE/etc/disabled/etc if you want them to work"
+echo "         new scripts should use ax.kde.settings(1ax) alias instead."
+if [[ ! -f $AX_BASE/autox ]]; then
+    echo "AutoX not present, please install it (git clone http://github.com/osirisgothra/autox)"
+elif [[ ! -f "$AX_BASE/k4.dlist" ]]; then
+    echo "AutoX may be present, but k[45].dlist are not, make sure they are in \$AX_BASE/etc/disabled/etc (because this is not depreciated!)"
 else
-	st -g 190x60+96+96 -e "$BASH_SOURCE"
+    if tty; then
+	    while true; do
+		    eval '$(eval "dialog --no-tags --output-fd 1 --menu \"systemsettings 5.2.2\" 0 0 0 $(cat $AX_BASE/etc/disabled/etc/k4.dlist $AX_BASE/etc/disabled/etc/k5.dlist | tr '\''\n'\'' '\'' '\'')")'
+		    (($?)) && break
+	    done
+    else
+	    st -g 190x60+96+96 -e "$BASH_SOURCE"
+    fi
 fi
